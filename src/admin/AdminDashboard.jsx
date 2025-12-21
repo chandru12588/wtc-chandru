@@ -21,6 +21,9 @@ ChartJS.register(
   Legend
 );
 
+// ✅ USE ENV VARIABLE (IMPORTANT)
+const API = import.meta.env.VITE_API_URL;
+
 export default function AdminDashboard() {
   const [stats, setStats] = useState({
     totalBookings: 0,
@@ -29,17 +32,29 @@ export default function AdminDashboard() {
     topDestinations: [],
     monthlyData: [],
     bookingTrend: [],
-    recentBookings: []
+    recentBookings: [],
   });
 
   useEffect(() => {
-    fetch("http://localhost:4000/api/admin/stats")
-      .then((res) => res.json())
+    if (!API) {
+      console.error("❌ VITE_API_URL is not defined");
+      return;
+    }
+
+    fetch(`${API}/api/admin/stats`)
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error(`API Error: ${res.status}`);
+        }
+        return res.json();
+      })
       .then((data) => {
-        console.log("ADMIN STATS:", data); // DEBUG
+        console.log("✅ ADMIN STATS:", data);
         setStats(data);
       })
-      .catch((err) => console.log(err));
+      .catch((err) => {
+        console.error("❌ Failed to load admin stats:", err);
+      });
   }, []);
 
   const formatINR = (num) =>
@@ -64,7 +79,9 @@ export default function AdminDashboard() {
 
         <div className="bg-white p-5 shadow rounded-xl">
           <h2 className="text-sm text-gray-500">Total Revenue</h2>
-          <p className="text-2xl font-semibold">₹ {formatINR(stats.totalRevenue)}</p>
+          <p className="text-2xl font-semibold">
+            ₹ {formatINR(stats.totalRevenue)}
+          </p>
         </div>
 
         <div className="bg-white p-5 shadow rounded-xl">
@@ -133,13 +150,10 @@ export default function AdminDashboard() {
                   <td className="border p-2">{b.name}</td>
                   <td className="border p-2">{b.phone}</td>
                   <td className="border p-2">{b.email}</td>
-
-                  {/* USE b.trip FROM BACKEND */}
                   <td className="border p-2">{b.trip}</td>
-
-                  <td className="border p-2">₹ {formatINR(b.amount)}</td>
-
-                  {/* USE unified b.date */}
+                  <td className="border p-2">
+                    ₹ {formatINR(b.amount)}
+                  </td>
                   <td className="border p-2">{formatDate(b.date)}</td>
                 </tr>
               ))

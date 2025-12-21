@@ -10,7 +10,12 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
-  const backend = import.meta.env.VITE_API_URL || "http://localhost:4000";
+  // ✅ MUST come from ENV (no localhost fallback)
+  const API = import.meta.env.VITE_API_URL;
+
+  if (!API) {
+    console.error("❌ VITE_API_URL is missing");
+  }
 
   /** Handle text input change */
   const handleChange = (e) =>
@@ -25,7 +30,7 @@ export default function Login() {
     setMessage("");
 
     try {
-      const res = await fetch(`${backend}/api/auth/send-otp`, {
+      const res = await fetch(`${API}/api/auth/send-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
@@ -34,7 +39,7 @@ export default function Login() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Failed to send OTP");
 
-      setMessage("OTP sent successfully! (Check console in development)");
+      setMessage("OTP sent successfully!");
       setStep(2);
     } catch (err) {
       setMessage(err.message);
@@ -52,7 +57,7 @@ export default function Login() {
     setMessage("");
 
     try {
-      const res = await fetch(`${backend}/api/auth/verify-otp`, {
+      const res = await fetch(`${API}/api/auth/verify-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: form.email, otp }),
