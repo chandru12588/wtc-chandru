@@ -1,6 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
-import { Menu, X, Home, Compass, User } from "lucide-react";
+import {
+  Menu,
+  X,
+  ChevronDown,
+  Home,
+  Compass,
+  LogIn,
+  ShieldCheck,
+  Tent,
+  UserPlus,
+} from "lucide-react";
 
 import logo3 from "../assets/log3.png";
 import CampfireAnimated from "../components/CampfireAnimated";
@@ -12,16 +22,12 @@ export default function Navbar() {
 
   const isAdminPage = location.pathname.startsWith("/admin");
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
+  const [mobileHostOpen, setMobileHostOpen] = useState(false);
   const [user, setUser] = useState(null);
 
   useEffect(() => {
     const saved = localStorage.getItem("wtc_user");
     if (saved) setUser(JSON.parse(saved));
-
-    const onScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   const handleLogout = () => {
@@ -35,60 +41,53 @@ export default function Navbar() {
   return (
     <>
       {/* ================= NAVBAR ================= */}
-      <header
-        className={`fixed top-0 left-0 right-0 z-50
-          bg-white/80 backdrop-blur-md border-b
-          transition-all duration-300
-          ${scrolled ? "h-[56px]" : "h-[64px]"}
-        `}
-      >
-        <nav className="w-full h-full flex items-center px-4 md:px-8">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b">
+        <nav className="w-full h-[64px] flex items-center px-4 md:px-8">
 
-          {/* LOGO — HARD LEFT */}
-          <Link to="/" className="flex items-center shrink-0">
+          {/* LOGO */}
+          <Link to="/" className="flex items-center">
             <img
               src={logo3}
               alt="WrongTurn Club"
-              className={`object-contain transition-transform duration-300
-                ${scrolled ? "h-9" : "h-11"}
-                hover:scale-105 drop-shadow-lg
-              `}
+              className="h-10 object-contain drop-shadow-lg"
             />
           </Link>
 
-          {/* DESKTOP MENU — HARD RIGHT */}
+          {/* DESKTOP MENU */}
           <div className="ml-auto hidden md:flex items-center gap-6 text-sm font-medium">
-
-            <NavLink to="/" className="hover:text-emerald-600">Home</NavLink>
+            <NavLink to="/">Home</NavLink>
 
             <div className="relative group">
               <CampfireAnimated size={24} />
-              <div className="absolute inset-0 blur-lg bg-orange-400 opacity-0 group-hover:opacity-40 transition" />
             </div>
 
-            <NavLink to="/trips" className="hover:text-emerald-600">Trips</NavLink>
+            <NavLink to="/trips">Trips</NavLink>
 
-            <Link
-              to="/host/register"
-              className="border px-4 py-1.5 rounded-full text-xs hover:bg-gray-50"
-            >
-              Become a Host
-            </Link>
+            <div className="relative group">
+              <button className="border px-4 py-1.5 rounded-full text-xs flex items-center gap-1">
+                Become a Host <ChevronDown size={14} />
+              </button>
+              <div className="absolute right-0 mt-2 hidden group-hover:block bg-white shadow-lg rounded-lg overflow-hidden">
+                <Link to="/host/login" className="block px-4 py-3 hover:bg-gray-100">
+                  Host Login
+                </Link>
+                <Link to="/host/register" className="block px-4 py-3 hover:bg-gray-100">
+                  Host Register
+                </Link>
+              </div>
+            </div>
 
             {!user ? (
               <>
-                <Link className="bg-emerald-600 text-white px-4 py-1.5 rounded-full text-xs" to="/login">
+                <Link to="/login" className="bg-emerald-600 text-white px-4 py-1.5 rounded-full text-xs">
                   Login
                 </Link>
-                <Link className="bg-gray-800 text-white px-4 py-1.5 rounded-full text-xs" to="/admin/login">
+                <Link to="/admin/login" className="bg-gray-800 text-white px-4 py-1.5 rounded-full text-xs">
                   Admin
                 </Link>
               </>
             ) : (
-              <button
-                onClick={handleLogout}
-                className="bg-red-500 text-white px-4 py-1.5 rounded-full text-xs"
-              >
+              <button onClick={handleLogout} className="bg-red-500 text-white px-4 py-1.5 rounded-full text-xs">
                 Logout
               </button>
             )}
@@ -101,16 +100,13 @@ export default function Navbar() {
           </div>
 
           {/* MOBILE BUTTON */}
-          <button
-            onClick={() => setMobileOpen(true)}
-            className="ml-auto md:hidden"
-          >
+          <button onClick={() => setMobileOpen(true)} className="ml-auto md:hidden">
             <Menu size={26} />
           </button>
         </nav>
       </header>
 
-      {/* FIX GAP UNDER FIXED NAVBAR */}
+      {/* Spacer */}
       <div className="h-[64px]" />
 
       {/* ================= MOBILE DRAWER ================= */}
@@ -122,30 +118,59 @@ export default function Navbar() {
               <X onClick={() => setMobileOpen(false)} />
             </div>
 
-            <div className="flex flex-col gap-4 p-6">
-              <NavLink to="/" onClick={() => setMobileOpen(false)}>🏠 Home</NavLink>
-              <NavLink to="/trips" onClick={() => setMobileOpen(false)}>🧭 Trips</NavLink>
-              <NavLink to="/host/register" onClick={() => setMobileOpen(false)}>🏕 Become a Host</NavLink>
+            <div className="flex flex-col gap-4 p-6 text-sm">
+
+              <NavLink to="/" onClick={() => setMobileOpen(false)} className="flex gap-2">
+                <Home size={18} /> Home
+              </NavLink>
+
+              <NavLink to="/trips" onClick={() => setMobileOpen(false)} className="flex gap-2">
+                <Compass size={18} /> Trips
+              </NavLink>
+
+              {/* HOST MENU */}
+              <button
+                onClick={() => setMobileHostOpen(!mobileHostOpen)}
+                className="flex items-center justify-between"
+              >
+                <span className="flex gap-2">
+                  <Tent size={18} /> Become a Host
+                </span>
+                <ChevronDown size={16} />
+              </button>
+
+              {mobileHostOpen && (
+                <div className="ml-6 flex flex-col gap-3">
+                  <NavLink to="/host/login" onClick={() => setMobileOpen(false)} className="flex gap-2">
+                    <LogIn size={16} /> Host Login
+                  </NavLink>
+                  <NavLink to="/host/register" onClick={() => setMobileOpen(false)} className="flex gap-2">
+                    <UserPlus size={16} /> Host Register
+                  </NavLink>
+                </div>
+              )}
+
+              <hr />
 
               {!user ? (
                 <>
-                  <Link to="/login">Login</Link>
-                  <Link to="/admin/login">Admin</Link>
+                  <NavLink to="/login" onClick={() => setMobileOpen(false)} className="flex gap-2">
+                    <LogIn size={18} /> User Login
+                  </NavLink>
+
+                  <NavLink to="/admin/login" onClick={() => setMobileOpen(false)} className="flex gap-2">
+                    <ShieldCheck size={18} /> Admin Login
+                  </NavLink>
                 </>
               ) : (
-                <button onClick={handleLogout}>Logout</button>
+                <button onClick={handleLogout} className="text-red-600">
+                  Logout
+                </button>
               )}
             </div>
           </div>
         </div>
       )}
-
-      {/* ================= MOBILE BOTTOM NAV ================= */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t flex md:hidden justify-around py-2">
-        <Link to="/" className="flex flex-col items-center text-xs"><Home size={18} />Home</Link>
-        <Link to="/trips" className="flex flex-col items-center text-xs"><Compass size={18} />Trips</Link>
-        <Link to="/login" className="flex flex-col items-center text-xs"><User size={18} />Login</Link>
-      </div>
     </>
   );
 }
