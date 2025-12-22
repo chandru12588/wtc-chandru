@@ -41,27 +41,27 @@ export default function Navbar() {
   return (
     <>
       {/* ================= NAVBAR ================= */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md shadow-sm">
         <nav className="w-full h-[64px] flex items-center justify-between px-4 md:px-8">
 
-          {/* LOGO — height 18 */}
+          {/* LOGO — LEFT */}
           <Link to="/" className="flex items-center">
             <img
               src={logo3}
               alt="WrongTurn Club"
-              className="h-18 object-contain drop-shadow-lg"
+              className="h-18 object-contain drop-shadow-lg block"
             />
           </Link>
 
-          {/* DESKTOP MENU */}
+          {/* DESKTOP MENU — RIGHT */}
           <div className="hidden md:flex items-center gap-6 text-sm font-medium">
 
-            <NavLink to="/" className="hover:text-emerald-600 flex items-center gap-1">
+            <NavLink to="/" className="hover:text-emerald-600">
               Home
             </NavLink>
 
-            {/* CAMPFIRE — slightly bigger */}
-            <div className="relative">
+            {/* Campfire */}
+            <div className="flex items-center">
               <CampfireAnimated size={32} />
             </div>
 
@@ -69,9 +69,9 @@ export default function Navbar() {
               Trips
             </NavLink>
 
-            {/* HOST DROPDOWN */}
+            {/* Host dropdown */}
             <div className="relative group">
-              <button className="border px-4 py-1.5 rounded-full text-xs flex items-center gap-1">
+              <button className="border px-4 py-1.5 rounded-full text-xs flex items-center gap-1 hover:bg-gray-50">
                 Become a Host <ChevronDown size={14} />
               </button>
               <div className="absolute right-0 mt-2 hidden group-hover:block bg-white shadow-lg rounded-lg overflow-hidden">
@@ -108,29 +108,32 @@ export default function Navbar() {
               </button>
             )}
 
-            {/* PEOPLE IMAGE — height 18 width 18 */}
+            {/* People image */}
             <img
               src={cammp1}
               alt="Campers"
-              className="h-18 w-18 rounded-full ring-2 ring-orange-300 shadow-md"
+              className="h-18 w-18 rounded-full ring-2 ring-orange-300 shadow-md block"
             />
           </div>
 
-          {/* MOBILE MENU BUTTON */}
-          <button onClick={() => setMobileOpen(true)} className="md:hidden">
+          {/* MOBILE BUTTON */}
+          <button
+            onClick={() => setMobileOpen(true)}
+            className="md:hidden p-2 rounded-lg hover:bg-gray-100"
+          >
             <Menu size={26} />
           </button>
         </nav>
       </header>
 
-      {/* Spacer (prevents hero gap) */}
+      {/* Spacer to prevent hero gap */}
       <div className="h-[64px]" />
 
       {/* ================= MOBILE DRAWER ================= */}
       {mobileOpen && (
         <div className="fixed inset-0 z-[999] bg-black/40 md:hidden">
           <div className="absolute right-0 top-0 h-full w-[80%] bg-white">
-            <div className="flex justify-between p-4 border-b">
+            <div className="flex justify-between items-center p-4 border-b">
               <span className="font-bold">Menu</span>
               <X onClick={() => setMobileOpen(false)} />
             </div>
