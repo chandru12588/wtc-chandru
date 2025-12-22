@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Star } from "lucide-react";
+import user1 from "../assets/user1.png"
+import user2 from "../assets/user2.png"
+import user3 from "../assets/user3.png"
 
 const testimonials = [
   {
@@ -7,21 +10,21 @@ const testimonials = [
     review:
       "Amazing camping experience! Everything was perfectly arranged. Highly recommended!",
     rating: 5,
-    img: "/images/user1.jpg",
+    img: user1,
   },
   {
     name: "Priya S",
     review:
       "The views were stunning and the campsite was very clean. A peaceful getaway.",
     rating: 4,
-    img: "/images/user2.jpg",
+    img: user2,
   },
   {
     name: "Rohit Menon",
     review:
       "Lovely hosts, great food, and comfortable tents. Will book again!",
     rating: 5,
-    img: "/images/user3.jpg",
+    img: user3,
   },
 ];
 
