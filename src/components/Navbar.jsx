@@ -23,7 +23,6 @@ export default function Navbar() {
   const handleLogout = () => {
     localStorage.clear();
     setUser(null);
-    setMobileOpen(false);
     navigate("/");
   };
 
@@ -33,16 +32,16 @@ export default function Navbar() {
     <>
       {/* ================= HEADER ================= */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b shadow-sm">
-        <nav className="max-w-7xl mx-auto h-[82px] flex items-center justify-between px-6">
+        <nav className="max-w-7xl mx-auto h-[72px] px-6 flex items-center justify-between">
 
-          {/* LEFT — LOGO (3D EFFECT) */}
-          <Link to="/" className="flex items-center gap-3">
+          {/* LEFT — LOGO */}
+          <Link to="/" className="flex items-center">
             <img
               src={logo3}
               alt="WrongTurn Club"
               className="
-                h-16 object-contain
-                drop-shadow-[0_8px_18px_rgba(0,0,0,0.35)]
+                h-12 object-contain
+                drop-shadow-[0_6px_14px_rgba(0,0,0,0.35)]
                 hover:scale-105 transition
               "
             />
@@ -56,26 +55,24 @@ export default function Navbar() {
               <NavLink
                 to="/"
                 className={({ isActive }) =>
-                  `hover:text-emerald-600 transition ${
-                    isActive ? "text-emerald-600 font-semibold" : ""
-                  }`
+                  isActive
+                    ? "text-emerald-600 font-semibold"
+                    : "hover:text-emerald-600 transition"
                 }
               >
                 Home
               </NavLink>
 
-              {/* Bigger campfire */}
-              <div className="scale-125 -mt-[2px]">
-                <CampfireAnimated size={32} />
-              </div>
+              {/* Campfire aligned to text baseline */}
+              <CampfireAnimated size={26} />
             </div>
 
             <NavLink
               to="/trips"
               className={({ isActive }) =>
-                `hover:text-emerald-600 transition ${
-                  isActive ? "text-emerald-600 font-semibold" : ""
-                }`
+                isActive
+                  ? "text-emerald-600 font-semibold"
+                  : "hover:text-emerald-600 transition"
               }
             >
               Trips
@@ -85,9 +82,9 @@ export default function Navbar() {
               <NavLink
                 to="/my-bookings"
                 className={({ isActive }) =>
-                  `hover:text-emerald-600 transition ${
-                    isActive ? "text-emerald-600 font-semibold" : ""
-                  }`
+                  isActive
+                    ? "text-emerald-600 font-semibold"
+                    : "hover:text-emerald-600 transition"
                 }
               >
                 My Bookings
@@ -98,17 +95,23 @@ export default function Navbar() {
             <div className="relative">
               <button
                 onClick={() => setHostMenuOpen(!hostMenuOpen)}
-                className="flex items-center gap-1 border px-4 py-2 rounded-full text-xs hover:bg-gray-50"
+                className="flex items-center gap-1 border px-4 py-1.5 rounded-full text-xs hover:bg-gray-50"
               >
                 Become a Host <ChevronDown size={14} />
               </button>
 
               {hostMenuOpen && (
                 <div className="absolute right-0 mt-2 w-44 bg-white shadow-lg rounded-xl overflow-hidden">
-                  <Link to="/host/register" className="block px-4 py-3 hover:bg-gray-100">
+                  <Link
+                    to="/host/register"
+                    className="block px-4 py-3 hover:bg-gray-100"
+                  >
                     Host Register
                   </Link>
-                  <Link to="/host/login" className="block px-4 py-3 hover:bg-gray-100">
+                  <Link
+                    to="/host/login"
+                    className="block px-4 py-3 hover:bg-gray-100"
+                  >
                     Host Login
                   </Link>
                 </div>
@@ -119,13 +122,13 @@ export default function Navbar() {
               <>
                 <Link
                   to="/login"
-                  className="bg-emerald-600 text-white px-5 py-2 rounded-full text-xs hover:bg-emerald-700"
+                  className="bg-emerald-600 text-white px-4 py-1.5 rounded-full text-xs hover:bg-emerald-700"
                 >
                   Login
                 </Link>
                 <Link
                   to="/admin/login"
-                  className="bg-gray-800 text-white px-5 py-2 rounded-full text-xs"
+                  className="bg-gray-800 text-white px-4 py-1.5 rounded-full text-xs"
                 >
                   Admin
                 </Link>
@@ -133,7 +136,7 @@ export default function Navbar() {
             ) : (
               <button
                 onClick={handleLogout}
-                className="bg-red-500 text-white px-5 py-2 rounded-full text-xs"
+                className="bg-red-500 text-white px-4 py-1.5 rounded-full text-xs"
               >
                 Logout
               </button>
@@ -145,11 +148,11 @@ export default function Navbar() {
             <img
               src={cammp1}
               alt="Campers"
-              className="h-14 w-14 rounded-full object-cover ring-2 ring-orange-300 shadow-md"
+              className="h-10 w-10 rounded-full object-cover ring-2 ring-orange-300 shadow-sm"
             />
           </div>
 
-          {/* MOBILE MENU BUTTON */}
+          {/* MOBILE BUTTON */}
           <button
             onClick={() => setMobileOpen(true)}
             className="md:hidden p-2 rounded-lg hover:bg-gray-100"
@@ -178,6 +181,7 @@ export default function Navbar() {
             <div className="p-6 space-y-5 text-base font-medium">
               <NavLink to="/" onClick={() => setMobileOpen(false)}>🏠 Home</NavLink>
               <NavLink to="/trips" onClick={() => setMobileOpen(false)}>🧭 Trips</NavLink>
+
               {user && (
                 <NavLink to="/my-bookings" onClick={() => setMobileOpen(false)}>
                   📑 My Bookings
@@ -226,7 +230,7 @@ export default function Navbar() {
       )}
 
       {/* HEADER SPACER */}
-      <div className="h-[82px]" />
+      <div className="h-[72px]" />
     </>
   );
 }
