@@ -31,34 +31,50 @@ export default function Navbar() {
   return (
     <>
       {/* ================= HEADER ================= */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b shadow-sm">
-        <nav className="max-w-7xl mx-auto h-[72px] px-4 flex items-center gap-6">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b shadow-md">
+        <nav className="max-w-7xl mx-auto h-[72px] px-6 flex items-center">
 
-          {/* LOGO — LEFT (NO GAP) */}
+          {/* LEFT — WRONGTURN LOGO (3D) */}
           <Link to="/" className="flex items-center">
             <img
               src={logo3}
               alt="WrongTurn Club"
-              className="h-11 object-contain drop-shadow-[0_4px_10px_rgba(0,0,0,0.35)]"
+              className="
+                h-12 object-contain
+                transition-all duration-300
+                drop-shadow-[0_6px_12px_rgba(0,0,0,0.35)]
+                hover:drop-shadow-[0_14px_28px_rgba(0,0,0,0.45)]
+                hover:-translate-y-1 hover:scale-105
+              "
             />
           </Link>
 
-          {/* MENU — STARTS RIGHT AFTER LOGO */}
-          <div className="hidden md:flex items-center gap-6 text-sm font-medium">
+          {/* RIGHT — MENU */}
+          <div className="hidden md:flex items-center gap-6 text-sm font-medium ml-auto">
 
-            {/* Home + Campfire */}
-            <div className="flex items-center gap-1">
+            {/* Home + Campfire (3D Glow) */}
+            <div className="flex items-center gap-2">
               <NavLink
                 to="/"
                 className={({ isActive }) =>
                   isActive
                     ? "text-emerald-600 font-semibold"
-                    : "hover:text-emerald-600"
+                    : "hover:text-emerald-600 transition"
                 }
               >
                 Home
               </NavLink>
-              <CampfireAnimated size={26} />
+
+              <div
+                className="
+                  transition-all duration-300
+                  drop-shadow-[0_4px_10px_rgba(255,120,0,0.6)]
+                  hover:drop-shadow-[0_10px_25px_rgba(255,120,0,0.9)]
+                  hover:scale-110
+                "
+              >
+                <CampfireAnimated size={28} />
+              </div>
             </div>
 
             <NavLink
@@ -66,23 +82,39 @@ export default function Navbar() {
               className={({ isActive }) =>
                 isActive
                   ? "text-emerald-600 font-semibold"
-                  : "hover:text-emerald-600"
+                  : "hover:text-emerald-600 transition"
               }
             >
               Trips
             </NavLink>
 
-            {/* Host Dropdown */}
+            {user && (
+              <NavLink
+                to="/my-bookings"
+                className={({ isActive }) =>
+                  isActive
+                    ? "text-emerald-600 font-semibold"
+                    : "hover:text-emerald-600 transition"
+                }
+              >
+                My Bookings
+              </NavLink>
+            )}
+
+            {/* HOST DROPDOWN */}
             <div className="relative">
               <button
                 onClick={() => setHostMenuOpen(!hostMenuOpen)}
-                className="flex items-center gap-1 border px-4 py-1.5 rounded-full text-xs hover:bg-gray-50"
+                className="
+                  flex items-center gap-1 border px-4 py-1.5 rounded-full text-xs
+                  transition hover:shadow-md hover:-translate-y-[1px]
+                "
               >
                 Become a Host <ChevronDown size={14} />
               </button>
 
               {hostMenuOpen && (
-                <div className="absolute left-0 mt-2 w-44 bg-white shadow-lg rounded-xl overflow-hidden">
+                <div className="absolute right-0 mt-2 w-44 bg-white shadow-xl rounded-xl overflow-hidden">
                   <Link to="/host/register" className="block px-4 py-3 hover:bg-gray-100">
                     Host Register
                   </Link>
@@ -92,22 +124,24 @@ export default function Navbar() {
                 </div>
               )}
             </div>
-          </div>
-
-          {/* RIGHT SIDE — PUSHED USING ml-auto */}
-          <div className="hidden md:flex items-center gap-4 ml-auto">
 
             {!user ? (
               <>
                 <Link
                   to="/login"
-                  className="bg-emerald-600 text-white px-4 py-1.5 rounded-full text-xs"
+                  className="
+                    bg-emerald-600 text-white px-4 py-1.5 rounded-full text-xs
+                    transition hover:shadow-lg hover:-translate-y-[1px]
+                  "
                 >
                   Login
                 </Link>
                 <Link
                   to="/admin/login"
-                  className="bg-gray-800 text-white px-4 py-1.5 rounded-full text-xs"
+                  className="
+                    bg-gray-800 text-white px-4 py-1.5 rounded-full text-xs
+                    transition hover:shadow-lg hover:-translate-y-[1px]
+                  "
                 >
                   Admin
                 </Link>
@@ -121,11 +155,17 @@ export default function Navbar() {
               </button>
             )}
 
-            {/* PEOPLE IMAGE — NEAR ADMIN */}
+            {/* PEOPLE IMAGE (3D CARD EFFECT) */}
             <img
               src={cammp1}
               alt="Campers"
-              className="h-10 w-10 rounded-full object-cover ring-2 ring-orange-300 shadow-sm"
+              className="
+                h-10 w-10 rounded-full object-cover
+                ring-2 ring-orange-300
+                transition-all duration-300
+                shadow-md hover:shadow-2xl
+                hover:-translate-y-1 hover:scale-105
+              "
             />
           </div>
 
@@ -139,7 +179,10 @@ export default function Navbar() {
         </nav>
       </header>
 
-      {/* MOBILE MENU */}
+      {/* HEADER SPACER */}
+      <div className="h-[72px]" />
+
+      {/* ================= MOBILE MENU ================= */}
       {mobileOpen && (
         <div className="fixed inset-0 z-[999] md:hidden">
           <div
@@ -158,33 +201,53 @@ export default function Navbar() {
             <div className="p-6 space-y-5 text-base font-medium">
               <NavLink to="/" onClick={() => setMobileOpen(false)}>🏠 Home</NavLink>
               <NavLink to="/trips" onClick={() => setMobileOpen(false)}>🧭 Trips</NavLink>
-              <NavLink to="/host/register" onClick={() => setMobileOpen(false)}>🏕 Become a Host</NavLink>
-              <NavLink to="/host/login" onClick={() => setMobileOpen(false)}>🔑 Host Login</NavLink>
 
-              {!user ? (
-                <>
-                  <Link to="/login" className="block text-center bg-emerald-600 text-white py-3 rounded-lg">
-                    Login
-                  </Link>
-                  <Link to="/admin/login" className="block text-center bg-gray-800 text-white py-3 rounded-lg">
-                    Admin
-                  </Link>
-                </>
-              ) : (
-                <button
-                  onClick={handleLogout}
-                  className="w-full bg-red-500 text-white py-3 rounded-lg"
-                >
-                  Logout
-                </button>
+              {user && (
+                <NavLink to="/my-bookings" onClick={() => setMobileOpen(false)}>
+                  📑 My Bookings
+                </NavLink>
               )}
+
+              <div className="border-t pt-4 text-xs text-gray-400">HOST</div>
+
+              <NavLink to="/host/register" onClick={() => setMobileOpen(false)}>
+                🏕 Become a Host
+              </NavLink>
+              <NavLink to="/host/login" onClick={() => setMobileOpen(false)}>
+                🔑 Host Login
+              </NavLink>
+
+              <div className="border-t pt-4 space-y-3">
+                {!user ? (
+                  <>
+                    <Link
+                      to="/login"
+                      onClick={() => setMobileOpen(false)}
+                      className="block text-center bg-emerald-600 text-white py-3 rounded-lg"
+                    >
+                      Login
+                    </Link>
+                    <Link
+                      to="/admin/login"
+                      onClick={() => setMobileOpen(false)}
+                      className="block text-center bg-gray-800 text-white py-3 rounded-lg"
+                    >
+                      Admin
+                    </Link>
+                  </>
+                ) : (
+                  <button
+                    onClick={handleLogout}
+                    className="w-full bg-red-500 text-white py-3 rounded-lg"
+                  >
+                    Logout
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </div>
       )}
-
-      {/* HEADER SPACER */}
-      <div className="h-[72px]" />
     </>
   );
 }
