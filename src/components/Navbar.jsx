@@ -41,7 +41,7 @@ export default function Navbar() {
               src={logo3}
               alt="WrongTurn Club"
               className="
-                h-10 w-auto
+                h-18 w-auto
                 drop-shadow-[0_6px_14px_rgba(0,0,0,0.35)]
                 hover:drop-shadow-[0_10px_22px_rgba(0,0,0,0.45)]
                 hover:-translate-y-[1px]
@@ -67,7 +67,7 @@ export default function Navbar() {
               <NavLink to="/" className="hover:text-emerald-600">
                 Home
               </NavLink>
-              <CampfireAnimated size={20} />
+              <CampfireAnimated size={28} />
             </div>
 
             <NavLink to="/trips" className="hover:text-emerald-600">
@@ -108,7 +108,7 @@ export default function Navbar() {
               <img
                 src={cammp1}
                 alt="Campfire Community"
-                className="h-9 w-9 rounded-full object-cover"
+                className="h-18 w-9 rounded-full object-cover"
               />
 
               {!user ? (
