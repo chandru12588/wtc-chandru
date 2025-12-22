@@ -40,7 +40,7 @@ export default function Navbar() {
               src={logo3}
               alt="WrongTurn Club"
               className="
-                h-12 object-contain
+                h-18 object-contain
                 transition-all duration-300
                 drop-shadow-[0_6px_12px_rgba(0,0,0,0.35)]
                 hover:drop-shadow-[0_14px_28px_rgba(0,0,0,0.45)]
@@ -160,7 +160,7 @@ export default function Navbar() {
               src={cammp1}
               alt="Campers"
               className="
-                h-10 w-10 rounded-full object-cover
+                h-18 w-10 rounded-full object-cover
                 ring-2 ring-orange-300
                 transition-all duration-300
                 shadow-md hover:shadow-2xl
