@@ -14,18 +14,10 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [hostMenuOpen, setHostMenuOpen] = useState(false);
   const [user, setUser] = useState(null);
-  const [scrollY, setScrollY] = useState(0);
 
   useEffect(() => {
     const saved = localStorage.getItem("wtc_user");
     if (saved) setUser(JSON.parse(saved));
-  }, []);
-
-  /* 🔥 LOGO PARALLAX */
-  useEffect(() => {
-    const onScroll = () => setScrollY(window.scrollY);
-    window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   const handleLogout = () => {
@@ -38,38 +30,36 @@ export default function Navbar() {
 
   return (
     <>
-      {/* ================= GLASS HEADER ================= */}
+      {/* ================= NAVBAR ================= */}
       <header
         className="
           fixed top-0 left-0 right-0 z-50
-          bg-white/70 backdrop-blur-xl
+          bg-white/70 backdrop-blur-md
           border-b border-white/40
-          shadow-[0_8px_30px_rgba(0,0,0,0.08)]
+          shadow-sm
         "
       >
-        <nav className="max-w-7xl mx-auto h-[72px] px-6 flex items-center">
+        <nav className="max-w-7xl mx-auto h-[64px] px-4 flex items-center">
 
-          {/* LEFT — LOGO (3D + PARALLAX) */}
+          {/* ================= LEFT : LOGO ================= */}
           <Link to="/" className="flex items-center">
             <img
               src={logo3}
               alt="WrongTurn Club"
-              style={{
-                transform: `translateY(${scrollY * 0.05}px)`
-              }}
               className="
-                h-12 object-contain
+                h-10
+                object-contain
+                drop-shadow-[0_8px_20px_rgba(0,0,0,0.35)]
                 transition-transform duration-300
-                drop-shadow-[0_6px_14px_rgba(0,0,0,0.35)]
-                hover:-translate-y-1 hover:scale-105
+                hover:scale-110
               "
             />
           </Link>
 
-          {/* RIGHT — MENU */}
-          <div className="hidden md:flex items-center gap-6 text-sm font-medium ml-auto">
+          {/* ================= RIGHT : MENU ================= */}
+          <div className="ml-auto hidden md:flex items-center gap-6 text-sm font-medium">
 
-            {/* HOME + CAMPFIRE (FLICKER GLOW) */}
+            {/* Home + Campfire */}
             <div className="flex items-center gap-2">
               <NavLink
                 to="/"
@@ -82,8 +72,10 @@ export default function Navbar() {
                 Home
               </NavLink>
 
-              <div className="campfire-glow cursor-pointer">
-                <CampfireAnimated size={28} />
+              {/* Campfire glow */}
+              <div className="relative group">
+                <div className="absolute inset-0 rounded-full blur-md opacity-0 group-hover:opacity-100 bg-orange-400 transition" />
+                <CampfireAnimated size={26} />
               </div>
             </div>
 
@@ -98,21 +90,17 @@ export default function Navbar() {
               Trips
             </NavLink>
 
-            {/* HOST */}
+            {/* Host dropdown */}
             <div className="relative">
               <button
                 onClick={() => setHostMenuOpen(!hostMenuOpen)}
-                className="
-                  flex items-center gap-1 border px-4 py-1.5 rounded-full text-xs
-                  bg-white/60 backdrop-blur
-                  transition hover:shadow-md
-                "
+                className="flex items-center gap-1 border px-4 py-1.5 rounded-full text-xs hover:bg-white"
               >
                 Become a Host <ChevronDown size={14} />
               </button>
 
               {hostMenuOpen && (
-                <div className="absolute right-0 mt-2 w-44 bg-white shadow-xl rounded-xl overflow-hidden">
+                <div className="absolute right-0 mt-2 w-44 bg-white shadow-lg rounded-xl overflow-hidden">
                   <Link to="/host/register" className="block px-4 py-3 hover:bg-gray-100">
                     Host Register
                   </Link>
@@ -127,19 +115,13 @@ export default function Navbar() {
               <>
                 <Link
                   to="/login"
-                  className="
-                    bg-emerald-600 text-white px-4 py-1.5 rounded-full text-xs
-                    hover:bg-emerald-700 transition shadow-md
-                  "
+                  className="bg-emerald-600 text-white px-4 py-1.5 rounded-full text-xs hover:bg-emerald-700"
                 >
                   Login
                 </Link>
                 <Link
                   to="/admin/login"
-                  className="
-                    bg-gray-800 text-white px-4 py-1.5 rounded-full text-xs
-                    transition shadow-md
-                  "
+                  className="bg-gray-800 text-white px-4 py-1.5 rounded-full text-xs"
                 >
                   Admin
                 </Link>
@@ -153,42 +135,64 @@ export default function Navbar() {
               </button>
             )}
 
-            {/* PEOPLE IMAGE — 3D GLASS BADGE */}
+            {/* People Image */}
             <img
               src={cammp1}
               alt="Campers"
               className="
-                h-10 w-10 rounded-full object-cover
+                h-10 w-10 rounded-full
+                object-cover
                 ring-2 ring-orange-300
-                bg-white/60 backdrop-blur
-                transition-all duration-300
-                shadow-md hover:shadow-2xl
-                hover:-translate-y-1 hover:scale-105
+                shadow-md
+                transition-transform
+                hover:scale-110
               "
             />
           </div>
 
-          {/* MOBILE BUTTON */}
+          {/* ================= MOBILE BUTTON ================= */}
           <button
             onClick={() => setMobileOpen(true)}
-            className="md:hidden ml-auto p-2 rounded-lg hover:bg-white/60"
+            className="ml-auto md:hidden p-2 rounded-lg hover:bg-gray-100"
           >
             <Menu size={26} />
           </button>
         </nav>
       </header>
 
-      {/* HEADER SPACER */}
-      <div className="h-[72px]" />
-
-      {/* MOBILE MENU (UNCHANGED, CLEAN) */}
+      {/* ================= MOBILE MENU ================= */}
       {mobileOpen && (
         <div className="fixed inset-0 z-[999] md:hidden">
           <div className="absolute inset-0 bg-black/40" onClick={() => setMobileOpen(false)} />
+
           <div className="fixed right-0 top-0 h-full w-[85%] bg-white shadow-xl">
             <div className="flex items-center justify-between p-4 border-b">
               <h2 className="text-lg font-bold">Menu</h2>
-              <button onClick={() => setMobileOpen(false)}><X size={26} /></button>
+              <button onClick={() => setMobileOpen(false)}>
+                <X size={26} />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-5 text-base font-medium">
+              <NavLink to="/" onClick={() => setMobileOpen(false)}>🏠 Home</NavLink>
+              <NavLink to="/trips" onClick={() => setMobileOpen(false)}>🧭 Trips</NavLink>
+              <NavLink to="/host/register" onClick={() => setMobileOpen(false)}>🏕 Become a Host</NavLink>
+              <NavLink to="/host/login" onClick={() => setMobileOpen(false)}>🔑 Host Login</NavLink>
+
+              {!user ? (
+                <>
+                  <Link to="/login" className="block bg-emerald-600 text-white py-3 rounded-lg text-center">
+                    Login
+                  </Link>
+                  <Link to="/admin/login" className="block bg-gray-800 text-white py-3 rounded-lg text-center">
+                    Admin
+                  </Link>
+                </>
+              ) : (
+                <button onClick={handleLogout} className="w-full bg-red-500 text-white py-3 rounded-lg">
+                  Logout
+                </button>
+              )}
             </div>
           </div>
         </div>
