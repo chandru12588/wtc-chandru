@@ -6,10 +6,8 @@ import {
   ChevronDown,
   Home,
   Compass,
-  LogIn,
-  ShieldCheck,
-  Tent,
-  UserPlus,
+  User,
+  LogOut,
 } from "lucide-react";
 
 import logo3 from "../assets/log3.png";
@@ -21,13 +19,19 @@ export default function Navbar() {
   const navigate = useNavigate();
 
   const isAdminPage = location.pathname.startsWith("/admin");
+
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [mobileHostOpen, setMobileHostOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const [user, setUser] = useState(null);
 
   useEffect(() => {
     const saved = localStorage.getItem("wtc_user");
     if (saved) setUser(JSON.parse(saved));
+
+    const onScroll = () => setScrolled(window.scrollY > 40);
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   const handleLogout = () => {
@@ -41,33 +45,64 @@ export default function Navbar() {
   return (
     <>
       {/* ================= NAVBAR ================= */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-white shadow-sm">
-        <nav className="h-[72px] w-full flex items-center justify-between px-6">
+      <header
+        className={`
+          fixed top-0 left-0 right-0 z-50
+          bg-white/80 backdrop-blur-xl
+          border-b border-white/40
+          transition-all duration-300
+          ${scrolled ? "h-[56px] shadow-md" : "h-[72px]"}
+        `}
+      >
+        <nav className="w-full h-full flex items-center px-4 md:px-8">
 
-          {/* 🔹 LEFT — LOGO (NO GAP) */}
+          {/* LOGO — LEFT (FIXED, NO GAP) */}
           <Link to="/" className="flex items-center">
             <img
               src={logo3}
               alt="WrongTurn Club"
-              className="h-18 object-contain block"
+              className={`object-contain transition-all duration-300
+                ${scrolled ? "h-14" : "h-18"}
+                drop-shadow-lg
+              `}
             />
           </Link>
 
-          {/* 🔹 RIGHT — MENU + PEOPLE */}
-          <div className="hidden md:flex items-center gap-6 text-sm font-medium">
+          {/* DESKTOP MENU — RIGHT */}
+          <div className="ml-auto hidden md:flex items-center gap-6 text-sm font-medium">
 
-            <NavLink to="/" className="hover:text-emerald-600">
-              Home
-            </NavLink>
+            {/* Home + Campfire */}
+            <div className="flex items-center gap-2">
+              <NavLink
+                to="/"
+                className={({ isActive }) =>
+                  isActive
+                    ? "text-emerald-600 font-semibold"
+                    : "hover:text-emerald-600 transition"
+                }
+              >
+                Home
+              </NavLink>
 
-            {/* Campfire (slightly bigger) */}
-            <CampfireAnimated size={34} />
+              {/* Campfire glow */}
+              <div className="relative group">
+                <CampfireAnimated size={34} />
+                <span className="absolute inset-0 bg-orange-400 blur-xl opacity-0 group-hover:opacity-60 transition rounded-full" />
+              </div>
+            </div>
 
-            <NavLink to="/trips" className="hover:text-emerald-600">
+            <NavLink
+              to="/trips"
+              className={({ isActive }) =>
+                isActive
+                  ? "text-emerald-600 font-semibold"
+                  : "hover:text-emerald-600 transition"
+              }
+            >
               Trips
             </NavLink>
 
-            {/* Become Host */}
+            {/* Become a Host */}
             <div className="relative group">
               <button className="border px-4 py-1.5 rounded-full text-xs flex items-center gap-1">
                 Become a Host <ChevronDown size={14} />
@@ -84,60 +119,63 @@ export default function Navbar() {
 
             {!user ? (
               <>
-                <Link
-                  to="/login"
-                  className="bg-emerald-600 text-white px-4 py-1.5 rounded-full text-xs"
-                >
+                <Link to="/login" className="bg-emerald-600 text-white px-4 py-1.5 rounded-full text-xs">
                   Login
                 </Link>
-                <Link
-                  to="/admin/login"
-                  className="bg-gray-800 text-white px-4 py-1.5 rounded-full text-xs"
-                >
+                <Link to="/admin/login" className="bg-gray-800 text-white px-4 py-1.5 rounded-full text-xs">
                   Admin
                 </Link>
               </>
-            ) : (
-              <button
-                onClick={handleLogout}
-                className="bg-red-500 text-white px-4 py-1.5 rounded-full text-xs"
-              >
-                Logout
-              </button>
-            )}
+            ) : null}
 
-            {/* People Image (18x18 EXACT) */}
-            <img
-              src={cammp1}
-              alt="Campers"
-              className="h-18 w-18 rounded-full ring-2 ring-orange-300 shadow-md block"
-            />
+            {/* AVATAR DROPDOWN */}
+            <div className="relative">
+              <img
+                src={cammp1}
+                alt="User"
+                onClick={() => setUserMenuOpen(!userMenuOpen)}
+                className="h-18 w-18 rounded-full ring-2 ring-orange-300 shadow-md cursor-pointer hover:scale-105 transition"
+              />
+
+              {userMenuOpen && (
+                <div className="absolute right-0 mt-2 w-44 bg-white shadow-xl rounded-xl overflow-hidden">
+                  <Link to="/my-bookings" className="block px-4 py-3 hover:bg-gray-100">
+                    My Bookings
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="w-full text-left px-4 py-3 text-red-500 hover:bg-gray-100"
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
 
-          {/* 🔹 MOBILE MENU BUTTON */}
+          {/* MOBILE MENU BUTTON */}
           <button
             onClick={() => setMobileOpen(true)}
-            className="md:hidden p-2"
+            className="ml-auto md:hidden"
           >
-            <Menu size={26} />
+            <Menu size={28} />
           </button>
         </nav>
       </header>
 
-      {/* Spacer (matches navbar height exactly) */}
-      <div className="h-[72px]" />
+      {/* SPACER — EXACT HEIGHT (NO GAP) */}
+      <div className={`${scrolled ? "h-[56px]" : "h-[72px]"}`} />
 
       {/* ================= MOBILE DRAWER ================= */}
       {mobileOpen && (
         <div className="fixed inset-0 z-[999] bg-black/40 md:hidden">
           <div className="absolute right-0 top-0 h-full w-[80%] bg-white">
-            <div className="flex justify-between items-center p-4 border-b">
+            <div className="flex justify-between p-4 border-b">
               <span className="font-bold">Menu</span>
               <X onClick={() => setMobileOpen(false)} />
             </div>
 
             <div className="flex flex-col gap-4 p-6 text-sm">
-
               <NavLink to="/" onClick={() => setMobileOpen(false)} className="flex gap-2">
                 <Home size={18} /> Home
               </NavLink>
@@ -146,47 +184,30 @@ export default function Navbar() {
                 <Compass size={18} /> Trips
               </NavLink>
 
-              <button
-                onClick={() => setMobileHostOpen(!mobileHostOpen)}
-                className="flex items-center justify-between"
-              >
-                <span className="flex gap-2">
-                  <Tent size={18} /> Become a Host
-                </span>
-                <ChevronDown size={16} />
+              <NavLink to="/login" onClick={() => setMobileOpen(false)} className="flex gap-2">
+                <User size={18} /> Login
+              </NavLink>
+
+              <button onClick={handleLogout} className="flex gap-2 text-red-600">
+                <LogOut size={18} /> Logout
               </button>
-
-              {mobileHostOpen && (
-                <div className="ml-6 flex flex-col gap-3">
-                  <NavLink to="/host/login" onClick={() => setMobileOpen(false)} className="flex gap-2">
-                    <LogIn size={16} /> Host Login
-                  </NavLink>
-                  <NavLink to="/host/register" onClick={() => setMobileOpen(false)} className="flex gap-2">
-                    <UserPlus size={16} /> Host Register
-                  </NavLink>
-                </div>
-              )}
-
-              <hr />
-
-              {!user ? (
-                <>
-                  <NavLink to="/login" onClick={() => setMobileOpen(false)} className="flex gap-2">
-                    <LogIn size={18} /> User Login
-                  </NavLink>
-                  <NavLink to="/admin/login" onClick={() => setMobileOpen(false)} className="flex gap-2">
-                    <ShieldCheck size={18} /> Admin Login
-                  </NavLink>
-                </>
-              ) : (
-                <button onClick={handleLogout} className="text-red-600">
-                  Logout
-                </button>
-              )}
             </div>
           </div>
         </div>
       )}
+
+      {/* ================= MOBILE BOTTOM NAV ================= */}
+      <div className="fixed bottom-0 left-0 right-0 md:hidden bg-white border-t flex justify-around py-2 z-40">
+        <NavLink to="/" className="flex flex-col items-center text-xs">
+          <Home size={18} /> Home
+        </NavLink>
+        <NavLink to="/trips" className="flex flex-col items-center text-xs">
+          <Compass size={18} /> Trips
+        </NavLink>
+        <NavLink to="/my-bookings" className="flex flex-col items-center text-xs">
+          <User size={18} /> Bookings
+        </NavLink>
+      </div>
     </>
   );
 }
