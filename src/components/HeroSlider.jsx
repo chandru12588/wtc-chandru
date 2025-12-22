@@ -13,19 +13,28 @@ export default function HeroSlider() {
     const timer = setInterval(() => {
       setIndex((prev) => (prev + 1) % images.length);
     }, 5000);
-
     return () => clearInterval(timer);
   }, []);
 
   return (
-    <div className="absolute inset-0 z-0 overflow-hidden">
-      {/* Background images */}
+    /* 🔥 REAL HERO CONTAINER (fills gap) */
+    <section
+      className="
+        relative w-full
+        min-h-[calc(100vh-72px)]
+        md:min-h-[calc(100vh-72px)]
+        overflow-hidden
+      "
+    >
+      {/* SLIDER IMAGES */}
       {images.map((img, i) => (
         <div
           key={i}
-          className={`absolute inset-0 transition-opacity duration-1000 ${
-            i === index ? "opacity-100" : "opacity-0"
-          }`}
+          className={`
+            absolute inset-0
+            transition-opacity duration-1000
+            ${i === index ? "opacity-100" : "opacity-0"}
+          `}
           style={{
             backgroundImage: `url(${img})`,
             backgroundSize: "cover",
@@ -34,8 +43,8 @@ export default function HeroSlider() {
         />
       ))}
 
-      {/* Dark overlay (ONLY over image) */}
-      <div className="absolute inset-0 bg-black/0 z-[1]" />
-    </div>
+      {/* OPTIONAL DARK OVERLAY */}
+      <div className="absolute inset-0 bg-black/10 z-[1]" />
+    </section>
   );
 }
