@@ -32,80 +32,83 @@ export default function Navbar() {
   return (
     <>
       {/* ================= HEADER ================= */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b">
-        <nav className="max-w-7xl mx-auto h-20 flex items-center justify-between px-6">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b shadow-sm">
+        <nav className="max-w-7xl mx-auto h-[82px] flex items-center justify-between px-6">
 
-          {/* LEFT: LOGO */}
+          {/* LEFT — LOGO (3D EFFECT) */}
           <Link to="/" className="flex items-center gap-3">
             <img
               src={logo3}
               alt="WrongTurn Club"
               className="
-                h-18
-                drop-shadow-[0_6px_16px_rgba(0,0,0,0.35)]
-                hover:drop-shadow-[0_10px_24px_rgba(0,0,0,0.45)]
-                hover:scale-[1.06]
-                transition-all duration-300
+                h-16 object-contain
+                drop-shadow-[0_8px_18px_rgba(0,0,0,0.35)]
+                hover:scale-105 transition
               "
             />
           </Link>
 
-          {/* MOBILE MENU BUTTON */}
-          <button
-            onClick={() => setMobileOpen(true)}
-            className="md:hidden p-2 rounded-lg hover:bg-gray-100"
-          >
-            <Menu size={28} />
-          </button>
-
-          {/* DESKTOP MENU */}
-          <div className="hidden md:flex items-center gap-6 text-sm font-medium">
+          {/* CENTER — DESKTOP MENU */}
+          <div className="hidden md:flex items-center gap-7 text-sm font-medium">
 
             {/* HOME + CAMPFIRE */}
             <div className="flex items-center gap-2">
               <NavLink
                 to="/"
-                className="hover:text-emerald-600 transition"
+                className={({ isActive }) =>
+                  `hover:text-emerald-600 transition ${
+                    isActive ? "text-emerald-600 font-semibold" : ""
+                  }`
+                }
               >
                 Home
               </NavLink>
-              <CampfireAnimated size={30} />
+
+              {/* Bigger campfire */}
+              <div className="scale-125 -mt-[2px]">
+                <CampfireAnimated size={32} />
+              </div>
             </div>
 
-            <NavLink to="/trips" className="hover:text-emerald-600 transition">
+            <NavLink
+              to="/trips"
+              className={({ isActive }) =>
+                `hover:text-emerald-600 transition ${
+                  isActive ? "text-emerald-600 font-semibold" : ""
+                }`
+              }
+            >
               Trips
             </NavLink>
 
             {user && (
               <NavLink
                 to="/my-bookings"
-                className="hover:text-emerald-600 transition"
+                className={({ isActive }) =>
+                  `hover:text-emerald-600 transition ${
+                    isActive ? "text-emerald-600 font-semibold" : ""
+                  }`
+                }
               >
                 My Bookings
               </NavLink>
             )}
 
-            {/* HOST MENU */}
+            {/* HOST DROPDOWN */}
             <div className="relative">
               <button
                 onClick={() => setHostMenuOpen(!hostMenuOpen)}
-                className="flex items-center gap-1 border px-4 py-1.5 rounded-full text-xs hover:bg-gray-50"
+                className="flex items-center gap-1 border px-4 py-2 rounded-full text-xs hover:bg-gray-50"
               >
                 Become a Host <ChevronDown size={14} />
               </button>
 
               {hostMenuOpen && (
-                <div className="absolute right-0 mt-2 w-40 bg-white shadow-lg rounded-lg overflow-hidden">
-                  <Link
-                    to="/host/register"
-                    className="block px-4 py-2 hover:bg-gray-100"
-                  >
+                <div className="absolute right-0 mt-2 w-44 bg-white shadow-lg rounded-xl overflow-hidden">
+                  <Link to="/host/register" className="block px-4 py-3 hover:bg-gray-100">
                     Host Register
                   </Link>
-                  <Link
-                    to="/host/login"
-                    className="block px-4 py-2 hover:bg-gray-100"
-                  >
+                  <Link to="/host/login" className="block px-4 py-3 hover:bg-gray-100">
                     Host Login
                   </Link>
                 </div>
@@ -116,13 +119,13 @@ export default function Navbar() {
               <>
                 <Link
                   to="/login"
-                  className="bg-emerald-600 text-white px-4 py-1.5 rounded-full text-xs hover:bg-emerald-700"
+                  className="bg-emerald-600 text-white px-5 py-2 rounded-full text-xs hover:bg-emerald-700"
                 >
                   Login
                 </Link>
                 <Link
                   to="/admin/login"
-                  className="bg-gray-800 text-white px-4 py-1.5 rounded-full text-xs hover:bg-gray-900"
+                  className="bg-gray-800 text-white px-5 py-2 rounded-full text-xs"
                 >
                   Admin
                 </Link>
@@ -130,25 +133,29 @@ export default function Navbar() {
             ) : (
               <button
                 onClick={handleLogout}
-                className="bg-red-500 text-white px-4 py-1.5 rounded-full text-xs hover:bg-red-600"
+                className="bg-red-500 text-white px-5 py-2 rounded-full text-xs"
               >
                 Logout
               </button>
             )}
+          </div>
 
-            {/* RIGHT IMAGE */}
+          {/* RIGHT — PEOPLE IMAGE */}
+          <div className="hidden md:flex items-center">
             <img
               src={cammp1}
               alt="Campers"
-              className="
-                h-18 w-18
-                rounded-full
-                object-cover
-                ring-2 ring-orange-200
-                shadow-sm
-              "
+              className="h-14 w-14 rounded-full object-cover ring-2 ring-orange-300 shadow-md"
             />
           </div>
+
+          {/* MOBILE MENU BUTTON */}
+          <button
+            onClick={() => setMobileOpen(true)}
+            className="md:hidden p-2 rounded-lg hover:bg-gray-100"
+          >
+            <Menu size={26} />
+          </button>
         </nav>
       </header>
 
@@ -168,27 +175,20 @@ export default function Navbar() {
               </button>
             </div>
 
-            <div className="p-5 space-y-4 text-base font-medium">
-              <NavLink to="/" onClick={() => setMobileOpen(false)}>
-                🏠 Home
-              </NavLink>
-
-              <NavLink to="/trips" onClick={() => setMobileOpen(false)}>
-                🧭 Trips
-              </NavLink>
-
+            <div className="p-6 space-y-5 text-base font-medium">
+              <NavLink to="/" onClick={() => setMobileOpen(false)}>🏠 Home</NavLink>
+              <NavLink to="/trips" onClick={() => setMobileOpen(false)}>🧭 Trips</NavLink>
               {user && (
                 <NavLink to="/my-bookings" onClick={() => setMobileOpen(false)}>
                   📑 My Bookings
                 </NavLink>
               )}
 
-              <div className="border-t pt-3 text-xs text-gray-400">HOST</div>
+              <div className="border-t pt-4 text-xs text-gray-400">HOST</div>
 
               <NavLink to="/host/register" onClick={() => setMobileOpen(false)}>
                 🏕 Become a Host
               </NavLink>
-
               <NavLink to="/host/login" onClick={() => setMobileOpen(false)}>
                 🔑 Host Login
               </NavLink>
@@ -203,7 +203,6 @@ export default function Navbar() {
                     >
                       Login
                     </Link>
-
                     <Link
                       to="/admin/login"
                       onClick={() => setMobileOpen(false)}
@@ -225,6 +224,9 @@ export default function Navbar() {
           </div>
         </div>
       )}
+
+      {/* HEADER SPACER */}
+      <div className="h-[82px]" />
     </>
   );
 }
