@@ -6,6 +6,7 @@ import {
   ChevronDown,
   Home,
   Compass,
+  User,
   LogIn,
   ShieldCheck,
   Tent,
@@ -22,13 +23,20 @@ export default function Navbar() {
   const navigate = useNavigate();
 
   const isAdminPage = location.pathname.startsWith("/admin");
+
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileHostOpen, setMobileHostOpen] = useState(false);
+  const [avatarOpen, setAvatarOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const [user, setUser] = useState(null);
 
   useEffect(() => {
     const saved = localStorage.getItem("wtc_user");
     if (saved) setUser(JSON.parse(saved));
+
+    const onScroll = () => setScrolled(window.scrollY > 40);
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   const handleLogout = () => {
@@ -42,27 +50,32 @@ export default function Navbar() {
   return (
     <>
       {/* ================= NAVBAR ================= */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md shadow-sm">
-        <nav className="w-full max-w-7xl mx-auto h-[76px] px-4 md:px-8 flex items-center">
+      <header
+        className={`fixed top-0 left-0 right-0 z-50
+        bg-white/80 backdrop-blur-md border-b
+        transition-all duration-300
+        ${scrolled ? "h-[56px] shadow-md" : "h-[72px]"}`}
+      >
+        <nav className="w-full h-full flex items-center px-4 md:px-8">
 
-          {/* LEFT — LOGO */}
+          {/* LEFT — LOGO (FIXED) */}
           <Link to="/" className="flex items-center">
             <img
               src={logo3}
               alt="WrongTurn Club"
-              className="h-[72px] object-contain drop-shadow-lg"
+              className={`object-contain transition-all duration-300
+              ${scrolled ? "h-[40px]" : "h-[48px]"}
+              drop-shadow-md`}
             />
           </Link>
 
           {/* RIGHT — DESKTOP MENU */}
           <div className="ml-auto hidden md:flex items-center gap-6 text-sm font-medium">
 
-            <NavLink to="/" className="hover:text-emerald-600">
-              Home
-            </NavLink>
-
-            {/* Campfire */}
-            <div className="flex items-center">
+            <div className="flex items-center gap-2">
+              <NavLink to="/" className="hover:text-emerald-600">
+                Home
+              </NavLink>
               <CampfireAnimated size={30} />
             </div>
 
@@ -70,12 +83,11 @@ export default function Navbar() {
               Trips
             </NavLink>
 
-            {/* Host Dropdown */}
+            {/* Host dropdown */}
             <div className="relative group">
-              <button className="border px-4 py-2 rounded-full text-xs flex items-center gap-1">
+              <button className="border px-4 py-1.5 rounded-full text-xs flex items-center gap-1">
                 Become a Host <ChevronDown size={14} />
               </button>
-
               <div className="absolute right-0 mt-2 hidden group-hover:block bg-white shadow-lg rounded-lg overflow-hidden">
                 <Link to="/host/login" className="block px-4 py-3 hover:bg-gray-100">
                   Host Login
@@ -86,37 +98,46 @@ export default function Navbar() {
               </div>
             </div>
 
-            {!user ? (
+            {!user && (
               <>
                 <Link
                   to="/login"
-                  className="bg-emerald-600 text-white px-4 py-2 rounded-full text-xs"
+                  className="bg-emerald-600 text-white px-4 py-1.5 rounded-full text-xs"
                 >
                   Login
                 </Link>
                 <Link
                   to="/admin/login"
-                  className="bg-gray-800 text-white px-4 py-2 rounded-full text-xs"
+                  className="bg-gray-800 text-white px-4 py-1.5 rounded-full text-xs"
                 >
                   Admin
                 </Link>
               </>
-            ) : (
-              <button
-                onClick={handleLogout}
-                className="bg-red-500 text-white px-4 py-2 rounded-full text-xs"
-              >
-                Logout
-              </button>
             )}
 
-            {/* PEOPLE IMAGE — FIXED */}
-            <div className="flex items-center">
+            {/* Avatar — FIXED inside navbar */}
+            <div className="relative flex items-center">
               <img
                 src={cammp1}
-                alt="Campers"
-                className="h-[72px] w-[72px] rounded-full ring-2 ring-orange-300 shadow-md object-cover"
+                alt="User"
+                onClick={() => setAvatarOpen(!avatarOpen)}
+                className={`rounded-full ring-2 ring-orange-300 cursor-pointer transition-all
+                ${scrolled ? "h-[40px] w-[40px]" : "h-[48px] w-[48px]"}`}
               />
+
+              {avatarOpen && (
+                <div className="absolute right-0 top-full mt-2 w-44 bg-white shadow-xl rounded-xl overflow-hidden">
+                  <Link to="/my-bookings" className="block px-4 py-3 hover:bg-gray-100">
+                    My Bookings
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="w-full text-left px-4 py-3 text-red-500 hover:bg-gray-100"
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 
@@ -125,17 +146,17 @@ export default function Navbar() {
             onClick={() => setMobileOpen(true)}
             className="ml-auto md:hidden"
           >
-            <Menu size={26} />
+            <Menu size={28} />
           </button>
         </nav>
       </header>
 
-      {/* SPACER — MATCH NAVBAR HEIGHT */}
-      <div className="h-[76px]" />
+      {/* Spacer — EXACT MATCH (NO GAP) */}
+      <div className={scrolled ? "h-[56px]" : "h-[72px]"} />
 
       {/* ================= MOBILE DRAWER ================= */}
       {mobileOpen && (
-        <div className="fixed inset-0 z-[999] md:hidden bg-black/40">
+        <div className="fixed inset-0 z-[999] bg-black/40 md:hidden">
           <div className="absolute right-0 top-0 h-full w-[80%] bg-white">
             <div className="flex justify-between p-4 border-b">
               <span className="font-bold">Menu</span>
@@ -151,9 +172,10 @@ export default function Navbar() {
                 <Compass size={18} /> Trips
               </NavLink>
 
+              {/* Host */}
               <button
                 onClick={() => setMobileHostOpen(!mobileHostOpen)}
-                className="flex justify-between"
+                className="flex items-center justify-between"
               >
                 <span className="flex gap-2">
                   <Tent size={18} /> Become a Host
@@ -163,27 +185,26 @@ export default function Navbar() {
 
               {mobileHostOpen && (
                 <div className="ml-6 flex flex-col gap-3">
-                  <NavLink to="/host/login" onClick={() => setMobileOpen(false)}>
-                    Host Login
+                  <NavLink to="/host/login" onClick={() => setMobileOpen(false)} className="flex gap-2">
+                    <LogIn size={16} /> Host Login
                   </NavLink>
-                  <NavLink to="/host/register" onClick={() => setMobileOpen(false)}>
-                    Host Register
+                  <NavLink to="/host/register" onClick={() => setMobileOpen(false)} className="flex gap-2">
+                    <UserPlus size={16} /> Host Register
                   </NavLink>
                 </div>
               )}
 
               <hr />
 
-              {!user ? (
-                <>
-                  <NavLink to="/login" onClick={() => setMobileOpen(false)} className="flex gap-2">
-                    <LogIn size={18} /> User Login
-                  </NavLink>
-                  <NavLink to="/admin/login" onClick={() => setMobileOpen(false)} className="flex gap-2">
-                    <ShieldCheck size={18} /> Admin Login
-                  </NavLink>
-                </>
-              ) : (
+              <NavLink to="/login" onClick={() => setMobileOpen(false)} className="flex gap-2">
+                <User size={18} /> User Login
+              </NavLink>
+
+              <NavLink to="/admin/login" onClick={() => setMobileOpen(false)} className="flex gap-2">
+                <ShieldCheck size={18} /> Admin Login
+              </NavLink>
+
+              {user && (
                 <button onClick={handleLogout} className="flex gap-2 text-red-600">
                   <LogOut size={18} /> Logout
                 </button>
@@ -192,6 +213,19 @@ export default function Navbar() {
           </div>
         </div>
       )}
+
+      {/* ================= MOBILE BOTTOM NAV ================= */}
+      <div className="fixed bottom-0 left-0 right-0 md:hidden bg-white border-t flex justify-around py-2 z-40">
+        <NavLink to="/" className="flex flex-col items-center text-xs">
+          <Home size={18} /> Home
+        </NavLink>
+        <NavLink to="/trips" className="flex flex-col items-center text-xs">
+          <Compass size={18} /> Trips
+        </NavLink>
+        <NavLink to="/my-bookings" className="flex flex-col items-center text-xs">
+          <User size={18} /> Bookings
+        </NavLink>
+      </div>
     </>
   );
 }
