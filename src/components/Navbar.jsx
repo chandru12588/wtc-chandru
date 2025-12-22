@@ -160,7 +160,7 @@ export default function Navbar() {
               src={cammp1}
               alt="Campers"
               className="
-                h-18 w-10 rounded-full object-cover
+                h-18 w-18 rounded-full object-cover
                 ring-2 ring-orange-300
                 transition-all duration-300
                 shadow-md hover:shadow-2xl
