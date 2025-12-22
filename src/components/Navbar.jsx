@@ -32,100 +32,76 @@ export default function Navbar() {
     <>
       {/* ================= HEADER ================= */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b shadow-sm">
-        <nav className="max-w-7xl mx-auto h-[72px] px-6 flex items-center justify-between">
+        <nav className="max-w-7xl mx-auto h-[70px] px-6 flex items-center gap-6">
 
-          {/* LEFT — LOGO */}
+          {/* LOGO — LEFT */}
           <Link to="/" className="flex items-center">
             <img
               src={logo3}
               alt="WrongTurn Club"
-              className="
-                h-12 object-contain
-                drop-shadow-[0_6px_14px_rgba(0,0,0,0.35)]
-                hover:scale-105 transition
-              "
+              className="h-12 object-contain drop-shadow-[0_6px_14px_rgba(0,0,0,0.35)]"
             />
           </Link>
 
-          {/* CENTER — DESKTOP MENU */}
-          <div className="hidden md:flex items-center gap-7 text-sm font-medium">
+          {/* MENU — STARTS IMMEDIATELY AFTER LOGO */}
+          <NavLink
+            to="/"
+            className={({ isActive }) =>
+              isActive
+                ? "text-emerald-600 font-semibold"
+                : "hover:text-emerald-600 font-medium"
+            }
+          >
+            Home
+          </NavLink>
 
-            {/* HOME + CAMPFIRE */}
-            <div className="flex items-center gap-2">
-              <NavLink
-                to="/"
-                className={({ isActive }) =>
-                  isActive
-                    ? "text-emerald-600 font-semibold"
-                    : "hover:text-emerald-600 transition"
-                }
-              >
-                Home
-              </NavLink>
+          <NavLink
+            to="/trips"
+            className={({ isActive }) =>
+              isActive
+                ? "text-emerald-600 font-semibold"
+                : "hover:text-emerald-600 font-medium"
+            }
+          >
+            Trips
+          </NavLink>
 
-              {/* Campfire aligned to text baseline */}
-              <CampfireAnimated size={26} />
-            </div>
+          {/* CAMPFIRE NEXT TO TRIPS */}
+          <CampfireAnimated size={26} />
 
-            <NavLink
-              to="/trips"
-              className={({ isActive }) =>
-                isActive
-                  ? "text-emerald-600 font-semibold"
-                  : "hover:text-emerald-600 transition"
-              }
+          {/* HOST DROPDOWN */}
+          <div className="relative">
+            <button
+              onClick={() => setHostMenuOpen(!hostMenuOpen)}
+              className="flex items-center gap-1 border px-4 py-1.5 rounded-full text-xs hover:bg-gray-50"
             >
-              Trips
-            </NavLink>
+              Become a Host <ChevronDown size={14} />
+            </button>
 
-            {user && (
-              <NavLink
-                to="/my-bookings"
-                className={({ isActive }) =>
-                  isActive
-                    ? "text-emerald-600 font-semibold"
-                    : "hover:text-emerald-600 transition"
-                }
-              >
-                My Bookings
-              </NavLink>
+            {hostMenuOpen && (
+              <div className="absolute left-0 mt-2 w-44 bg-white shadow-lg rounded-xl overflow-hidden">
+                <Link to="/host/register" className="block px-4 py-3 hover:bg-gray-100">
+                  Host Register
+                </Link>
+                <Link to="/host/login" className="block px-4 py-3 hover:bg-gray-100">
+                  Host Login
+                </Link>
+              </div>
             )}
+          </div>
 
-            {/* HOST DROPDOWN */}
-            <div className="relative">
-              <button
-                onClick={() => setHostMenuOpen(!hostMenuOpen)}
-                className="flex items-center gap-1 border px-4 py-1.5 rounded-full text-xs hover:bg-gray-50"
-              >
-                Become a Host <ChevronDown size={14} />
-              </button>
-
-              {hostMenuOpen && (
-                <div className="absolute right-0 mt-2 w-44 bg-white shadow-lg rounded-xl overflow-hidden">
-                  <Link
-                    to="/host/register"
-                    className="block px-4 py-3 hover:bg-gray-100"
-                  >
-                    Host Register
-                  </Link>
-                  <Link
-                    to="/host/login"
-                    className="block px-4 py-3 hover:bg-gray-100"
-                  >
-                    Host Login
-                  </Link>
-                </div>
-              )}
-            </div>
+          {/* PUSH AUTH TO RIGHT */}
+          <div className="ml-auto flex items-center gap-4">
 
             {!user ? (
               <>
                 <Link
                   to="/login"
-                  className="bg-emerald-600 text-white px-4 py-1.5 rounded-full text-xs hover:bg-emerald-700"
+                  className="bg-emerald-600 text-white px-4 py-1.5 rounded-full text-xs"
                 >
                   Login
                 </Link>
+
                 <Link
                   to="/admin/login"
                   className="bg-gray-800 text-white px-4 py-1.5 rounded-full text-xs"
@@ -141,96 +117,27 @@ export default function Navbar() {
                 Logout
               </button>
             )}
-          </div>
 
-          {/* RIGHT — PEOPLE IMAGE */}
-          <div className="hidden md:flex items-center">
+            {/* PEOPLE IMAGE — RIGHT NEXT TO ADMIN */}
             <img
               src={cammp1}
               alt="Campers"
-              className="h-10 w-10 rounded-full object-cover ring-2 ring-orange-300 shadow-sm"
+              className="h-9 w-9 rounded-full object-cover ring-2 ring-orange-300"
             />
           </div>
 
-          {/* MOBILE BUTTON */}
+          {/* MOBILE MENU BUTTON */}
           <button
             onClick={() => setMobileOpen(true)}
-            className="md:hidden p-2 rounded-lg hover:bg-gray-100"
+            className="md:hidden ml-auto p-2 rounded-lg hover:bg-gray-100"
           >
             <Menu size={26} />
           </button>
         </nav>
       </header>
 
-      {/* ================= MOBILE MENU ================= */}
-      {mobileOpen && (
-        <div className="fixed inset-0 z-[999] md:hidden">
-          <div
-            className="absolute inset-0 bg-black/40"
-            onClick={() => setMobileOpen(false)}
-          />
-
-          <div className="fixed right-0 top-0 h-full w-[85%] bg-white shadow-xl animate-slideIn overflow-y-auto">
-            <div className="flex items-center justify-between p-4 border-b">
-              <h2 className="text-lg font-bold">Menu</h2>
-              <button onClick={() => setMobileOpen(false)}>
-                <X size={26} />
-              </button>
-            </div>
-
-            <div className="p-6 space-y-5 text-base font-medium">
-              <NavLink to="/" onClick={() => setMobileOpen(false)}>🏠 Home</NavLink>
-              <NavLink to="/trips" onClick={() => setMobileOpen(false)}>🧭 Trips</NavLink>
-
-              {user && (
-                <NavLink to="/my-bookings" onClick={() => setMobileOpen(false)}>
-                  📑 My Bookings
-                </NavLink>
-              )}
-
-              <div className="border-t pt-4 text-xs text-gray-400">HOST</div>
-
-              <NavLink to="/host/register" onClick={() => setMobileOpen(false)}>
-                🏕 Become a Host
-              </NavLink>
-              <NavLink to="/host/login" onClick={() => setMobileOpen(false)}>
-                🔑 Host Login
-              </NavLink>
-
-              <div className="border-t pt-4 space-y-3">
-                {!user ? (
-                  <>
-                    <Link
-                      to="/login"
-                      onClick={() => setMobileOpen(false)}
-                      className="block text-center bg-emerald-600 text-white py-3 rounded-lg"
-                    >
-                      Login
-                    </Link>
-                    <Link
-                      to="/admin/login"
-                      onClick={() => setMobileOpen(false)}
-                      className="block text-center bg-gray-800 text-white py-3 rounded-lg"
-                    >
-                      Admin
-                    </Link>
-                  </>
-                ) : (
-                  <button
-                    onClick={handleLogout}
-                    className="w-full bg-red-500 text-white py-3 rounded-lg"
-                  >
-                    Logout
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* HEADER SPACER */}
-      <div className="h-[72px]" />
+      <div className="h-[70px]" />
     </>
   );
 }
