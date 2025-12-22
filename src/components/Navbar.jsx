@@ -49,7 +49,7 @@ export default function Navbar() {
             <img
               src={logo3}
               alt="WrongTurn Club"
-              className="h-10 object-contain drop-shadow-lg"
+              className="h-19 object-contain drop-shadow-lg"
             />
           </Link>
 
@@ -95,7 +95,7 @@ export default function Navbar() {
             <img
               src={cammp1}
               alt="Campers"
-              className="h-10 w-10 rounded-full ring-2 ring-orange-300 shadow-md"
+              className="h-18 w-18 rounded-full ring-2 ring-orange-300 shadow-md"
             />
           </div>
 
