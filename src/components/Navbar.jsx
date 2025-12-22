@@ -42,27 +42,34 @@ export default function Navbar() {
     <>
       {/* ================= NAVBAR ================= */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b">
-        <nav className="w-full h-[64px] flex items-center px-4 md:px-8">
+        <nav className="w-full h-[64px] flex items-center justify-between px-4 md:px-8">
 
-          {/* LOGO */}
+          {/* LOGO — height 18 */}
           <Link to="/" className="flex items-center">
             <img
               src={logo3}
               alt="WrongTurn Club"
-              className="h-19 object-contain drop-shadow-lg"
+              className="h-18 object-contain drop-shadow-lg"
             />
           </Link>
 
           {/* DESKTOP MENU */}
-          <div className="ml-auto hidden md:flex items-center gap-6 text-sm font-medium">
-            <NavLink to="/">Home</NavLink>
+          <div className="hidden md:flex items-center gap-6 text-sm font-medium">
 
-            <div className="relative group">
-              <CampfireAnimated size={24} />
+            <NavLink to="/" className="hover:text-emerald-600 flex items-center gap-1">
+              Home
+            </NavLink>
+
+            {/* CAMPFIRE — slightly bigger */}
+            <div className="relative">
+              <CampfireAnimated size={32} />
             </div>
 
-            <NavLink to="/trips">Trips</NavLink>
+            <NavLink to="/trips" className="hover:text-emerald-600">
+              Trips
+            </NavLink>
 
+            {/* HOST DROPDOWN */}
             <div className="relative group">
               <button className="border px-4 py-1.5 rounded-full text-xs flex items-center gap-1">
                 Become a Host <ChevronDown size={14} />
@@ -79,19 +86,29 @@ export default function Navbar() {
 
             {!user ? (
               <>
-                <Link to="/login" className="bg-emerald-600 text-white px-4 py-1.5 rounded-full text-xs">
+                <Link
+                  to="/login"
+                  className="bg-emerald-600 text-white px-4 py-1.5 rounded-full text-xs"
+                >
                   Login
                 </Link>
-                <Link to="/admin/login" className="bg-gray-800 text-white px-4 py-1.5 rounded-full text-xs">
+                <Link
+                  to="/admin/login"
+                  className="bg-gray-800 text-white px-4 py-1.5 rounded-full text-xs"
+                >
                   Admin
                 </Link>
               </>
             ) : (
-              <button onClick={handleLogout} className="bg-red-500 text-white px-4 py-1.5 rounded-full text-xs">
+              <button
+                onClick={handleLogout}
+                className="bg-red-500 text-white px-4 py-1.5 rounded-full text-xs"
+              >
                 Logout
               </button>
             )}
 
+            {/* PEOPLE IMAGE — height 18 width 18 */}
             <img
               src={cammp1}
               alt="Campers"
@@ -99,14 +116,14 @@ export default function Navbar() {
             />
           </div>
 
-          {/* MOBILE BUTTON */}
-          <button onClick={() => setMobileOpen(true)} className="ml-auto md:hidden">
+          {/* MOBILE MENU BUTTON */}
+          <button onClick={() => setMobileOpen(true)} className="md:hidden">
             <Menu size={26} />
           </button>
         </nav>
       </header>
 
-      {/* Spacer */}
+      {/* Spacer (prevents hero gap) */}
       <div className="h-[64px]" />
 
       {/* ================= MOBILE DRAWER ================= */}
@@ -157,7 +174,6 @@ export default function Navbar() {
                   <NavLink to="/login" onClick={() => setMobileOpen(false)} className="flex gap-2">
                     <LogIn size={18} /> User Login
                   </NavLink>
-
                   <NavLink to="/admin/login" onClick={() => setMobileOpen(false)} className="flex gap-2">
                     <ShieldCheck size={18} /> Admin Login
                   </NavLink>
