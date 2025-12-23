@@ -14,6 +14,10 @@ export default function PackageForm() {
     region: "",
     category: "",
     days: "",
+
+    // ⭐ NEW — DATES
+    startDate: "",
+    endDate: "",
   });
 
   const [oldImages, setOldImages] = useState([]);
@@ -41,6 +45,14 @@ export default function PackageForm() {
           region: pkg.region || "",
           category: pkg.category || "",
           days: pkg.days || "",
+
+          // ⭐ NEW — LOAD DATES
+          startDate: pkg.startDate
+            ? pkg.startDate.split("T")[0]
+            : "",
+          endDate: pkg.endDate
+            ? pkg.endDate.split("T")[0]
+            : "",
         });
 
         setOldImages(pkg.images || []);
@@ -52,7 +64,8 @@ export default function PackageForm() {
     load();
   }, [id]);
 
-  const update = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
+  const update = (key, value) =>
+    setForm((prev) => ({ ...prev, [key]: value }));
 
   /* =============================
       IMAGE UPLOAD HANDLING
@@ -80,7 +93,10 @@ export default function PackageForm() {
     try {
       const fd = new FormData();
 
-      Object.keys(form).forEach((key) => fd.append(key, form[key]));
+      Object.keys(form).forEach((key) => {
+        fd.append(key, form[key]);
+      });
+
       newImages.forEach((file) => fd.append("images", file));
 
       if (isEdit) {
@@ -105,53 +121,7 @@ export default function PackageForm() {
         {isEdit ? "Edit Package" : "Add New Package"}
       </h2>
 
-      {/* EXISTING IMAGES */}
-      {isEdit && oldImages.length > 0 && (
-        <div className="mb-6">
-          <p className="font-medium mb-2">Existing Images</p>
-
-          <div className="grid grid-cols-4 gap-3">
-            {oldImages.map((img, i) => (
-              <div key={i} className="relative group">
-                <img src={img} className="w-full h-28 rounded-lg object-cover" />
-
-                <button
-                  type="button"
-                  onClick={() => removeOldImage(img)}
-                  className="absolute top-1 right-1 bg-red-600 text-white text-xs px-2 py-1 rounded"
-                >
-                  ✕
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* NEW IMAGE PREVIEW */}
-      {previewImages.length > 0 && (
-        <div className="mb-6">
-          <p className="font-medium mb-2">New Images Preview</p>
-
-          <div className="grid grid-cols-4 gap-3">
-            {previewImages.map((img, i) => (
-              <div key={i} className="relative group">
-                <img src={img} className="w-full h-28 rounded-lg object-cover" />
-
-                <button
-                  type="button"
-                  onClick={() => removeNewImage(i)}
-                  className="absolute top-1 right-1 bg-black text-white text-xs px-2 py-1 rounded"
-                >
-                  ✕
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* FORM FIELDS */}
+      {/* FORM */}
       <form onSubmit={save} className="space-y-4">
         <input
           className="border p-3 rounded w-full"
@@ -177,10 +147,9 @@ export default function PackageForm() {
           onChange={(e) => update("price", e.target.value)}
         />
 
-        {/* NEW FIELD — LOCATION */}
         <input
           className="border p-3 rounded w-full"
-          placeholder="Location (Example: Ooty)"
+          placeholder="Location (Ooty)"
           value={form.location}
           onChange={(e) => update("location", e.target.value)}
           required
@@ -188,7 +157,7 @@ export default function PackageForm() {
 
         <input
           className="border p-3 rounded w-full"
-          placeholder="Region (Example: Tamil Nadu)"
+          placeholder="Region (Tamil Nadu)"
           value={form.region}
           onChange={(e) => update("region", e.target.value)}
           required
@@ -207,6 +176,34 @@ export default function PackageForm() {
           value={form.days}
           onChange={(e) => update("days", e.target.value)}
         />
+
+        {/* ⭐ NEW — DATE FIELDS */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="text-sm font-medium block mb-1">
+              Start Date *
+            </label>
+            <input
+              type="date"
+              className="border p-3 rounded w-full"
+              value={form.startDate}
+              onChange={(e) => update("startDate", e.target.value)}
+              required
+            />
+          </div>
+
+          <div>
+            <label className="text-sm font-medium block mb-1">
+              End Date (optional)
+            </label>
+            <input
+              type="date"
+              className="border p-3 rounded w-full"
+              value={form.endDate}
+              onChange={(e) => update("endDate", e.target.value)}
+            />
+          </div>
+        </div>
 
         {/* IMAGE INPUT */}
         <div className="border p-4 rounded-lg">
