@@ -57,50 +57,44 @@ export default function Navbar() {
         ${scrolled ? "h-[56px] shadow-md" : "h-[72px]"}`}
       >
         <nav className="w-full h-full flex items-center px-4 md:px-8">
-
-          {/* LOGO — LEFT */}
+          {/* LOGO */}
           <Link to="/" className="flex items-center">
             <img
               src={logo3}
               alt="WrongTurn Club"
-              className={`object-contain transition-all duration-300
-              ${scrolled ? "h-[40px]" : "h-[48px]"}
-              drop-shadow-md`}
+              className={`transition-all duration-300
+              ${scrolled ? "h-[40px]" : "h-[48px]"}`}
             />
           </Link>
 
-          {/* DESKTOP MENU — RIGHT */}
+          {/* DESKTOP MENU */}
           <div className="ml-auto hidden md:flex items-center gap-6 text-sm font-medium">
-
-            {/* Airbnb-style underline */}
-            <NavLink
-              to="/"
-              className="relative after:absolute after:left-0 after:-bottom-1
-              after:h-[2px] after:w-0 after:bg-emerald-600
-              hover:after:w-full after:transition-all"
-            >
+            <NavLink to="/" className="hover:text-emerald-600">
               Home
             </NavLink>
 
-            <div className="flex items-center gap-2">
-              <CampfireAnimated size={30} />
-            </div>
+            <CampfireAnimated size={28} />
 
-            <NavLink
-              to="/trips"
-              className="relative after:absolute after:left-0 after:-bottom-1
-              after:h-[2px] after:w-0 after:bg-emerald-600
-              hover:after:w-full after:transition-all"
-            >
+            <NavLink to="/trips" className="hover:text-emerald-600">
               Trips
             </NavLink>
 
-            {/* Host dropdown */}
+            {/* ⭐ NEW — MY BOOKINGS (VISIBLE) */}
+            {user && (
+              <NavLink
+                to="/my-bookings"
+                className="font-semibold text-emerald-700 hover:underline"
+              >
+                My Bookings
+              </NavLink>
+            )}
+
+            {/* HOST MENU */}
             <div className="relative group">
-              <button className="border px-4 py-1.5 rounded-full text-xs flex items-center gap-1 hover:bg-white/60">
+              <button className="border px-4 py-1.5 rounded-full text-xs flex items-center gap-1">
                 Become a Host <ChevronDown size={14} />
               </button>
-              <div className="absolute right-0 mt-2 hidden group-hover:block bg-white shadow-lg rounded-lg overflow-hidden">
+              <div className="absolute right-0 mt-2 hidden group-hover:block bg-white shadow-lg rounded-lg">
                 <Link to="/host/login" className="block px-4 py-3 hover:bg-gray-100">
                   Host Login
                 </Link>
@@ -110,6 +104,7 @@ export default function Navbar() {
               </div>
             </div>
 
+            {/* AUTH BUTTONS */}
             {!user && (
               <>
                 <Link to="/login" className="bg-emerald-600 text-white px-4 py-1.5 rounded-full text-xs">
@@ -122,39 +117,39 @@ export default function Navbar() {
             )}
 
             {/* AVATAR */}
-            <div className="relative flex items-center">
-              <img
-                src={cammp1}
-                alt="User"
-                onClick={() => setAvatarOpen(!avatarOpen)}
-                className={`rounded-full ring-2 ring-orange-300 cursor-pointer transition-all
-                ${scrolled ? "h-[40px] w-[40px]" : "h-[48px] w-[48px]"}`}
-              />
+            {user && (
+              <div className="relative">
+                <img
+                  src={cammp1}
+                  alt="User"
+                  onClick={() => setAvatarOpen(!avatarOpen)}
+                  className={`rounded-full ring-2 ring-orange-300 cursor-pointer
+                  ${scrolled ? "h-9 w-9" : "h-11 w-11"}`}
+                />
 
-              {avatarOpen && (
-                <div className="absolute right-0 top-full mt-2 w-44 bg-white shadow-xl rounded-xl overflow-hidden">
-                  <Link to="/my-bookings" className="block px-4 py-3 hover:bg-gray-100">
-                    My Bookings
-                  </Link>
-                  <button
-                    onClick={handleLogout}
-                    className="w-full text-left px-4 py-3 text-red-500 hover:bg-gray-100"
-                  >
-                    Logout
-                  </button>
-                </div>
-              )}
-            </div>
+                {avatarOpen && (
+                  <div className="absolute right-0 mt-2 w-44 bg-white shadow-xl rounded-xl">
+                    <Link to="/my-bookings" className="block px-4 py-3 hover:bg-gray-100">
+                      My Bookings
+                    </Link>
+                    <button
+                      onClick={handleLogout}
+                      className="w-full text-left px-4 py-3 text-red-500 hover:bg-gray-100"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
-          {/* MOBILE BUTTON */}
+          {/* MOBILE MENU BUTTON */}
           <button onClick={() => setMobileOpen(true)} className="ml-auto md:hidden">
             <Menu size={28} />
           </button>
         </nav>
       </header>
-
-      {/* ❌ SPACER REMOVED — GAP FIXED */}
 
       {/* ================= MOBILE DRAWER ================= */}
       {mobileOpen && (
@@ -174,36 +169,26 @@ export default function Navbar() {
                 <Compass size={18} /> Trips
               </NavLink>
 
-              <button
-                onClick={() => setMobileHostOpen(!mobileHostOpen)}
-                className="flex items-center justify-between"
-              >
-                <span className="flex gap-2">
-                  <Tent size={18} /> Become a Host
-                </span>
-                <ChevronDown size={16} />
-              </button>
-
-              {mobileHostOpen && (
-                <div className="ml-6 flex flex-col gap-3">
-                  <NavLink to="/host/login" className="flex gap-2">
-                    <LogIn size={16} /> Host Login
-                  </NavLink>
-                  <NavLink to="/host/register" className="flex gap-2">
-                    <UserPlus size={16} /> Host Register
-                  </NavLink>
-                </div>
+              {/* ⭐ MY BOOKINGS — MOBILE */}
+              {user && (
+                <NavLink to="/my-bookings" className="flex gap-2">
+                  <User size={18} /> My Bookings
+                </NavLink>
               )}
 
               <hr />
 
-              <NavLink to="/login" className="flex gap-2">
-                <User size={18} /> User Login
-              </NavLink>
+              {!user && (
+                <>
+                  <NavLink to="/login" className="flex gap-2">
+                    <LogIn size={18} /> Login
+                  </NavLink>
 
-              <NavLink to="/admin/login" className="flex gap-2">
-                <ShieldCheck size={18} /> Admin Login
-              </NavLink>
+                  <NavLink to="/admin/login" className="flex gap-2">
+                    <ShieldCheck size={18} /> Admin
+                  </NavLink>
+                </>
+              )}
 
               {user && (
                 <button onClick={handleLogout} className="flex gap-2 text-red-600">
