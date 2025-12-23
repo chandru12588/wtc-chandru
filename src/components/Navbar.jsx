@@ -25,7 +25,6 @@ export default function Navbar() {
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileHostOpen, setMobileHostOpen] = useState(false);
-  const [avatarOpen, setAvatarOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [user, setUser] = useState(null);
 
@@ -39,7 +38,7 @@ export default function Navbar() {
   }, []);
 
   const handleLogout = () => {
-    localStorage.clear();
+    localStorage.removeItem("wtc_user");
     setUser(null);
     navigate("/");
   };
@@ -79,7 +78,7 @@ export default function Navbar() {
               Trips
             </NavLink>
 
-            {/* ⭐ NEW — MY BOOKINGS (VISIBLE) */}
+            {/* ⭐ CLEAR MY BOOKINGS */}
             {user && (
               <NavLink
                 to="/my-bookings"
@@ -87,6 +86,16 @@ export default function Navbar() {
               >
                 My Bookings
               </NavLink>
+            )}
+
+            {/* ⭐ CLEAR LOGOUT (VISIBLE) */}
+            {user && (
+              <button
+                onClick={handleLogout}
+                className="text-red-500 font-medium hover:underline"
+              >
+                Logout
+              </button>
             )}
 
             {/* HOST MENU */}
@@ -104,43 +113,31 @@ export default function Navbar() {
               </div>
             </div>
 
-            {/* AUTH BUTTONS */}
             {!user && (
               <>
-                <Link to="/login" className="bg-emerald-600 text-white px-4 py-1.5 rounded-full text-xs">
+                <Link
+                  to="/login"
+                  className="bg-emerald-600 text-white px-4 py-1.5 rounded-full text-xs"
+                >
                   Login
                 </Link>
-                <Link to="/admin/login" className="bg-gray-800 text-white px-4 py-1.5 rounded-full text-xs">
+                <Link
+                  to="/admin/login"
+                  className="bg-gray-800 text-white px-4 py-1.5 rounded-full text-xs"
+                >
                   Admin
                 </Link>
               </>
             )}
 
-            {/* AVATAR */}
+            {/* AVATAR (IDENTITY ONLY) */}
             {user && (
-              <div className="relative">
-                <img
-                  src={cammp1}
-                  alt="User"
-                  onClick={() => setAvatarOpen(!avatarOpen)}
-                  className={`rounded-full ring-2 ring-orange-300 cursor-pointer
-                  ${scrolled ? "h-9 w-9" : "h-11 w-11"}`}
-                />
-
-                {avatarOpen && (
-                  <div className="absolute right-0 mt-2 w-44 bg-white shadow-xl rounded-xl">
-                    <Link to="/my-bookings" className="block px-4 py-3 hover:bg-gray-100">
-                      My Bookings
-                    </Link>
-                    <button
-                      onClick={handleLogout}
-                      className="w-full text-left px-4 py-3 text-red-500 hover:bg-gray-100"
-                    >
-                      Logout
-                    </button>
-                  </div>
-                )}
-              </div>
+              <img
+                src={cammp1}
+                alt="User"
+                className={`rounded-full ring-2 ring-orange-300
+                ${scrolled ? "h-9 w-9" : "h-11 w-11"}`}
+              />
             )}
           </div>
 
@@ -169,7 +166,6 @@ export default function Navbar() {
                 <Compass size={18} /> Trips
               </NavLink>
 
-              {/* ⭐ MY BOOKINGS — MOBILE */}
               {user && (
                 <NavLink to="/my-bookings" className="flex gap-2">
                   <User size={18} /> My Bookings
