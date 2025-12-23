@@ -24,25 +24,17 @@ export default function Home() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  /* ================= LOAD ADMIN + HOST PACKAGES ================= */
+  /* =====================================================
+     LOAD ALL TRIPS (ADMIN + HOST) — SINGLE SOURCE
+  ====================================================== */
   useEffect(() => {
-    const loadAllTrips = async () => {
+    const loadTrips = async () => {
       try {
-        const [adminRes, hostRes] = await Promise.all([
-          axios.get(`${API}/api/packages`),
-          axios.get(`${API}/api/host/listings`),
-        ]);
+        const res = await axios.get(`${API}/api/packages`);
+        const trips = res.data || [];
 
-        const adminTrips = adminRes.data || [];
-        const hostTrips = (hostRes.data || []).map((t) => ({
-          ...t,
-          isHostListing: true,
-        }));
-
-        const combined = [...adminTrips, ...hostTrips];
-
-        setAllTrips(combined);
-        setFilteredTrips(combined);
+        setAllTrips(trips);
+        setFilteredTrips(trips);
       } catch (err) {
         console.error("Error loading trips:", err);
       } finally {
@@ -50,32 +42,34 @@ export default function Home() {
       }
     };
 
-    loadAllTrips();
+    loadTrips();
   }, []);
 
-  /* ================= ADVANCED SEARCH ================= */
+  /* =====================================================
+     ADVANCED SEARCH
+  ====================================================== */
   const handleSearch = ({ location, people }) => {
     let results = [...allTrips];
 
     if (location) {
       const q = location.toLowerCase();
       results = results.filter((t) =>
-        `${t.title} ${t.location} ${t.region}`
-          .toLowerCase()
-          .includes(q)
+        `${t.title} ${t.location} ${t.region}`.toLowerCase().includes(q)
       );
     }
 
     if (people) {
       results = results.filter((t) =>
-        t.minPeople ? people >= t.minPeople : true
+        t.minPeople ? Number(people) >= t.minPeople : true
       );
     }
 
     setFilteredTrips(results);
   };
 
-  /* ================= WEEK / MONTH FILTER (EXOTICAMP STYLE) ================= */
+  /* =====================================================
+     THIS WEEK / THIS MONTH (DATE BASED)
+  ====================================================== */
   const handleTabSelect = (tab) => {
     if (tab === "all") {
       setFilteredTrips(allTrips);
@@ -84,35 +78,36 @@ export default function Home() {
 
     const today = new Date();
 
-    // Monday start (Exoticamp style)
-    const startOfWeek = new Date(today);
-    const day = today.getDay() || 7;
-    startOfWeek.setDate(today.getDate() - day + 1);
-    startOfWeek.setHours(0, 0, 0, 0);
-
-    const endOfWeek = new Date(startOfWeek);
-    endOfWeek.setDate(startOfWeek.getDate() + 6);
-    endOfWeek.setHours(23, 59, 59, 999);
-
+    /* ---- WEEK (Mon → Sun) ---- */
     if (tab === "week") {
+      const start = new Date(today);
+      const day = start.getDay() || 7;
+      start.setDate(start.getDate() - day + 1);
+      start.setHours(0, 0, 0, 0);
+
+      const end = new Date(start);
+      end.setDate(start.getDate() + 6);
+      end.setHours(23, 59, 59, 999);
+
       setFilteredTrips(
         allTrips.filter((t) => {
           if (!t.startDate) return false;
           const d = new Date(t.startDate);
-          return d >= startOfWeek && d <= endOfWeek;
+          return d >= start && d <= end;
         })
       );
     }
 
+    /* ---- MONTH ---- */
     if (tab === "month") {
-      const month = today.getMonth();
-      const year = today.getFullYear();
+      const m = today.getMonth();
+      const y = today.getFullYear();
 
       setFilteredTrips(
         allTrips.filter((t) => {
           if (!t.startDate) return false;
           const d = new Date(t.startDate);
-          return d.getMonth() === month && d.getFullYear() === year;
+          return d.getMonth() === m && d.getFullYear() === y;
         })
       );
     }
@@ -121,12 +116,14 @@ export default function Home() {
   return (
     <div className="w-full overflow-x-hidden">
       {/* ================= HERO ================= */}
-      <section className="relative w-full h-[75vh] md:h-[80vh]">
+      <section className="relative w-full h-[75vh] md:h-[80vh] overflow-hidden">
         <HeroSlider />
         <div className="absolute inset-0 bg-black/25" />
 
         <div className="absolute inset-0 flex flex-col justify-center items-center text-white text-center px-4">
-          <h1 className="text-4xl md:text-6xl font-bold">Camping in India</h1>
+          <h1 className="text-4xl md:text-6xl font-bold">
+            Camping in India
+          </h1>
           <h2 className="text-2xl md:text-4xl font-bold mt-3">
             Made Easy & Safe
           </h2>
@@ -155,13 +152,15 @@ export default function Home() {
 
       {/* ================= FEATURED TRIPS ================= */}
       <section className="max-w-7xl mx-auto px-4 py-12">
-        <h2 className="text-2xl font-semibold mb-6">Featured Trips</h2>
+        <h2 className="text-2xl font-semibold mb-6">
+          Featured Trips
+        </h2>
 
         {loading ? (
           <p className="text-gray-500">Loading trips...</p>
         ) : (
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {filteredTrips.length ? (
+            {filteredTrips.length > 0 ? (
               filteredTrips.map((trip) => (
                 <TripCard key={trip._id} trip={trip} />
               ))
@@ -179,7 +178,6 @@ export default function Home() {
       <TestimonialsSlider />
 
       <StickyFilterBar onOpenFilter={() => setIsFilterOpen(true)} />
-
       <FilterDrawer
         isOpen={isFilterOpen}
         onClose={() => setIsFilterOpen(false)}
