@@ -24,10 +24,7 @@ export default function TripCard({ trip }) {
 I want to book:
 ${trip.title}
 Location: ${trip.location}
-Price: ₹${trip.price}
-
-Please guide me with booking.`;
-
+Price: ₹${trip.price}`;
     window.open(
       `https://wa.me/918248579662?text=${encodeURIComponent(msg)}`,
       "_blank"
@@ -37,11 +34,10 @@ Please guide me with booking.`;
   const media = trip.images?.length ? trip.images : ["/no-image.jpg"];
 
   return (
-    <div className="bg-white rounded-3xl shadow-lg hover:shadow-xl transition overflow-hidden flex flex-col">
+    <div className="bg-white rounded-3xl shadow-md hover:shadow-xl transition overflow-hidden flex flex-col">
 
-      {/* ================= MEDIA SLIDER ================= */}
+      {/* ===== IMAGE / VIDEO (BIGGER) ===== */}
       <div className="relative h-[320px]">
-
         <Swiper
           modules={[Pagination]}
           pagination={{ clickable: true }}
@@ -69,62 +65,34 @@ Please guide me with booking.`;
           ))}
         </Swiper>
 
-        {/* DARK GRADIENT OVERLAY */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
-
-        {/* DURATION BADGE */}
-        {trip.duration && (
-          <span className="absolute bottom-4 left-4 bg-black/70 text-white text-xs px-3 py-1 rounded-full">
-            {trip.duration}
-          </span>
-        )}
+        {/* PRICE FLOAT (LIKE EXOTICAMP) */}
+        <div className="absolute bottom-4 left-4 bg-white/95 backdrop-blur px-4 py-1.5 rounded-full text-sm font-semibold shadow">
+          From ₹{trip.price} / person
+        </div>
       </div>
 
-      {/* ================= CONTENT ================= */}
-      <div className="p-6 flex flex-col flex-1 gap-2">
-
-        <h3 className="font-semibold text-lg leading-snug">
+      {/* ===== CONTENT ===== */}
+      <div className="p-6 flex flex-col flex-1 space-y-2">
+        <h3 className="text-lg font-semibold leading-snug line-clamp-2">
           {trip.title}
         </h3>
 
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-gray-500 flex items-center gap-1">
           📍 {trip.location}
         </p>
 
-        {/* DATE CHIPS (optional – Exotic style) */}
-        {trip.availableDates?.length > 0 && (
-          <div className="flex flex-wrap gap-2 mt-1">
-            {trip.availableDates.slice(0, 3).map((d, i) => (
-              <span
-                key={i}
-                className="border border-orange-400 text-orange-500 text-xs px-3 py-1 rounded-full"
-              >
-                {d}
-              </span>
-            ))}
-          </div>
-        )}
-
-        {/* PRICE */}
-        <div className="mt-3 text-lg font-bold">
-          From ₹{trip.price}
-          <span className="text-sm font-normal text-gray-500">
-            {" "} / person
-          </span>
-        </div>
-
         {/* CTA */}
-        <div className="mt-4 grid grid-cols-2 gap-3">
+        <div className="mt-auto flex gap-3 pt-4">
           <button
             onClick={handleDetails}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-full text-sm font-semibold transition"
+            className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-full text-sm font-semibold transition"
           >
             View Details
           </button>
 
           <button
             onClick={handleWhatsApp}
-            className="bg-green-500 hover:bg-green-600 text-white py-2.5 rounded-full flex items-center justify-center gap-2 text-sm font-semibold transition"
+            className="flex-1 bg-green-500 hover:bg-green-600 text-white py-2.5 rounded-full flex items-center justify-center gap-2 text-sm font-semibold transition"
           >
             <FaWhatsapp size={18} />
             WhatsApp
