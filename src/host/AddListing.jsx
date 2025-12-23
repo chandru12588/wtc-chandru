@@ -4,8 +4,7 @@ import { getHostToken, getHostUser } from "../utils/hostAuth";
 
 export default function AddListing() {
   const API = import.meta.env.VITE_API_URL;
-
-  const host = getHostUser(); // ⭐ Get logged-in host user
+  const host = getHostUser();
 
   const [form, setForm] = useState({
     title: "",
@@ -13,6 +12,8 @@ export default function AddListing() {
     location: "",
     price: "",
     category: "",
+    startDate: "",   // ✅ NEW
+    endDate: "",     // ✅ NEW
   });
 
   const [images, setImages] = useState([]);
@@ -39,13 +40,19 @@ export default function AddListing() {
       return;
     }
 
+    if (!form.startDate || !form.endDate) {
+      alert("Please select trip start and end dates");
+      return;
+    }
+
     try {
       await axios.post(
         `${API}/api/host/listings`,
         {
           ...form,
           images,
-          hostId: host._id, // ⭐ FIXED — required for host details
+          hostId: host._id,
+          isHostListing: true, // ✅ IMPORTANT FLAG
         },
         {
           headers: { Authorization: getHostToken() },
@@ -55,7 +62,7 @@ export default function AddListing() {
       alert("Listing submitted for approval");
       window.location.href = "/host/dashboard";
     } catch (err) {
-      console.log(err);
+      console.error(err);
       alert("Error submitting listing");
     }
   };
@@ -65,15 +72,67 @@ export default function AddListing() {
       <h2 className="text-xl font-bold mb-4">Add New Listing</h2>
 
       <form onSubmit={handleSubmit} className="space-y-3">
-        <input name="title" placeholder="Title" className="border p-2 w-full" onChange={handleChange} />
-        <input name="location" placeholder="Location" className="border p-2 w-full" onChange={handleChange} />
-        <input name="price" placeholder="Price" type="number" className="border p-2 w-full" onChange={handleChange} />
-        <textarea name="description" placeholder="Description" className="border p-2 w-full h-20" onChange={handleChange} />
-        <input name="category" placeholder="Category" className="border p-2 w-full" onChange={handleChange} />
+        <input
+          name="title"
+          placeholder="Title"
+          className="border p-2 w-full"
+          onChange={handleChange}
+          required
+        />
+
+        <input
+          name="location"
+          placeholder="Location (e.g., Ooty)"
+          className="border p-2 w-full"
+          onChange={handleChange}
+          required
+        />
+
+        <input
+          name="price"
+          placeholder="Price"
+          type="number"
+          className="border p-2 w-full"
+          onChange={handleChange}
+          required
+        />
+
+        {/* ✅ NEW DATE FIELDS */}
+        <div className="grid grid-cols-2 gap-3">
+          <input
+            type="date"
+            name="startDate"
+            className="border p-2 w-full"
+            onChange={handleChange}
+            required
+          />
+          <input
+            type="date"
+            name="endDate"
+            className="border p-2 w-full"
+            onChange={handleChange}
+            required
+          />
+        </div>
+
+        <textarea
+          name="description"
+          placeholder="Description"
+          className="border p-2 w-full h-20"
+          onChange={handleChange}
+          required
+        />
+
+        <input
+          name="category"
+          placeholder="Category (Camping / Trek / Stay)"
+          className="border p-2 w-full"
+          onChange={handleChange}
+        />
 
         <input type="file" multiple onChange={handleImage} />
 
-        <button className="bg-emerald-600 text-white p-2 w-full rounded">
+        <button className="bg-emerald-600 hover:bg-emerald-700 text-white p-2 w-full rounded">
           Submit Listing
         </button>
       </form>
