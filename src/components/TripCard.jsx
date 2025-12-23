@@ -3,14 +3,19 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { FaWhatsapp } from "react-icons/fa";
 
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Pagination } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/pagination";
+
 export default function TripCard({ trip }) {
   const navigate = useNavigate();
 
   const handleDetails = () => {
     if (trip.isHostListing) {
-      navigate(`/host-listing/${trip._id}`); // ✅ correct route
+      navigate(`/host-listing/${trip._id}`);
     } else {
-      navigate(`/packages/${trip._id}`); // admin package
+      navigate(`/packages/${trip._id}`);
     }
   };
 
@@ -29,33 +34,71 @@ Please guide me with booking.`;
     );
   };
 
+  const media = trip.images?.length ? trip.images : ["/no-image.jpg"];
+
   return (
-    <div className="bg-white shadow-md rounded-2xl overflow-hidden flex flex-col">
-      <img
-        src={trip.images?.[0] || "/no-image.jpg"}
-        alt={trip.title}
-        className="h-44 w-full object-cover"
-      />
+    <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition overflow-hidden flex flex-col">
 
-      <div className="p-4 flex flex-col flex-1">
-        <h3 className="font-bold text-lg">{trip.title}</h3>
-        <p className="text-sm text-gray-600">{trip.location}</p>
+      {/* ================= MEDIA SLIDER ================= */}
+      <div className="relative h-[260px]">
+        <Swiper
+          modules={[Pagination]}
+          pagination={{ clickable: true }}
+          className="h-full"
+        >
+          {media.map((src, i) => (
+            <SwiperSlide key={i}>
+              {src.endsWith(".mp4") ? (
+                <video
+                  src={src}
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <img
+                  src={src}
+                  alt={trip.title}
+                  className="w-full h-full object-cover"
+                />
+              )}
+            </SwiperSlide>
+          ))}
+        </Swiper>
 
-        <p className="text-lg font-extrabold mt-2">₹ {trip.price}</p>
+        {/* PRICE BADGE */}
+        <div className="absolute bottom-3 right-3 bg-white/95 px-4 py-1 rounded-full text-sm font-bold shadow">
+          ₹ {trip.price}
+        </div>
+      </div>
 
-        <div className="mt-auto grid grid-cols-2 gap-2 pt-4">
+      {/* ================= CONTENT ================= */}
+      <div className="p-5 flex flex-col flex-1 space-y-2">
+        <h3 className="font-semibold text-lg leading-snug">
+          {trip.title}
+        </h3>
+
+        <p className="text-sm text-gray-600">
+          {trip.location}
+        </p>
+
+        {/* CTA */}
+        <div className="mt-auto grid grid-cols-2 gap-3 pt-4">
           <button
             onClick={handleDetails}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-full text-sm font-semibold"
+            className="bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-full text-sm font-semibold transition"
           >
             View Details
           </button>
 
           <button
             onClick={handleWhatsApp}
-            className="bg-green-500 hover:bg-green-600 text-white py-2 rounded-full flex items-center justify-center gap-2 text-sm font-semibold"
+            className="bg-green-500 hover:bg-green-600 text-white py-2.5 rounded-full flex items-center justify-center gap-2 text-sm font-semibold transition"
           >
-            <FaWhatsapp size={18} /> WhatsApp
+            <FaWhatsapp size={18} />
+            WhatsApp
           </button>
         </div>
       </div>
