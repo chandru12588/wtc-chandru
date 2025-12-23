@@ -24,7 +24,7 @@ export default function Home() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  /* ================= LOAD PACKAGES ================= */
+  /* ================= LOAD ALL PACKAGES (ADMIN + HOST) ================= */
   useEffect(() => {
     const loadPackages = async () => {
       try {
@@ -63,37 +63,60 @@ export default function Home() {
     setFilteredTrips(results);
   };
 
-  /* ================= TABS (ALL / WEEK / MONTH) ================= */
+  /* ================= WEEK / MONTH FILTER (DATE BASED) ================= */
   const handleTabSelect = (tab) => {
-    if (tab === "all") return setFilteredTrips(allTrips);
-    if (tab === "week")
-      return setFilteredTrips(allTrips.filter((t) => t.tag === "week"));
-    if (tab === "month")
-      return setFilteredTrips(allTrips.filter((t) => t.tag === "month"));
+    if (tab === "all") {
+      setFilteredTrips(allTrips);
+      return;
+    }
+
+    const today = new Date();
+
+    if (tab === "week") {
+      const startOfWeek = new Date(today);
+      startOfWeek.setDate(today.getDate() - today.getDay());
+
+      const endOfWeek = new Date(startOfWeek);
+      endOfWeek.setDate(startOfWeek.getDate() + 6);
+
+      setFilteredTrips(
+        allTrips.filter((t) => {
+          if (!t.startDate) return false;
+          const d = new Date(t.startDate);
+          return d >= startOfWeek && d <= endOfWeek;
+        })
+      );
+    }
+
+    if (tab === "month") {
+      const month = today.getMonth();
+      const year = today.getFullYear();
+
+      setFilteredTrips(
+        allTrips.filter((t) => {
+          if (!t.startDate) return false;
+          const d = new Date(t.startDate);
+          return d.getMonth() === month && d.getFullYear() === year;
+        })
+      );
+    }
   };
 
   return (
     <div className="w-full overflow-x-hidden">
-      {/* ================= HERO SECTION ================= */}
+      {/* ================= HERO ================= */}
       <section className="relative w-full h-[75vh] md:h-[80vh] overflow-hidden">
         <HeroSlider />
         <div className="absolute inset-0 bg-black/25" />
 
-        {/* HERO CONTENT */}
         <div className="absolute inset-0 flex flex-col justify-center items-center text-white text-center px-4">
-          <h1 className="text-4xl md:text-6xl font-bold drop-shadow-xl">
-            Camping in India
-          </h1>
-
-          <h2 className="text-2xl md:text-4xl font-bold mt-3 drop-shadow-xl">
+          <h1 className="text-4xl md:text-6xl font-bold">Camping in India</h1>
+          <h2 className="text-2xl md:text-4xl font-bold mt-3">
             Made Easy & Safe
           </h2>
 
-          <div className="mt-6 bg-emerald-600 px-6 py-3 rounded-full flex items-center gap-2 shadow-xl">
-            <span className="text-xl">✔</span>
-            <span className="font-semibold tracking-wide">
-              VERIFIED FAMILY CAMPSITES
-            </span>
+          <div className="mt-6 bg-emerald-600 px-6 py-3 rounded-full shadow-xl">
+            VERIFIED FAMILY CAMPSITES
           </div>
 
           <div className="absolute top-10 right-10 hidden md:block">
@@ -101,7 +124,6 @@ export default function Home() {
           </div>
         </div>
 
-        {/* SEARCH BAR */}
         <div className="absolute bottom-8 w-full px-4">
           <div className="max-w-5xl mx-auto">
             <AdvancedSearchBar onSearch={handleSearch} />
@@ -112,27 +134,23 @@ export default function Home() {
       {/* ================= CATEGORIES ================= */}
       <CategoriesBar />
 
-      {/* ================= TRIP TABS ================= */}
+      {/* ================= TABS ================= */}
       <TripTabs onTabSelect={handleTabSelect} />
 
-      {/* ================= FEATURED TRIPS (PRIORITY) ================= */}
+      {/* ================= FEATURED TRIPS (FIRST PRIORITY) ================= */}
       <section className="max-w-7xl mx-auto px-4 py-12">
-        <h2 className="text-2xl font-semibold mb-6">
-          Featured Trips
-        </h2>
+        <h2 className="text-2xl font-semibold mb-6">Featured Trips</h2>
 
         {loading ? (
-          <p className="text-sm text-gray-500">Loading trips...</p>
+          <p className="text-gray-500">Loading trips...</p>
         ) : (
-          <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
             {filteredTrips.length > 0 ? (
               filteredTrips.map((trip) => (
-                <TripCard key={trip._id || trip.id} trip={trip} />
+                <TripCard key={trip._id} trip={trip} />
               ))
             ) : (
-              <p className="text-sm text-gray-600">
-                No trips found. Try changing filters.
-              </p>
+              <p className="text-gray-600">No trips found</p>
             )}
           </div>
         )}
@@ -140,10 +158,10 @@ export default function Home() {
         <ExploreMoreButton />
       </section>
 
-      {/* ================= POPULAR DESTINATIONS ================= */}
+      {/* ================= DESTINATIONS ================= */}
       <PopularDestinations />
 
-      {/* ================= BLOGS / STORIES ================= */}
+      {/* ================= BLOGS ================= */}
       <BlogSection />
 
       {/* ================= TESTIMONIALS ================= */}
