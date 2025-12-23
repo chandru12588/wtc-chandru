@@ -37,10 +37,11 @@ Please guide me with booking.`;
   const media = trip.images?.length ? trip.images : ["/no-image.jpg"];
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg hover:shadow-xl transition overflow-hidden flex flex-col">
+    <div className="bg-white rounded-3xl shadow-lg hover:shadow-xl transition overflow-hidden flex flex-col">
 
       {/* ================= MEDIA SLIDER ================= */}
-      <div className="relative h-[260px]">
+      <div className="relative h-[320px]">
+
         <Swiper
           modules={[Pagination]}
           pagination={{ clickable: true }}
@@ -51,9 +52,9 @@ Please guide me with booking.`;
               {src.endsWith(".mp4") ? (
                 <video
                   src={src}
-                  autoPlay
                   muted
                   loop
+                  autoPlay
                   playsInline
                   className="w-full h-full object-cover"
                 />
@@ -68,24 +69,52 @@ Please guide me with booking.`;
           ))}
         </Swiper>
 
-        {/* PRICE BADGE */}
-        <div className="absolute bottom-3 right-3 bg-white/95 px-4 py-1 rounded-full text-sm font-bold shadow">
-          ₹ {trip.price}
-        </div>
+        {/* DARK GRADIENT OVERLAY */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
+
+        {/* DURATION BADGE */}
+        {trip.duration && (
+          <span className="absolute bottom-4 left-4 bg-black/70 text-white text-xs px-3 py-1 rounded-full">
+            {trip.duration}
+          </span>
+        )}
       </div>
 
       {/* ================= CONTENT ================= */}
-      <div className="p-5 flex flex-col flex-1 space-y-2">
+      <div className="p-6 flex flex-col flex-1 gap-2">
+
         <h3 className="font-semibold text-lg leading-snug">
           {trip.title}
         </h3>
 
-        <p className="text-sm text-gray-600">
-          {trip.location}
+        <p className="text-sm text-gray-500">
+          📍 {trip.location}
         </p>
 
+        {/* DATE CHIPS (optional – Exotic style) */}
+        {trip.availableDates?.length > 0 && (
+          <div className="flex flex-wrap gap-2 mt-1">
+            {trip.availableDates.slice(0, 3).map((d, i) => (
+              <span
+                key={i}
+                className="border border-orange-400 text-orange-500 text-xs px-3 py-1 rounded-full"
+              >
+                {d}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {/* PRICE */}
+        <div className="mt-3 text-lg font-bold">
+          From ₹{trip.price}
+          <span className="text-sm font-normal text-gray-500">
+            {" "} / person
+          </span>
+        </div>
+
         {/* CTA */}
-        <div className="mt-auto grid grid-cols-2 gap-3 pt-4">
+        <div className="mt-4 grid grid-cols-2 gap-3">
           <button
             onClick={handleDetails}
             className="bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-full text-sm font-semibold transition"
