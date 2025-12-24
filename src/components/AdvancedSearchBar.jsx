@@ -5,21 +5,20 @@ export default function AdvancedSearchBar({ trips = [], onSearch }) {
   const [query, setQuery] = useState("");
   const [date, setDate] = useState("");
   const [people, setPeople] = useState("");
-
   const [open, setOpen] = useState(false);
-  const panelRef = useRef(null);
 
-  /* =====================================================
-     🔥 BUILD SEARCH SUGGESTIONS FROM ALL PACKAGES
-  ===================================================== */
+  const panelRef = useRef(null);
+  const inputRef = useRef(null);
+
+  /* ================= BUILD SUGGESTIONS FROM PACKAGES ================= */
   const suggestions = useMemo(() => {
     const set = new Set();
 
     trips.forEach((t) => {
-      if (t.location) set.add(t.location);
-      if (t.region) set.add(t.region);
-      if (t.category) set.add(t.category);
-      if (t.title) set.add(t.title);
+      t.title && set.add(t.title);
+      t.location && set.add(t.location);
+      t.region && set.add(t.region);
+      t.category && set.add(t.category);
     });
 
     return Array.from(set);
@@ -31,9 +30,7 @@ export default function AdvancedSearchBar({ trips = [], onSearch }) {
       )
     : suggestions;
 
-  /* =====================================================
-     🎤 VOICE SEARCH
-  ===================================================== */
+  /* ================= VOICE SEARCH ================= */
   const startVoiceSearch = () => {
     const SpeechRecognition =
       window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -49,26 +46,26 @@ export default function AdvancedSearchBar({ trips = [], onSearch }) {
 
     recognition.onresult = (e) => {
       setQuery(e.results[0][0].transcript);
-      setOpen(false);
+      setOpen(true);
     };
   };
 
-  /* =====================================================
-     SUBMIT SEARCH
-  ===================================================== */
+  /* ================= SUBMIT ================= */
   const handleSubmit = (e) => {
     e.preventDefault();
     onSearch?.({ location: query, people });
+    setOpen(false);
   };
 
   const clearAll = () => {
     setQuery("");
     setDate("");
     setPeople("");
+    setOpen(false);
     onSearch?.({ location: "", people: "" });
   };
 
-  /* CLOSE ON OUTSIDE CLICK */
+  /* ================= CLOSE ON OUTSIDE CLICK ================= */
   useEffect(() => {
     const handler = (e) => {
       if (panelRef.current && !panelRef.current.contains(e.target)) {
@@ -80,38 +77,38 @@ export default function AdvancedSearchBar({ trips = [], onSearch }) {
   }, []);
 
   return (
-    <div className="relative w-full">
+    <div className="relative w-full z-[9999]">
       {/* ================= SEARCH BAR ================= */}
       <form
         onSubmit={handleSubmit}
         className="
           w-full max-w-6xl mx-auto
           backdrop-blur-xl bg-white/70
-          rounded-full shadow-2xl
+          rounded-3xl shadow-2xl
           px-4 py-3
-          flex flex-col md:flex-row items-center gap-4
+          flex flex-col md:flex-row gap-4
         "
       >
-        {/* SEARCH INPUT */}
-        <div
-          className="flex items-center gap-3 flex-1 cursor-pointer"
-          onClick={() => setOpen(true)}
-        >
+        {/* LOCATION / TYPE */}
+        <div className="flex items-center gap-3 flex-1">
           <MapPin className="text-orange-500" />
+
           <div className="flex flex-col w-full">
-            <span className="text-[11px] font-semibold">LOCATION / STAY TYPE</span>
+            <span className="text-[11px] font-semibold">
+              LOCATION / STAY TYPE
+            </span>
             <input
-              readOnly
+              ref={inputRef}
               value={query}
-              placeholder="Search destination, Tree House, Mud House..."
-              className="bg-transparent outline-none text-sm cursor-pointer"
+              onChange={(e) => setQuery(e.target.value)}
+              onFocus={() => setOpen(true)}
+              placeholder="Ooty, Tree House, Dome stay..."
+              className="bg-transparent outline-none text-sm"
             />
           </div>
+
           <Mic
-            onClick={(e) => {
-              e.stopPropagation();
-              startVoiceSearch();
-            }}
+            onClick={startVoiceSearch}
             className="text-orange-600 cursor-pointer"
             size={18}
           />
@@ -124,7 +121,7 @@ export default function AdvancedSearchBar({ trips = [], onSearch }) {
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
-            className="bg-transparent outline-none text-sm"
+            className="bg-transparent outline-none text-sm w-full"
           />
         </div>
 
@@ -136,13 +133,13 @@ export default function AdvancedSearchBar({ trips = [], onSearch }) {
             min="1"
             value={people}
             onChange={(e) => setPeople(e.target.value)}
-            className="bg-transparent outline-none text-sm"
+            className="bg-transparent outline-none text-sm w-full"
             placeholder="People"
           />
         </div>
 
         {/* ACTIONS */}
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2">
           {(query || people || date) && (
             <button
               type="button"
@@ -164,14 +161,13 @@ export default function AdvancedSearchBar({ trips = [], onSearch }) {
 
       {/* ================= DROPDOWN ================= */}
       {open && (
-        <div className="absolute left-0 right-0 mt-4 z-50 flex justify-center">
+        <div className="fixed inset-0 z-[9998] flex justify-center items-end md:items-start">
           <div
             ref={panelRef}
             className="
               bg-white w-full max-w-3xl
-              rounded-2xl shadow-2xl
-              p-6
-              fixed bottom-0 md:static
+              rounded-t-2xl md:rounded-2xl
+              shadow-2xl p-6
               max-h-[70vh] overflow-y-auto
             "
           >
@@ -179,22 +175,28 @@ export default function AdvancedSearchBar({ trips = [], onSearch }) {
               autoFocus
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Type location or stay type..."
+              placeholder="Search location or stay type..."
               className="w-full p-3 border rounded mb-4"
             />
 
-            {filtered.map((item) => (
-              <div
-                key={item}
-                onClick={() => {
-                  setQuery(item);
-                  setOpen(false);
-                }}
-                className="py-3 px-2 cursor-pointer hover:bg-gray-100 rounded"
-              >
-                {item}
-              </div>
-            ))}
+            {filtered.length > 0 ? (
+              filtered.map((item) => (
+                <div
+                  key={item}
+                  onClick={() => {
+                    setQuery(item);
+                    setOpen(false);
+                  }}
+                  className="py-3 px-2 cursor-pointer hover:bg-gray-100 rounded"
+                >
+                  {item}
+                </div>
+              ))
+            ) : (
+              <p className="text-sm text-gray-500">
+                No matches found
+              </p>
+            )}
           </div>
         </div>
       )}
