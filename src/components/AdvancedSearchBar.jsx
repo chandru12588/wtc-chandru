@@ -1,172 +1,200 @@
-import React, { useEffect, useRef, useState } from "react";
-import { MapPin, Calendar, Users, X } from "lucide-react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { MapPin, Calendar, Users, Mic, X } from "lucide-react";
 
-export default function AdvancedSearchBar({ onSearch, trips = [] }) {
-  const [location, setLocation] = useState("");
+export default function AdvancedSearchBar({ trips = [], onSearch }) {
+  const [query, setQuery] = useState("");
   const [date, setDate] = useState("");
   const [people, setPeople] = useState("");
 
-  const [showPanel, setShowPanel] = useState(false);
-  const [query, setQuery] = useState("");
+  const [open, setOpen] = useState(false);
   const panelRef = useRef(null);
 
-  /* ✅ BUILD LOCATIONS FROM PACKAGES */
-  const locations = Array.from(
-    new Set(
-      trips
-        .map((t) => t.location)
-        .filter(Boolean)
-        .map((l) => l.trim())
-    )
-  );
+  /* =====================================================
+     🔥 BUILD SEARCH SUGGESTIONS FROM ALL PACKAGES
+  ===================================================== */
+  const suggestions = useMemo(() => {
+    const set = new Set();
 
-  const filtered =
-    query.length === 0
-      ? locations
-      : locations.filter((l) =>
-          l.toLowerCase().includes(query.toLowerCase())
-        );
+    trips.forEach((t) => {
+      if (t.location) set.add(t.location);
+      if (t.region) set.add(t.region);
+      if (t.category) set.add(t.category);
+      if (t.title) set.add(t.title);
+    });
 
-  /* CLOSE PANEL */
+    return Array.from(set);
+  }, [trips]);
+
+  const filtered = query
+    ? suggestions.filter((s) =>
+        s.toLowerCase().includes(query.toLowerCase())
+      )
+    : suggestions;
+
+  /* =====================================================
+     🎤 VOICE SEARCH
+  ===================================================== */
+  const startVoiceSearch = () => {
+    const SpeechRecognition =
+      window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      alert("Voice search not supported");
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = "en-IN";
+    recognition.start();
+
+    recognition.onresult = (e) => {
+      setQuery(e.results[0][0].transcript);
+      setOpen(false);
+    };
+  };
+
+  /* =====================================================
+     SUBMIT SEARCH
+  ===================================================== */
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSearch?.({ location: query, people });
+  };
+
+  const clearAll = () => {
+    setQuery("");
+    setDate("");
+    setPeople("");
+    onSearch?.({ location: "", people: "" });
+  };
+
+  /* CLOSE ON OUTSIDE CLICK */
   useEffect(() => {
-    if (!showPanel) return;
     const handler = (e) => {
       if (panelRef.current && !panelRef.current.contains(e.target)) {
-        setShowPanel(false);
+        setOpen(false);
       }
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
-  }, [showPanel]);
-
-  /* SEARCH */
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    onSearch?.({
-      location,
-      people: Number(people),
-    });
-  };
-
-  /* CLEAR */
-  const clearSearch = () => {
-    setLocation("");
-    setDate("");
-    setPeople("");
-    setQuery("");
-    onSearch?.({ location: "", people: "" });
-  };
+  }, []);
 
   return (
-    <div className="relative z-[60] w-full px-4">
-      {/* SEARCH BAR */}
+    <div className="relative w-full">
+      {/* ================= SEARCH BAR ================= */}
       <form
         onSubmit={handleSubmit}
         className="
-          w-full max-w-5xl mx-auto
+          w-full max-w-6xl mx-auto
           backdrop-blur-xl bg-white/70
-          rounded-3xl shadow-2xl
-          p-4 md:p-6
-          grid grid-cols-1 md:grid-cols-4 gap-4
+          rounded-full shadow-2xl
+          px-4 py-3
+          flex flex-col md:flex-row items-center gap-4
         "
       >
-        {/* LOCATION */}
+        {/* SEARCH INPUT */}
         <div
-          onClick={() => setShowPanel(true)}
-          className="flex items-center gap-3 cursor-pointer bg-white rounded-xl p-3"
+          className="flex items-center gap-3 flex-1 cursor-pointer"
+          onClick={() => setOpen(true)}
         >
           <MapPin className="text-orange-500" />
           <div className="flex flex-col w-full">
-            <span className="text-xs font-semibold">LOCATION</span>
-            <span className="text-sm text-gray-600">
-              {location || "Select destination"}
-            </span>
+            <span className="text-[11px] font-semibold">LOCATION / STAY TYPE</span>
+            <input
+              readOnly
+              value={query}
+              placeholder="Search destination, Tree House, Mud House..."
+              className="bg-transparent outline-none text-sm cursor-pointer"
+            />
           </div>
+          <Mic
+            onClick={(e) => {
+              e.stopPropagation();
+              startVoiceSearch();
+            }}
+            className="text-orange-600 cursor-pointer"
+            size={18}
+          />
         </div>
 
         {/* DATE */}
-        <div className="flex items-center gap-3 bg-white rounded-xl p-3">
+        <div className="flex items-center gap-3 flex-1">
           <Calendar className="text-orange-500" />
-          <div className="flex flex-col w-full">
-            <span className="text-xs font-semibold">DATE</span>
-            <input
-              type="date"
-              className="text-sm outline-none bg-transparent"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-            />
-          </div>
+          <input
+            type="date"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+            className="bg-transparent outline-none text-sm"
+          />
         </div>
 
         {/* PEOPLE */}
-        <div className="flex items-center gap-3 bg-white rounded-xl p-3">
+        <div className="flex items-center gap-3 flex-1">
           <Users className="text-orange-500" />
-          <div className="flex flex-col w-full">
-            <span className="text-xs font-semibold">NO OF MEMBERS</span>
-            <input
-              type="number"
-              min="1"
-              placeholder="e.g. 2"
-              className="text-sm outline-none bg-transparent"
-              value={people}
-              onChange={(e) => setPeople(e.target.value)}
-            />
-          </div>
+          <input
+            type="number"
+            min="1"
+            value={people}
+            onChange={(e) => setPeople(e.target.value)}
+            className="bg-transparent outline-none text-sm"
+            placeholder="People"
+          />
         </div>
 
         {/* ACTIONS */}
         <div className="flex gap-2">
+          {(query || people || date) && (
+            <button
+              type="button"
+              onClick={clearAll}
+              className="p-2 rounded-full bg-gray-200"
+            >
+              <X size={16} />
+            </button>
+          )}
+
           <button
             type="submit"
-            className="flex-1 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-xl py-3"
+            className="bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-full px-6 py-3"
           >
             LET’S GO
           </button>
-
-          {(location || people) && (
-            <button
-              type="button"
-              onClick={clearSearch}
-              className="bg-gray-200 hover:bg-gray-300 rounded-xl px-4"
-            >
-              <X />
-            </button>
-          )}
         </div>
       </form>
 
-      {/* LOCATION PANEL */}
-      {showPanel && (
-        <div className="fixed inset-0 z-[70] bg-black/40 flex items-end md:items-center justify-center">
+      {/* ================= DROPDOWN ================= */}
+      {open && (
+        <div className="absolute left-0 right-0 mt-4 z-50 flex justify-center">
           <div
             ref={panelRef}
-            className="bg-white w-full md:max-w-xl rounded-t-3xl md:rounded-3xl p-6 max-h-[80vh] overflow-y-auto"
+            className="
+              bg-white w-full max-w-3xl
+              rounded-2xl shadow-2xl
+              p-6
+              fixed bottom-0 md:static
+              max-h-[70vh] overflow-y-auto
+            "
           >
             <input
               autoFocus
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search destination..."
-              className="w-full border p-3 rounded-xl mb-4"
+              placeholder="Type location or stay type..."
+              className="w-full p-3 border rounded mb-4"
             />
 
-            {filtered.length ? (
-              filtered.map((l) => (
-                <div
-                  key={l}
-                  onClick={() => {
-                    setLocation(l);
-                    setShowPanel(false);
-                    setQuery("");
-                  }}
-                  className="py-3 px-2 rounded-lg cursor-pointer hover:bg-gray-100"
-                >
-                  {l}
-                </div>
-              ))
-            ) : (
-              <p className="text-sm text-gray-500">No locations found</p>
-            )}
+            {filtered.map((item) => (
+              <div
+                key={item}
+                onClick={() => {
+                  setQuery(item);
+                  setOpen(false);
+                }}
+                className="py-3 px-2 cursor-pointer hover:bg-gray-100 rounded"
+              >
+                {item}
+              </div>
+            ))}
           </div>
         </div>
       )}

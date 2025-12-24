@@ -24,12 +24,15 @@ export default function Home() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  /* ================= LOAD ALL TRIPS ================= */
+  /* =====================================================
+     LOAD ALL TRIPS (ADMIN + HOST — SINGLE SOURCE)
+  ===================================================== */
   useEffect(() => {
     const loadTrips = async () => {
       try {
         const res = await axios.get(`${API}/api/packages`);
         const trips = res.data || [];
+
         setAllTrips(trips);
         setFilteredTrips(trips);
       } catch (err) {
@@ -42,7 +45,13 @@ export default function Home() {
     loadTrips();
   }, []);
 
-  /* ================= ADVANCED SEARCH ================= */
+  /* =====================================================
+     ADVANCED SEARCH (GLOBAL SEARCH)
+     - Location
+     - Title
+     - Region
+     - Category / Stay Type
+  ===================================================== */
   const handleSearch = ({ location, people }) => {
     if (!location && !people) {
       setFilteredTrips(allTrips);
@@ -53,8 +62,14 @@ export default function Home() {
 
     if (location) {
       const q = location.toLowerCase();
+
       results = results.filter((t) =>
-        `${t.title} ${t.location} ${t.region}`
+        `
+          ${t.title || ""}
+          ${t.location || ""}
+          ${t.region || ""}
+          ${t.category || ""}
+        `
           .toLowerCase()
           .includes(q)
       );
@@ -68,6 +83,7 @@ export default function Home() {
 
     setFilteredTrips(results);
 
+    // 🔥 AUTO SCROLL TO RESULTS
     setTimeout(() => {
       document
         .getElementById("featured-trips")
@@ -75,7 +91,9 @@ export default function Home() {
     }, 100);
   };
 
-  /* ================= WEEK / MONTH FILTER ================= */
+  /* =====================================================
+     THIS WEEK / THIS MONTH FILTER (DATE BASED)
+  ===================================================== */
   const handleTabSelect = (tab) => {
     if (tab === "all") {
       setFilteredTrips(allTrips);
@@ -84,6 +102,7 @@ export default function Home() {
 
     const today = new Date();
 
+    // ---- THIS WEEK (MON → SUN)
     if (tab === "week") {
       const start = new Date(today);
       const day = start.getDay() || 7;
@@ -103,6 +122,7 @@ export default function Home() {
       );
     }
 
+    // ---- THIS MONTH
     if (tab === "month") {
       const m = today.getMonth();
       const y = today.getFullYear();
@@ -147,12 +167,12 @@ export default function Home() {
           </div>
         </div>
 
-        {/* 🔥 PASS TRIPS HERE (CRITICAL FIX) */}
+        {/* 🔥 CRITICAL FIX: PASS ALL TRIPS */}
         <div className="absolute bottom-8 w-full px-4">
-          <div className="max-w-5xl mx-auto">
+          <div className="max-w-6xl mx-auto">
             <AdvancedSearchBar
-              onSearch={handleSearch}
               trips={allTrips}
+              onSearch={handleSearch}
             />
           </div>
         </div>
@@ -174,7 +194,7 @@ export default function Home() {
           <p className="text-gray-500">Loading trips...</p>
         ) : (
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {filteredTrips.length ? (
+            {filteredTrips.length > 0 ? (
               filteredTrips.map((trip) => (
                 <TripCard key={trip._id} trip={trip} />
               ))
