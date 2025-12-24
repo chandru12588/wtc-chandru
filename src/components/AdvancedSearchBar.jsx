@@ -9,39 +9,52 @@ export default function AdvancedSearchBar({ trips = [], onSearch }) {
 
   const panelRef = useRef(null);
 
-  /* ================= BUILD SUGGESTIONS ================= */
+  /* BUILD SEARCH WORDS FROM DB PACKAGES ONLY */
   const suggestions = useMemo(() => {
     const set = new Set();
     trips.forEach((t) => {
-      if (t.title) set.add(t.title);
-      if (t.location) set.add(t.location);
-      if (t.region) set.add(t.region);
-      if (t.category) set.add(t.category);
+      t.title && set.add(t.title);
+      t.location && set.add(t.location);
+      t.region && set.add(t.region);
+      t.category && set.add(t.category);
     });
-    return Array.from(set);
+    return [...set];
   }, [trips]);
 
   const filtered = query
-    ? suggestions.filter((s) =>
-        s.toLowerCase().includes(query.toLowerCase())
-      )
-    : suggestions.slice(0, 20);
+    ? suggestions.filter((s) => s.toLowerCase().includes(query.toLowerCase()))
+    : suggestions; // show all if empty
 
-  /* ================= HANDLERS ================= */
+  /* ---------------- Voice Search ---------------- */
+  const startVoice = () => {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) return alert("Voice search not supported in this browser");
+
+    const rec = new SR();
+    rec.lang = "en-IN";
+    rec.start();
+    rec.onresult = (e) => {
+      setQuery(e.results[0][0].transcript);
+      setOpen(true);
+    };
+  };
+
+  /* Search Submit */
   const handleSubmit = (e) => {
     e.preventDefault();
     onSearch?.({ location: query, people });
     setOpen(false);
   };
 
+  /* Clear All */
   const clearAll = () => {
     setQuery("");
-    setDate("");
     setPeople("");
+    setDate("");
     onSearch?.({ location: "", people: "" });
   };
 
-  /* OUTSIDE CLICK CLOSE */
+  /* Close dropdown when clicking outside */
   useEffect(() => {
     const close = (e) => {
       if (panelRef.current && !panelRef.current.contains(e.target)) {
@@ -53,16 +66,13 @@ export default function AdvancedSearchBar({ trips = [], onSearch }) {
   }, []);
 
   return (
-    <div className="relative w-full z-[100]">
+    <div className="relative w-full z-[200]">
 
-      {/* 🔥 MAIN GLASS SEARCH BAR */}
+      {/* ================= TOP GLASS SEARCH BAR ================= */}
       <form
         onSubmit={handleSubmit}
-        className="
-        bg-white/70 backdrop-blur-xl border border-white/20
-        w-full max-w-6xl mx-auto rounded-full shadow-lg
-        px-5 py-3 flex items-center gap-3
-        "
+        className="bg-white/60 backdrop-blur-md w-full max-w-6xl mx-auto 
+        rounded-full shadow-lg px-5 py-3 flex items-center gap-4 border border-white/30"
       >
         {/* Location */}
         <div
@@ -71,11 +81,27 @@ export default function AdvancedSearchBar({ trips = [], onSearch }) {
         >
           <MapPin className="text-orange-500" size={18} />
           <input
-            placeholder="Enter the Destination"
             value={query}
             readOnly
-            className="bg-transparent text-sm w-full outline-none"
+            placeholder="Search Ooty, Treehouse, Dome Stay..."
+            className="bg-transparent w-full outline-none text-sm"
           />
+
+          {/* Voice Search outside */}
+          <Mic
+            size={18}
+            className="text-orange-600 cursor-pointer hover:scale-110"
+            onClick={(e) => { e.stopPropagation(); startVoice(); }}
+          />
+
+          {/* Clear button outside */}
+          {query && (
+            <X
+              size={16}
+              className="text-gray-600 cursor-pointer"
+              onClick={(e) => { e.stopPropagation(); clearAll(); }}
+            />
+          )}
         </div>
 
         {/* Date */}
@@ -85,7 +111,7 @@ export default function AdvancedSearchBar({ trips = [], onSearch }) {
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
-            className="bg-transparent text-sm outline-none w-full"
+            className="bg-transparent outline-none text-sm w-full"
           />
         </div>
 
@@ -95,96 +121,79 @@ export default function AdvancedSearchBar({ trips = [], onSearch }) {
           <input
             type="number"
             min="1"
-            placeholder="People"
             value={people}
             onChange={(e) => setPeople(e.target.value)}
-            className="bg-transparent text-sm outline-none w-full"
+            placeholder="People"
+            className="bg-transparent outline-none text-sm w-full"
           />
         </div>
 
-        {/* Actions */}
-        <button
-          type="submit"
-          className="bg-orange-500 hover:bg-orange-600 rounded-full px-6 py-2 text-white text-xs font-bold"
-        >
-          LET’S GO
+        <button className="bg-orange-500 hover:bg-orange-600 text-white rounded-full 
+          px-6 py-2 text-xs font-bold">
+          LET'S GO
         </button>
       </form>
 
-      {/* ================= MODAL LIKE YOUR PIC ================= */}
+      {/* ================= DROPDOWN MODAL ================= */}
       {open && (
-        <div className="fixed inset-0 bg-black/30 flex justify-center items-start md:items-center z-[200] p-3 md:p-0">
+        <div className="fixed inset-0 bg-black/35 flex justify-center items-start md:items-center p-4 z-[999]">
           <div
             ref={panelRef}
-            className="
-              bg-white rounded-3xl shadow-xl
-              w-full max-w-4xl max-h-[75vh] overflow-y-auto
-              p-5 md:p-8
-            "
+            className="bg-white w-full max-w-4xl max-h-[75vh] overflow-y-auto 
+            rounded-3xl shadow-2xl p-6 relative"
           >
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold">Location</h2>
-              <X
-                onClick={() => setOpen(false)}
-                className="cursor-pointer text-gray-500"
-              />
-            </div>
+            {/* Close button */}
+            <X
+              size={20}
+              className="absolute top-5 right-5 cursor-pointer"
+              onClick={() => setOpen(false)}
+            />
 
-            {/* Input inside modal */}
-            <div className="flex items-center bg-gray-100 rounded-full px-4 py-2 mb-5">
+            <h2 className="font-semibold text-lg mb-4">Search</h2>
+
+            {/* Input with Voice + Clear (INSIDE) */}
+            <div className="flex items-center bg-gray-100 rounded-full px-4 py-2 mb-4 gap-2">
               <MapPin size={18} className="text-orange-500" />
+
               <input
                 autoFocus
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Enter the Destination"
-                className="bg-transparent w-full outline-none ml-2"
+                placeholder="Type destination..."
+                className="bg-transparent flex-1 outline-none"
               />
-              <Mic className="text-orange-500 cursor-pointer" size={18} />
+
+              {/* Voice inside */}
+              <Mic
+                size={18}
+                className="text-orange-600 cursor-pointer"
+                onClick={startVoice}
+              />
+
+              {/* Clear inside */}
+              {query && (
+                <X
+                  className="cursor-pointer text-gray-600 hover:text-red-500"
+                  onClick={() => setQuery("")}
+                />
+              )}
             </div>
 
-            {/* Trending Searches */}
-            <p className="font-semibold text-sm mb-2">Trending Searches</p>
-            <div className="flex flex-wrap gap-2 mb-4">
-              {["Gavi","Munnar","Varkala","Meghalaya","Vagamon","Jawadhu Hills","Tada"].map((tag) => (
-                <span
-                  key={tag}
-                  onClick={() => setQuery(tag)}
-                  className="px-3 py-1 bg-orange-100 text-orange-600 rounded-full text-xs cursor-pointer"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-
-            {/* Trending Locations */}
-            <p className="font-semibold text-sm mb-2">Trending Locations</p>
-            <div className="flex flex-wrap gap-2 mb-4">
-              {["Ooty","Kodaikanal","Masinagudi","Yelagiri","Gokarna","Kotagiri","Dandeli"].map((loc) => (
-                <span
-                  key={loc}
-                  onClick={() => setQuery(loc)}
-                  className="px-3 py-1 bg-gray-100 rounded-full text-xs cursor-pointer"
-                >
-                  {loc}
-                </span>
-              ))}
-            </div>
-
-            {/* Live search suggestions */}
-            <div className="border-t pt-3">
-              {filtered.map((item) => (
-                <div
-                  key={item}
-                  onClick={() => {
-                    setQuery(item);
-                    setOpen(false);
-                  }}
-                  className="p-2 text-sm cursor-pointer hover:bg-gray-100 rounded"
-                >
-                  {item}
-                </div>
-              ))}
+            {/* Suggestions list */}
+            <div>
+              {filtered.length > 0 ? (
+                filtered.map((v) => (
+                  <div
+                    key={v}
+                    className="p-2 text-sm cursor-pointer hover:bg-gray-100 rounded"
+                    onClick={() => { setQuery(v); setOpen(false); }}
+                  >
+                    {v}
+                  </div>
+                ))
+              ) : (
+                <p className="text-gray-500 text-sm">No results found</p>
+              )}
             </div>
           </div>
         </div>
