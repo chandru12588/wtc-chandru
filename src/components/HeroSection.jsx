@@ -2,7 +2,7 @@ import React from "react";
 import HeroSlider from "./HeroSlider";
 import SearchBar from "./SearchBar";
 import Navbar from "./Navbar";
-import RotatingBadge from "../components/RotatingBadge";  // <-- Added import
+import RotatingBadge from "./RotatingBadge";  // <-- FIXED PATH
 
 export default function HeroSection({ onSearch }) {
   return (
@@ -31,7 +31,7 @@ export default function HeroSection({ onSearch }) {
           <span className="block text-white/90">Made Easy & Safe</span>
         </h1>
 
-        {/* 🔥 Rotating Badge instead of static */}
+        {/* 🔥 Rotating Badge */}
         <RotatingBadge />
       </div>
 
