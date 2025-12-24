@@ -25,7 +25,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
 
   /* =====================================================
-     LOAD ALL TRIPS (ADMIN + HOST) — SINGLE SOURCE
+     LOAD ALL TRIPS (ADMIN PACKAGES)
   ====================================================== */
   useEffect(() => {
     const loadTrips = async () => {
@@ -46,7 +46,7 @@ export default function Home() {
   }, []);
 
   /* =====================================================
-     ADVANCED SEARCH
+     ADVANCED SEARCH (LOCATION + PEOPLE)
   ====================================================== */
   const handleSearch = ({ location, people }) => {
     let results = [...allTrips];
@@ -54,7 +54,9 @@ export default function Home() {
     if (location) {
       const q = location.toLowerCase();
       results = results.filter((t) =>
-        `${t.title} ${t.location} ${t.region}`.toLowerCase().includes(q)
+        `${t.title} ${t.location} ${t.region}`
+          .toLowerCase()
+          .includes(q)
       );
     }
 
@@ -65,10 +67,16 @@ export default function Home() {
     }
 
     setFilteredTrips(results);
+
+    // ✅ AUTO SCROLL TO RESULTS
+    setTimeout(() => {
+      const el = document.getElementById("featured-trips");
+      if (el) el.scrollIntoView({ behavior: "smooth" });
+    }, 100);
   };
 
   /* =====================================================
-     THIS WEEK / THIS MONTH (DATE BASED)
+     THIS WEEK / THIS MONTH FILTER
   ====================================================== */
   const handleTabSelect = (tab) => {
     if (tab === "all") {
@@ -78,7 +86,7 @@ export default function Home() {
 
     const today = new Date();
 
-    /* ---- WEEK (Mon → Sun) ---- */
+    // ---- THIS WEEK (Mon → Sun)
     if (tab === "week") {
       const start = new Date(today);
       const day = start.getDay() || 7;
@@ -98,7 +106,7 @@ export default function Home() {
       );
     }
 
-    /* ---- MONTH ---- */
+    // ---- THIS MONTH
     if (tab === "month") {
       const m = today.getMonth();
       const y = today.getFullYear();
@@ -111,6 +119,12 @@ export default function Home() {
         })
       );
     }
+
+    // scroll to results
+    setTimeout(() => {
+      const el = document.getElementById("featured-trips");
+      if (el) el.scrollIntoView({ behavior: "smooth" });
+    }, 100);
   };
 
   return (
@@ -151,7 +165,10 @@ export default function Home() {
       <TripTabs onTabSelect={handleTabSelect} />
 
       {/* ================= FEATURED TRIPS ================= */}
-      <section className="max-w-7xl mx-auto px-4 py-12">
+      <section
+        id="featured-trips"
+        className="max-w-7xl mx-auto px-4 py-12"
+      >
         <h2 className="text-2xl font-semibold mb-6">
           Featured Trips
         </h2>

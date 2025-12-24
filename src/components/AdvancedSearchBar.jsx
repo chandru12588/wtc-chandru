@@ -12,16 +12,6 @@ export default function AdvancedSearchBar({ onSearch }) {
 
   const panelRef = useRef(null);
 
-  /* ================= GEOLOCATION ================= */
-  const askUserLocation = () => {
-    if (!navigator.geolocation) return;
-
-    navigator.geolocation.getCurrentPosition(
-      () => {},
-      () => {}
-    );
-  };
-
   /* ---------------- STATIC DATA ---------------- */
   const allLocations = [
     "Kashmir",
@@ -36,7 +26,7 @@ export default function AdvancedSearchBar({ onSearch }) {
     "Hampi",
   ];
 
-  const trendingSearches = [
+  const trending = [
     "Gavi",
     "Munnar",
     "Varkala",
@@ -44,19 +34,9 @@ export default function AdvancedSearchBar({ onSearch }) {
     "Vagamon",
     "Jawadhu Hills",
     "Tada",
-  ];
-
-  const trendingLocations = [
-    "Havelock Island",
     "Yelagiri",
-    "Nelliyampathy",
-    "Gavi",
-    "Masinagudi",
     "Kotagiri",
     "Gokarna",
-    "Varkala",
-    "Dandeli",
-    "Tada",
   ];
 
   /* ---------------- VOICE SEARCH ---------------- */
@@ -65,7 +45,7 @@ export default function AdvancedSearchBar({ onSearch }) {
       window.SpeechRecognition || window.webkitSpeechRecognition;
 
     if (!SpeechRecognition) {
-      alert("Voice search not supported.");
+      alert("Voice search not supported");
       return;
     }
 
@@ -73,12 +53,13 @@ export default function AdvancedSearchBar({ onSearch }) {
     recognition.lang = "en-IN";
     recognition.start();
 
-    recognition.onresult = (event) => {
-      setLocation(event.results[0][0].transcript);
+    recognition.onresult = (e) => {
+      setLocation(e.results[0][0].transcript);
+      setShowPanel(false);
     };
   };
 
-  /* ---------------- FILTER ---------------- */
+  /* ---------------- FILTER PANEL ---------------- */
   const handleModalInput = (txt) => {
     setModalInput(txt);
 
@@ -100,7 +81,7 @@ export default function AdvancedSearchBar({ onSearch }) {
     setShowPanel(false);
   };
 
-  /* ---------------- OUTSIDE CLICK ---------------- */
+  /* ---------------- CLOSE ON OUTSIDE CLICK ---------------- */
   useEffect(() => {
     if (!showPanel) return;
 
@@ -114,15 +95,23 @@ export default function AdvancedSearchBar({ onSearch }) {
     return () => document.removeEventListener("mousedown", handler);
   }, [showPanel]);
 
-  /* ---------------- SUBMIT (🔥 FIXED) ---------------- */
+  /* ---------------- SUBMIT (🔥 FINAL FIX) ---------------- */
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    if (!onSearch) return;
 
     onSearch({
       location,
       date,
       people: Number(people),
     });
+
+    // ✅ SCROLL TO RESULTS (IMPORTANT)
+    setTimeout(() => {
+      const el = document.getElementById("featured-trips");
+      if (el) el.scrollIntoView({ behavior: "smooth" });
+    }, 100);
   };
 
   return (
@@ -132,8 +121,7 @@ export default function AdvancedSearchBar({ onSearch }) {
         onSubmit={handleSubmit}
         className="
           w-full max-w-[1100px] mx-auto
-          md:bg-white md:rounded-full md:shadow-xl md:px-6 md:py-4
-          bg-white/20 backdrop-blur-lg rounded-xl
+          bg-white rounded-full shadow-xl
           px-4 py-4
           flex flex-col md:flex-row gap-4
         "
@@ -143,26 +131,17 @@ export default function AdvancedSearchBar({ onSearch }) {
           <MapPin size={20} className="text-orange-500" />
           <div className="flex flex-col w-full">
             <p className="text-[11px] font-semibold">LOCATION</p>
-            <div className="flex items-center gap-2">
-              <input
-                readOnly
-                value={location}
-                placeholder="Enter Destination"
-                className="text-sm w-full outline-none cursor-pointer"
-                onClick={() => {
-                  askUserLocation();
-                  setShowPanel(true);
-                }}
-              />
-              <button
-                type="button"
-                onClick={startVoiceSearch}
-                className="p-2 rounded-full"
-              >
-                <Mic size={16} className="text-orange-600" />
-              </button>
-            </div>
+            <input
+              value={location}
+              placeholder="Enter Destination"
+              className="text-sm w-full outline-none cursor-pointer"
+              onFocus={() => setShowPanel(true)}
+              readOnly
+            />
           </div>
+          <button type="button" onClick={startVoiceSearch}>
+            <Mic size={16} className="text-orange-600" />
+          </button>
         </div>
 
         {/* DATE */}
@@ -217,28 +196,18 @@ export default function AdvancedSearchBar({ onSearch }) {
               className="w-full p-3 border rounded mb-4"
             />
 
-            {filteredSuggestions.map((l, i) => (
+            {(filteredSuggestions.length
+              ? filteredSuggestions
+              : trending
+            ).map((t, i) => (
               <div
                 key={i}
-                onClick={() => selectLocation(l)}
-                className="py-2 cursor-pointer hover:bg-gray-100"
+                onClick={() => selectLocation(t)}
+                className="py-3 cursor-pointer hover:bg-gray-100"
               >
-                {l}
+                {t}
               </div>
             ))}
-
-            <h3 className="font-semibold mt-4">Trending</h3>
-            <div className="flex flex-wrap gap-2 mt-2">
-              {[...trendingSearches, ...trendingLocations].map((t, i) => (
-                <span
-                  key={i}
-                  onClick={() => selectLocation(t)}
-                  className="px-4 py-2 bg-gray-100 rounded-full text-sm cursor-pointer"
-                >
-                  {t}
-                </span>
-              ))}
-            </div>
           </div>
         </div>
       )}
