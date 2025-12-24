@@ -24,15 +24,12 @@ export default function Home() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  /* =====================================================
-     LOAD ALL TRIPS (ADMIN PACKAGES)
-  ====================================================== */
+  /* ================= LOAD ALL TRIPS ================= */
   useEffect(() => {
     const loadTrips = async () => {
       try {
         const res = await axios.get(`${API}/api/packages`);
         const trips = res.data || [];
-
         setAllTrips(trips);
         setFilteredTrips(trips);
       } catch (err) {
@@ -45,10 +42,14 @@ export default function Home() {
     loadTrips();
   }, []);
 
-  /* =====================================================
-     ADVANCED SEARCH (LOCATION + PEOPLE)
-  ====================================================== */
+  /* ================= ADVANCED SEARCH ================= */
   const handleSearch = ({ location, people }) => {
+    // 🔥 if nothing selected → show all
+    if (!location && !people) {
+      setFilteredTrips(allTrips);
+      return;
+    }
+
     let results = [...allTrips];
 
     if (location) {
@@ -68,16 +69,15 @@ export default function Home() {
 
     setFilteredTrips(results);
 
-    // ✅ AUTO SCROLL TO RESULTS
+    // auto scroll
     setTimeout(() => {
-      const el = document.getElementById("featured-trips");
-      if (el) el.scrollIntoView({ behavior: "smooth" });
+      document
+        .getElementById("featured-trips")
+        ?.scrollIntoView({ behavior: "smooth" });
     }, 100);
   };
 
-  /* =====================================================
-     THIS WEEK / THIS MONTH FILTER
-  ====================================================== */
+  /* ================= WEEK / MONTH ================= */
   const handleTabSelect = (tab) => {
     if (tab === "all") {
       setFilteredTrips(allTrips);
@@ -86,7 +86,6 @@ export default function Home() {
 
     const today = new Date();
 
-    // ---- THIS WEEK (Mon → Sun)
     if (tab === "week") {
       const start = new Date(today);
       const day = start.getDay() || 7;
@@ -106,7 +105,6 @@ export default function Home() {
       );
     }
 
-    // ---- THIS MONTH
     if (tab === "month") {
       const m = today.getMonth();
       const y = today.getFullYear();
@@ -120,16 +118,16 @@ export default function Home() {
       );
     }
 
-    // scroll to results
     setTimeout(() => {
-      const el = document.getElementById("featured-trips");
-      if (el) el.scrollIntoView({ behavior: "smooth" });
+      document
+        .getElementById("featured-trips")
+        ?.scrollIntoView({ behavior: "smooth" });
     }, 100);
   };
 
   return (
     <div className="w-full overflow-x-hidden">
-      {/* ================= HERO ================= */}
+      {/* HERO */}
       <section className="relative w-full h-[75vh] md:h-[80vh] overflow-hidden">
         <HeroSlider />
         <div className="absolute inset-0 bg-black/25" />
@@ -158,13 +156,10 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ================= CATEGORIES ================= */}
       <CategoriesBar />
-
-      {/* ================= TABS ================= */}
       <TripTabs onTabSelect={handleTabSelect} />
 
-      {/* ================= FEATURED TRIPS ================= */}
+      {/* RESULTS */}
       <section
         id="featured-trips"
         className="max-w-7xl mx-auto px-4 py-12"
@@ -177,7 +172,7 @@ export default function Home() {
           <p className="text-gray-500">Loading trips...</p>
         ) : (
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {filteredTrips.length > 0 ? (
+            {filteredTrips.length ? (
               filteredTrips.map((trip) => (
                 <TripCard key={trip._id} trip={trip} />
               ))
