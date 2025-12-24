@@ -15,6 +15,7 @@ import FilterDrawer from "../components/FilterDrawer";
 import PopularDestinations from "../components/PopularDestinations";
 import BlogSection from "../components/BlogSection";
 import RotatingReviewBadge from "../components/ReviewBadge";
+import RotatingBadge from "../components/RotatingBadge";   // <-- ADDED 🔥
 
 const API = import.meta.env.VITE_API_URL;
 
@@ -24,9 +25,7 @@ export default function Home() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  /* =====================================================
-     LOAD ALL TRIPS (ADMIN + HOST — SINGLE SOURCE)
-  ===================================================== */
+  /* ================= Load Trips ================= */
   useEffect(() => {
     const loadTrips = async () => {
       try {
@@ -41,17 +40,10 @@ export default function Home() {
         setLoading(false);
       }
     };
-
     loadTrips();
   }, []);
 
-  /* =====================================================
-     ADVANCED SEARCH (GLOBAL SEARCH)
-     - Location
-     - Title
-     - Region
-     - Category / Stay Type
-  ===================================================== */
+  /* ================= Search Filter ================= */
   const handleSearch = ({ location, people }) => {
     if (!location && !people) {
       setFilteredTrips(allTrips);
@@ -59,17 +51,10 @@ export default function Home() {
     }
 
     let results = [...allTrips];
-
     if (location) {
       const q = location.toLowerCase();
-
       results = results.filter((t) =>
-        `
-          ${t.title || ""}
-          ${t.location || ""}
-          ${t.region || ""}
-          ${t.category || ""}
-        `
+        `${t.title} ${t.location} ${t.region} ${t.category}`
           .toLowerCase()
           .includes(q)
       );
@@ -83,28 +68,19 @@ export default function Home() {
 
     setFilteredTrips(results);
 
-    // 🔥 AUTO SCROLL TO RESULTS
     setTimeout(() => {
-      document
-        .getElementById("featured-trips")
-        ?.scrollIntoView({ behavior: "smooth" });
+      document.getElementById("featured-trips")?.scrollIntoView({ behavior: "smooth" });
     }, 100);
   };
 
-  /* =====================================================
-     THIS WEEK / THIS MONTH FILTER (DATE BASED)
-  ===================================================== */
+  /* ================= Week / Month Filter ================= */
   const handleTabSelect = (tab) => {
-    if (tab === "all") {
-      setFilteredTrips(allTrips);
-      return;
-    }
+    if (tab === "all") return setFilteredTrips(allTrips);
 
     const today = new Date();
 
-    // ---- THIS WEEK (MON → SUN)
     if (tab === "week") {
-      const start = new Date(today);
+      const start = new Date();
       const day = start.getDay() || 7;
       start.setDate(start.getDate() - day + 1);
       start.setHours(0, 0, 0, 0);
@@ -115,21 +91,18 @@ export default function Home() {
 
       setFilteredTrips(
         allTrips.filter((t) => {
-          if (!t.startDate) return false;
           const d = new Date(t.startDate);
           return d >= start && d <= end;
         })
       );
     }
 
-    // ---- THIS MONTH
     if (tab === "month") {
       const m = today.getMonth();
       const y = today.getFullYear();
 
       setFilteredTrips(
         allTrips.filter((t) => {
-          if (!t.startDate) return false;
           const d = new Date(t.startDate);
           return d.getMonth() === m && d.getFullYear() === y;
         })
@@ -137,29 +110,25 @@ export default function Home() {
     }
 
     setTimeout(() => {
-      document
-        .getElementById("featured-trips")
-        ?.scrollIntoView({ behavior: "smooth" });
+      document.getElementById("featured-trips")?.scrollIntoView({ behavior: "smooth" });
     }, 100);
   };
 
   return (
     <div className="w-full overflow-x-hidden">
-      {/* ================= HERO ================= */}
+
+      {/* ================= HERO SECTION ================= */}
       <section className="relative w-full h-[75vh] md:h-[80vh] overflow-hidden">
         <HeroSlider />
         <div className="absolute inset-0 bg-black/25" />
 
         <div className="absolute inset-0 flex flex-col justify-center items-center text-white text-center px-4">
-          <h1 className="text-4xl md:text-6xl font-bold">
-            Camping in India
-          </h1>
-          <h2 className="text-2xl md:text-4xl font-bold mt-3">
-            Made Easy & Safe
-          </h2>
+          <h1 className="text-4xl md:text-6xl font-bold">Camping in India</h1>
+          <h2 className="text-2xl md:text-4xl font-bold mt-3">Made Easy & Safe</h2>
 
-          <div className="mt-6 bg-emerald-600 px-6 py-3 rounded-full shadow-xl">
-            VERIFIED FAMILY CAMPSITES
+          {/* 🔥 Rotating Badge Added */}
+          <div className="mt-6">
+            <RotatingBadge />
           </div>
 
           <div className="absolute top-10 right-10 hidden md:block">
@@ -167,13 +136,10 @@ export default function Home() {
           </div>
         </div>
 
-        {/* 🔥 CRITICAL FIX: PASS ALL TRIPS */}
+        {/* Search Bar */}
         <div className="absolute bottom-8 w-full px-4">
           <div className="max-w-6xl mx-auto">
-            <AdvancedSearchBar
-              trips={allTrips}
-              onSearch={handleSearch}
-            />
+            <AdvancedSearchBar trips={allTrips} onSearch={handleSearch} />
           </div>
         </div>
       </section>
@@ -182,22 +148,15 @@ export default function Home() {
       <TripTabs onTabSelect={handleTabSelect} />
 
       {/* ================= RESULTS ================= */}
-      <section
-        id="featured-trips"
-        className="max-w-7xl mx-auto px-4 py-12"
-      >
-        <h2 className="text-2xl font-semibold mb-6">
-          Featured Trips
-        </h2>
+      <section id="featured-trips" className="max-w-7xl mx-auto px-4 py-12">
+        <h2 className="text-2xl font-semibold mb-6">Featured Trips</h2>
 
         {loading ? (
           <p className="text-gray-500">Loading trips...</p>
         ) : (
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
             {filteredTrips.length > 0 ? (
-              filteredTrips.map((trip) => (
-                <TripCard key={trip._id} trip={trip} />
-              ))
+              filteredTrips.map((trip) => <TripCard key={trip._id} trip={trip} />)
             ) : (
               <p className="text-gray-600">No trips found</p>
             )}
