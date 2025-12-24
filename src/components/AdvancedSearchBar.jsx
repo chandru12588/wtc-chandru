@@ -1,8 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { MapPin, Calendar, Users, Mic } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 
-export default function AdvancedSearchBar() {
+export default function AdvancedSearchBar({ onSearch }) {
   const [location, setLocation] = useState("");
   const [date, setDate] = useState("");
   const [people, setPeople] = useState("");
@@ -12,25 +11,14 @@ export default function AdvancedSearchBar() {
   const [filteredSuggestions, setFilteredSuggestions] = useState([]);
 
   const panelRef = useRef(null);
-  const navigate = useNavigate();
 
   /* ================= GEOLOCATION ================= */
   const askUserLocation = () => {
-    if (!navigator.geolocation) {
-      console.log("Geolocation not supported");
-      return;
-    }
+    if (!navigator.geolocation) return;
 
     navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const { latitude, longitude } = position.coords;
-        console.log("User location:", latitude, longitude);
-
-        // Later: reverse geocode → city
-      },
-      () => {
-        console.log("Location permission denied");
-      }
+      () => {},
+      () => {}
     );
   };
 
@@ -106,14 +94,13 @@ export default function AdvancedSearchBar() {
     );
   };
 
-  /* ---------------- SELECT LOCATION ---------------- */
   const selectLocation = (loc) => {
     setLocation(loc);
     setModalInput("");
     setShowPanel(false);
   };
 
-  /* ---------------- OUTSIDE CLICK CLOSE ---------------- */
+  /* ---------------- OUTSIDE CLICK ---------------- */
   useEffect(() => {
     if (!showPanel) return;
 
@@ -127,19 +114,20 @@ export default function AdvancedSearchBar() {
     return () => document.removeEventListener("mousedown", handler);
   }, [showPanel]);
 
-  /* ---------------- SUBMIT ---------------- */
+  /* ---------------- SUBMIT (🔥 FIXED) ---------------- */
   const handleSubmit = (e) => {
     e.preventDefault();
-    navigate(
-      `/search?location=${encodeURIComponent(
-        location
-      )}&date=${date}&people=${people}`
-    );
+
+    onSearch({
+      location,
+      date,
+      people: Number(people),
+    });
   };
 
   return (
     <div className="relative w-full">
-      {/* ================= SEARCH BAR ================= */}
+      {/* SEARCH BAR */}
       <form
         onSubmit={handleSubmit}
         className="
@@ -154,24 +142,22 @@ export default function AdvancedSearchBar() {
         <div className="flex items-center gap-3 flex-1">
           <MapPin size={20} className="text-orange-500" />
           <div className="flex flex-col w-full">
-            <p className="text-[11px] md:text-xs font-semibold text-gray-700">
-              LOCATION
-            </p>
+            <p className="text-[11px] font-semibold">LOCATION</p>
             <div className="flex items-center gap-2">
               <input
                 readOnly
                 value={location}
                 placeholder="Enter Destination"
-                className="text-sm w-full outline-none h-8 cursor-pointer"
+                className="text-sm w-full outline-none cursor-pointer"
                 onClick={() => {
-                  askUserLocation();   // 🔥 LOCATION POPUP
-                  setShowPanel(true); // 🔥 OPEN PANEL
+                  askUserLocation();
+                  setShowPanel(true);
                 }}
               />
               <button
                 type="button"
                 onClick={startVoiceSearch}
-                className="p-2 bg-white/40 hover:bg-white rounded-full"
+                className="p-2 rounded-full"
               >
                 <Mic size={16} className="text-orange-600" />
               </button>
@@ -183,12 +169,10 @@ export default function AdvancedSearchBar() {
         <div className="flex items-center gap-3 flex-1">
           <Calendar size={20} className="text-orange-500" />
           <div className="flex flex-col w-full">
-            <p className="text-[11px] md:text-xs font-semibold text-gray-700">
-              DATE
-            </p>
+            <p className="text-[11px] font-semibold">DATE</p>
             <input
               type="date"
-              className="text-sm w-full outline-none h-8"
+              className="text-sm w-full outline-none"
               value={date}
               onChange={(e) => setDate(e.target.value)}
             />
@@ -199,13 +183,11 @@ export default function AdvancedSearchBar() {
         <div className="flex items-center gap-3 flex-1">
           <Users size={20} className="text-orange-500" />
           <div className="flex flex-col w-full">
-            <p className="text-[11px] md:text-xs font-semibold text-gray-700">
-              NO OF MEMBERS
-            </p>
+            <p className="text-[11px] font-semibold">NO OF MEMBERS</p>
             <input
               type="number"
               min="1"
-              className="text-sm w-full outline-none h-8"
+              className="text-sm w-full outline-none"
               value={people}
               onChange={(e) => setPeople(e.target.value)}
             />
@@ -214,68 +196,44 @@ export default function AdvancedSearchBar() {
 
         <button
           type="submit"
-          className="bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-full px-8 py-3 w-full md:w-auto"
+          className="bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-full px-8 py-3"
         >
           LET’S GO
         </button>
       </form>
 
-      {/* ================= LOCATION PANEL ================= */}
+      {/* LOCATION PANEL */}
       {showPanel && (
         <div className="absolute left-0 right-0 mt-3 z-50 flex justify-center">
           <div
             ref={panelRef}
-            className="
-              bg-white w-full max-w-3xl rounded-2xl shadow-2xl p-6
-              fixed bottom-0 left-0 right-0 md:static
-              md:rounded-2xl rounded-t-2xl
-              max-h-[80vh] overflow-y-auto
-            "
+            className="bg-white w-full max-w-3xl rounded-2xl shadow-2xl p-6"
           >
-            <h2 className="text-xl font-bold mb-4">Location</h2>
-
-            <div className="flex items-center gap-3 bg-gray-100 p-3 rounded-full mb-4">
-              <MapPin className="text-orange-500" size={20} />
-              <input
-                autoFocus
-                type="text"
-                value={modalInput}
-                onChange={(e) => handleModalInput(e.target.value)}
-                placeholder="Search places..."
-                className="w-full bg-transparent outline-none text-sm"
-              />
-            </div>
+            <input
+              autoFocus
+              value={modalInput}
+              onChange={(e) => handleModalInput(e.target.value)}
+              placeholder="Search places..."
+              className="w-full p-3 border rounded mb-4"
+            />
 
             {filteredSuggestions.map((l, i) => (
               <div
                 key={i}
                 onClick={() => selectLocation(l)}
-                className="py-3 border-b cursor-pointer hover:bg-gray-50"
+                className="py-2 cursor-pointer hover:bg-gray-100"
               >
                 {l}
               </div>
             ))}
 
-            <h3 className="font-semibold mt-6 mb-2">Trending Searches</h3>
-            <div className="flex flex-wrap gap-2">
-              {trendingSearches.map((t, i) => (
+            <h3 className="font-semibold mt-4">Trending</h3>
+            <div className="flex flex-wrap gap-2 mt-2">
+              {[...trendingSearches, ...trendingLocations].map((t, i) => (
                 <span
                   key={i}
                   onClick={() => selectLocation(t)}
-                  className="px-4 py-2 bg-gray-100 rounded-full text-sm cursor-pointer hover:bg-gray-200"
-                >
-                  {t}
-                </span>
-              ))}
-            </div>
-
-            <h3 className="font-semibold mt-6 mb-2">Trending Locations</h3>
-            <div className="flex flex-wrap gap-2">
-              {trendingLocations.map((t, i) => (
-                <span
-                  key={i}
-                  onClick={() => selectLocation(t)}
-                  className="px-4 py-2 bg-gray-100 rounded-full text-sm cursor-pointer hover:bg-gray-200"
+                  className="px-4 py-2 bg-gray-100 rounded-full text-sm cursor-pointer"
                 >
                   {t}
                 </span>
