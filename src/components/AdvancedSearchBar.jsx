@@ -7,37 +7,7 @@ export default function AdvancedSearchBar({ onSearch }) {
   const [people, setPeople] = useState("");
 
   const [showPanel, setShowPanel] = useState(false);
-  const [modalInput, setModalInput] = useState("");
-  const [filteredSuggestions, setFilteredSuggestions] = useState([]);
-
   const panelRef = useRef(null);
-
-  /* ---------------- STATIC DATA ---------------- */
-  const allLocations = [
-    "Kashmir",
-    "Jammu and Kashmir",
-    "Tenkasi",
-    "Tada",
-    "Munnar",
-    "Gavi",
-    "Ooty",
-    "Kodaikanal",
-    "Manali",
-    "Hampi",
-  ];
-
-  const trending = [
-    "Gavi",
-    "Munnar",
-    "Varkala",
-    "Meghalaya",
-    "Vagamon",
-    "Jawadhu Hills",
-    "Tada",
-    "Yelagiri",
-    "Kotagiri",
-    "Gokarna",
-  ];
 
   /* ---------------- VOICE SEARCH ---------------- */
   const startVoiceSearch = () => {
@@ -59,72 +29,42 @@ export default function AdvancedSearchBar({ onSearch }) {
     };
   };
 
-  /* ---------------- FILTER PANEL ---------------- */
-  const handleModalInput = (txt) => {
-    setModalInput(txt);
-
-    if (!txt) {
-      setFilteredSuggestions([]);
-      return;
-    }
-
-    setFilteredSuggestions(
-      allLocations.filter((l) =>
-        l.toLowerCase().includes(txt.toLowerCase())
-      )
-    );
-  };
-
-  const selectLocation = (loc) => {
-    setLocation(loc);
-    setModalInput("");
-    setShowPanel(false);
-  };
-
-  /* ---------------- CLOSE ON OUTSIDE CLICK ---------------- */
-  useEffect(() => {
-    if (!showPanel) return;
-
-    const handler = (e) => {
-      if (panelRef.current && !panelRef.current.contains(e.target)) {
-        setShowPanel(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, [showPanel]);
-
-  /* ---------------- SUBMIT (🔥 FINAL FIX) ---------------- */
+  /* ---------------- SUBMIT (REAL FIX) ---------------- */
   const handleSubmit = (e) => {
     e.preventDefault();
 
     if (!onSearch) return;
 
     onSearch({
-      location,
+      location: location.trim(),
       date,
       people: Number(people),
     });
 
-    // ✅ SCROLL TO RESULTS (IMPORTANT)
+    // auto scroll
     setTimeout(() => {
       const el = document.getElementById("featured-trips");
       if (el) el.scrollIntoView({ behavior: "smooth" });
     }, 100);
   };
 
+  /* ---------------- CLOSE PANEL ---------------- */
+  useEffect(() => {
+    if (!showPanel) return;
+    const handler = (e) => {
+      if (panelRef.current && !panelRef.current.contains(e.target)) {
+        setShowPanel(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [showPanel]);
+
   return (
     <div className="relative w-full">
-      {/* SEARCH BAR */}
       <form
         onSubmit={handleSubmit}
-        className="
-          w-full max-w-[1100px] mx-auto
-          bg-white rounded-full shadow-xl
-          px-4 py-4
-          flex flex-col md:flex-row gap-4
-        "
+        className="w-full max-w-[1100px] mx-auto bg-white rounded-full shadow-xl px-4 py-4 flex flex-col md:flex-row gap-4"
       >
         {/* LOCATION */}
         <div className="flex items-center gap-3 flex-1">
@@ -133,10 +73,9 @@ export default function AdvancedSearchBar({ onSearch }) {
             <p className="text-[11px] font-semibold">LOCATION</p>
             <input
               value={location}
-              placeholder="Enter Destination"
-              className="text-sm w-full outline-none cursor-pointer"
-              onFocus={() => setShowPanel(true)}
-              readOnly
+              onChange={(e) => setLocation(e.target.value)}
+              placeholder="Enter destination"
+              className="text-sm w-full outline-none"
             />
           </div>
           <button type="button" onClick={startVoiceSearch}>
@@ -180,37 +119,6 @@ export default function AdvancedSearchBar({ onSearch }) {
           LET’S GO
         </button>
       </form>
-
-      {/* LOCATION PANEL */}
-      {showPanel && (
-        <div className="absolute left-0 right-0 mt-3 z-50 flex justify-center">
-          <div
-            ref={panelRef}
-            className="bg-white w-full max-w-3xl rounded-2xl shadow-2xl p-6"
-          >
-            <input
-              autoFocus
-              value={modalInput}
-              onChange={(e) => handleModalInput(e.target.value)}
-              placeholder="Search places..."
-              className="w-full p-3 border rounded mb-4"
-            />
-
-            {(filteredSuggestions.length
-              ? filteredSuggestions
-              : trending
-            ).map((t, i) => (
-              <div
-                key={i}
-                onClick={() => selectLocation(t)}
-                className="py-3 cursor-pointer hover:bg-gray-100"
-              >
-                {t}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
