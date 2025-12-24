@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
-import { MapPin, Calendar, Users, Mic } from "lucide-react";
+import { MapPin, Calendar, Users, X } from "lucide-react";
 
-export default function AdvancedSearchBar({ onSearch }) {
+export default function AdvancedSearchBar({ onSearch, trips = [] }) {
   const [location, setLocation] = useState("");
   const [date, setDate] = useState("");
   const [people, setPeople] = useState("");
@@ -10,18 +10,15 @@ export default function AdvancedSearchBar({ onSearch }) {
   const [query, setQuery] = useState("");
   const panelRef = useRef(null);
 
-  const locations = [
-    "Ooty",
-    "Kodaikanal",
-    "Munnar",
-    "Gavi",
-    "Tada",
-    "Varkala",
-    "Yelagiri",
-    "Kotagiri",
-    "Gokarna",
-    "Hampi",
-  ];
+  /* ✅ BUILD LOCATIONS FROM PACKAGES */
+  const locations = Array.from(
+    new Set(
+      trips
+        .map((t) => t.location)
+        .filter(Boolean)
+        .map((l) => l.trim())
+    )
+  );
 
   const filtered =
     query.length === 0
@@ -30,66 +27,71 @@ export default function AdvancedSearchBar({ onSearch }) {
           l.toLowerCase().includes(query.toLowerCase())
         );
 
-  /* CLOSE ON OUTSIDE CLICK */
+  /* CLOSE PANEL */
   useEffect(() => {
     if (!showPanel) return;
-
     const handler = (e) => {
       if (panelRef.current && !panelRef.current.contains(e.target)) {
         setShowPanel(false);
       }
     };
-
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, [showPanel]);
 
-  /* SUBMIT */
+  /* SEARCH */
   const handleSubmit = (e) => {
     e.preventDefault();
-
     onSearch?.({
       location,
       people: Number(people),
     });
   };
 
+  /* CLEAR */
+  const clearSearch = () => {
+    setLocation("");
+    setDate("");
+    setPeople("");
+    setQuery("");
+    onSearch?.({ location: "", people: "" });
+  };
+
   return (
-    <div className="relative z-[60] w-full">
+    <div className="relative z-[60] w-full px-4">
       {/* SEARCH BAR */}
       <form
         onSubmit={handleSubmit}
         className="
-          bg-white rounded-full shadow-xl
-          px-4 py-4
-          flex flex-col md:flex-row gap-4
+          w-full max-w-5xl mx-auto
+          backdrop-blur-xl bg-white/70
+          rounded-3xl shadow-2xl
+          p-4 md:p-6
+          grid grid-cols-1 md:grid-cols-4 gap-4
         "
       >
-        {/* LOCATION (CLICKABLE WRAPPER) */}
+        {/* LOCATION */}
         <div
-          className="flex items-center gap-3 flex-1 cursor-pointer"
           onClick={() => setShowPanel(true)}
+          className="flex items-center gap-3 cursor-pointer bg-white rounded-xl p-3"
         >
           <MapPin className="text-orange-500" />
           <div className="flex flex-col w-full">
-            <p className="text-[11px] font-semibold">LOCATION</p>
-            <input
-              value={location}
-              placeholder="Select destination"
-              className="text-sm outline-none cursor-pointer"
-              readOnly
-            />
+            <span className="text-xs font-semibold">LOCATION</span>
+            <span className="text-sm text-gray-600">
+              {location || "Select destination"}
+            </span>
           </div>
         </div>
 
         {/* DATE */}
-        <div className="flex items-center gap-3 flex-1">
+        <div className="flex items-center gap-3 bg-white rounded-xl p-3">
           <Calendar className="text-orange-500" />
           <div className="flex flex-col w-full">
-            <p className="text-[11px] font-semibold">DATE</p>
+            <span className="text-xs font-semibold">DATE</span>
             <input
               type="date"
-              className="text-sm outline-none"
+              className="text-sm outline-none bg-transparent"
               value={date}
               onChange={(e) => setDate(e.target.value)}
             />
@@ -97,56 +99,74 @@ export default function AdvancedSearchBar({ onSearch }) {
         </div>
 
         {/* PEOPLE */}
-        <div className="flex items-center gap-3 flex-1">
+        <div className="flex items-center gap-3 bg-white rounded-xl p-3">
           <Users className="text-orange-500" />
           <div className="flex flex-col w-full">
-            <p className="text-[11px] font-semibold">NO OF MEMBERS</p>
+            <span className="text-xs font-semibold">NO OF MEMBERS</span>
             <input
               type="number"
               min="1"
-              className="text-sm outline-none"
+              placeholder="e.g. 2"
+              className="text-sm outline-none bg-transparent"
               value={people}
               onChange={(e) => setPeople(e.target.value)}
             />
           </div>
         </div>
 
-        <button
-          type="submit"
-          className="bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-full px-8 py-3"
-        >
-          LET’S GO
-        </button>
+        {/* ACTIONS */}
+        <div className="flex gap-2">
+          <button
+            type="submit"
+            className="flex-1 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-xl py-3"
+          >
+            LET’S GO
+          </button>
+
+          {(location || people) && (
+            <button
+              type="button"
+              onClick={clearSearch}
+              className="bg-gray-200 hover:bg-gray-300 rounded-xl px-4"
+            >
+              <X />
+            </button>
+          )}
+        </div>
       </form>
 
       {/* LOCATION PANEL */}
       {showPanel && (
-        <div className="fixed inset-0 z-[70] flex items-end md:items-center justify-center bg-black/40">
+        <div className="fixed inset-0 z-[70] bg-black/40 flex items-end md:items-center justify-center">
           <div
             ref={panelRef}
-            className="bg-white w-full md:max-w-xl rounded-t-2xl md:rounded-2xl p-6 max-h-[80vh] overflow-y-auto"
+            className="bg-white w-full md:max-w-xl rounded-t-3xl md:rounded-3xl p-6 max-h-[80vh] overflow-y-auto"
           >
             <input
               autoFocus
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search destination..."
-              className="w-full border p-3 rounded mb-4"
+              className="w-full border p-3 rounded-xl mb-4"
             />
 
-            {filtered.map((l) => (
-              <div
-                key={l}
-                onClick={() => {
-                  setLocation(l);
-                  setShowPanel(false);
-                  setQuery("");
-                }}
-                className="py-3 border-b cursor-pointer hover:bg-gray-100"
-              >
-                {l}
-              </div>
-            ))}
+            {filtered.length ? (
+              filtered.map((l) => (
+                <div
+                  key={l}
+                  onClick={() => {
+                    setLocation(l);
+                    setShowPanel(false);
+                    setQuery("");
+                  }}
+                  className="py-3 px-2 rounded-lg cursor-pointer hover:bg-gray-100"
+                >
+                  {l}
+                </div>
+              ))
+            ) : (
+              <p className="text-sm text-gray-500">No locations found</p>
+            )}
           </div>
         </div>
       )}

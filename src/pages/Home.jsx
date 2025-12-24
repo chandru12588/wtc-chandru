@@ -44,7 +44,6 @@ export default function Home() {
 
   /* ================= ADVANCED SEARCH ================= */
   const handleSearch = ({ location, people }) => {
-    // 🔥 if nothing selected → show all
     if (!location && !people) {
       setFilteredTrips(allTrips);
       return;
@@ -69,7 +68,6 @@ export default function Home() {
 
     setFilteredTrips(results);
 
-    // auto scroll
     setTimeout(() => {
       document
         .getElementById("featured-trips")
@@ -77,7 +75,7 @@ export default function Home() {
     }, 100);
   };
 
-  /* ================= WEEK / MONTH ================= */
+  /* ================= WEEK / MONTH FILTER ================= */
   const handleTabSelect = (tab) => {
     if (tab === "all") {
       setFilteredTrips(allTrips);
@@ -127,7 +125,7 @@ export default function Home() {
 
   return (
     <div className="w-full overflow-x-hidden">
-      {/* HERO */}
+      {/* ================= HERO ================= */}
       <section className="relative w-full h-[75vh] md:h-[80vh] overflow-hidden">
         <HeroSlider />
         <div className="absolute inset-0 bg-black/25" />
@@ -149,9 +147,13 @@ export default function Home() {
           </div>
         </div>
 
+        {/* 🔥 PASS TRIPS HERE (CRITICAL FIX) */}
         <div className="absolute bottom-8 w-full px-4">
           <div className="max-w-5xl mx-auto">
-            <AdvancedSearchBar onSearch={handleSearch} />
+            <AdvancedSearchBar
+              onSearch={handleSearch}
+              trips={allTrips}
+            />
           </div>
         </div>
       </section>
@@ -159,7 +161,7 @@ export default function Home() {
       <CategoriesBar />
       <TripTabs onTabSelect={handleTabSelect} />
 
-      {/* RESULTS */}
+      {/* ================= RESULTS ================= */}
       <section
         id="featured-trips"
         className="max-w-7xl mx-auto px-4 py-12"
