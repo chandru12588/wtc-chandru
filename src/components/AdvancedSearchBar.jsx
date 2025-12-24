@@ -2,158 +2,129 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { MapPin, Calendar, Users, Mic, X } from "lucide-react";
 
 export default function AdvancedSearchBar({ trips = [], onSearch }) {
-  const [search, setSearch] = useState("");
+  const [query, setQuery] = useState("");
   const [date, setDate] = useState("");
   const [people, setPeople] = useState("");
   const [open, setOpen] = useState(false);
 
   const panelRef = useRef(null);
 
-  const clean = v => v ? v.trim() : "";
-  const cap = v => v ? v.charAt(0).toUpperCase() + v.slice(1) : "";
-
-  /* ================== Group By States ================== */
-  const states = useMemo(() => {
+  /* 🔥 GROUP STATE → PLACES + STAY TYPES */
+  const structured = useMemo(() => {
     const data = {};
     trips.forEach(t => {
-      const state = cap(clean(t.state || t.region || "Others"));
+      const state = cap(t.region || "Others");
       if (!data[state]) data[state] = { places: new Set(), types: new Set() };
 
-      t.location && data[state].places.add(cap(t.location));
-      t.category && data[state].types.add(cap(t.category));
+      if (t.location) data[state].places.add(cap(t.location));
+      if (t.category) data[state].types.add(cap(t.category));
     });
     return data;
   }, [trips]);
 
-  /* ================== Trending from DB ================== */
-  const trendingLocations = [...new Set(trips.map(t => cap(t.location)))].slice(0,8);
-  const trendingTypes = [...new Set(trips.map(t => cap(t.category)))].slice(0,8);
+  const TrendingLocations = [...new Set(trips.map(t => cap(t.location)))].slice(0, 10); // city only
+  const handleSubmit = e => { e.preventDefault(); onSearch({ location: query, people }); setOpen(false); };
+  
+  const clearAll = () => { setQuery(""); setPeople(""); setDate(""); };
 
-  /* ================== Voice Search ================== */
-  const voiceSearch = () => {
-    const SR = window.webkitSpeechRecognition || window.SpeechRecognition;
-    if(!SR) return alert("Voice search not supported");
-    let mic = new SR();
-    mic.lang="en-IN"; mic.start();
-    mic.onresult = e => setSearch(e.results[0][0].transcript);
+  const voice = () => {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) return alert("Voice search not supported");
+    const r = new SR(); r.lang = "en-IN"; r.start();
+    r.onresult = e => setQuery(e.results[0][0].transcript);
   };
 
-  /* ================== Submit ================== */
-  const submit = (e) => {
-    e.preventDefault();
-    onSearch?.({location:search,people});
-    setOpen(false);
-  };
-
-  const clear = () => { setSearch(""); setDate(""); setPeople(""); };
-
-  /* ================== Close on Outside Click ================== */
+  /* === CLOSE WHEN CLICK OUTSIDE === */
   useEffect(() => {
-    const close = e=>{
-      if(panelRef.current && !panelRef.current.contains(e.target)) setOpen(false);
+    const close = e => {
+      if (panelRef.current && !panelRef.current.contains(e.target)) setOpen(false);
     };
-    document.addEventListener("mousedown",close);
-    return()=>document.removeEventListener("mousedown",close);
-  },[]);
+    document.addEventListener("mousedown", close);
+    return () => document.removeEventListener("mousedown", close);
+  }, []);
 
   return (
-    <div className="relative z-[200]">
+    <div className="relative w-full">
 
-      {/* 🔍 Main Search Bar */}
-      <form onSubmit={submit}
-        className="max-w-[950px] mx-auto rounded-full bg-white/60 backdrop-blur-xl shadow-xl
-        flex gap-3 items-center px-4 py-3 border border-white/30">
+      {/** TOP SEARCH BAR UI - SAME LIKE DESIGN **/}
+      <form onSubmit={handleSubmit}
+        className="flex items-center bg-white/80 backdrop-blur-xl shadow-xl rounded-full px-6 py-3 w-full max-w-6xl mx-auto gap-4 border">
 
-        <div className="flex items-center gap-2 flex-1" onClick={()=>setOpen(true)}>
+        <div className="flex-1 flex items-center gap-2" onClick={() => setOpen(true)}>
           <MapPin className="text-orange-600"/>
-          <input
-            placeholder="Search Ooty, Kodaikanal, Manali, Treehouse..."
-            value={search}
-            readOnly
-            className="w-full bg-transparent outline-none text-sm"
-          />
+          <input className="bg-transparent outline-none text-sm w-full"
+           placeholder="Search Ooty, Kodaikanal, Tent stay..."
+           value={query} readOnly />
         </div>
 
-        <Mic size={18} onClick={voiceSearch} className="cursor-pointer text-orange-600"/>
+        <Mic className="text-orange-600 cursor-pointer" onClick={voice} />
 
-        { (search||date||people) &&
-          <button type="button" onClick={clear}
-            className="p-2 rounded-full bg-gray-200"><X size={14}/></button>
-        }
+        {(query || date || people) && (
+          <button type="button" className="p-2 bg-gray-200 rounded-full"
+            onClick={clearAll}><X size={14}/></button>
+        )}
 
-        <button className="px-7 py-2 bg-orange-500 text-white rounded-full text-sm font-bold">
+        <button className="bg-orange-500 hover:bg-orange-600 text-white rounded-full px-6 py-2">
           LET'S GO
         </button>
       </form>
 
-      {/* 🔥 Modal Dropdown */}
+      {/* ================= MODAL =============== */}
       {open && (
-        <div className="fixed inset-0 bg-black/40 flex justify-center items-start p-3 z-[300]">
+        <div className="fixed inset-0 bg-black/40 flex justify-center items-start pt-20 z-[999] px-3">
           <div ref={panelRef}
-            className="bg-white w-full max-w-4xl rounded-3xl p-6 max-h-[80vh] overflow-y-auto">
+            className="bg-white w-full max-w-4xl rounded-3xl p-6 max-h-[70vh] overflow-y-auto shadow-2xl">
 
-            <div className="flex justify-between mb-3">
-              <h2 className="text-lg font-bold">Search</h2>
-              <X className="cursor-pointer" size={22} onClick={()=>setOpen(false)}/>
+            {/* Header row */}
+            <div className="flex justify-between mb-4">
+              <h2 className="font-semibold text-lg">Search</h2>
+              <X size={22} className="cursor-pointer" onClick={() => setOpen(false)}/>
             </div>
 
-            {/* Search box inside */}
-            <div className="flex gap-2 items-center bg-gray-100 p-3 rounded-full mb-5">
+            {/* Input inside popup */}
+            <div className="flex items-center bg-gray-100 rounded-full px-4 py-2 mb-5 gap-2">
               <MapPin className="text-orange-600"/>
-              <input autoFocus
-                value={search}
-                onChange={e=>setSearch(e.target.value)}
-                placeholder="Type destination or stay type..."
-                className="flex-1 bg-transparent outline-none"
-              />
-              <Mic className="text-orange-600 cursor-pointer" onClick={voiceSearch}/>
-              {search && <X size={16} onClick={()=>setSearch("")} className="cursor-pointer"/>}
+              <input autoFocus value={query} onChange={e=>setQuery(e.target.value)}
+                placeholder="Type place or stay type..." className="bg-transparent outline-none w-full"/>
+              <Mic className="text-orange-600 cursor-pointer" onClick={voice}/>
+              {query && <X size={16} onClick={()=>setQuery("")} className="cursor-pointer"/>}
             </div>
 
-            {/* ================== STATE SECTIONS ================== */}
-            {Object.entries(states).map(([state,data])=>(
+            {/* STATE / PLACES / STAY TYPES */}
+            {Object.keys(structured).map(state => (
               <div key={state} className="mb-6">
-                <p className="font-bold text-base">{state}</p>
+                <p className="font-bold text-gray-900">{state}</p>
 
-                <p className="mt-2 text-xs font-semibold text-gray-500">PLACES</p>
-                <div className="flex flex-wrap gap-2 mb-3">
-                  {[...data.places].map(p=>(
-                    <Tag key={p} label={p} onClick={()=>{setSearch(p);setOpen(false)}}/>
-                  ))}
-                </div>
+                <p className="font-semibold text-xs mt-2">PLACES</p>
+                <Row items={[...structured[state].places]} set={setQuery} close={setOpen} />
 
-                <p className="text-xs font-semibold text-gray-500">STAY TYPES</p>
-                <div className="flex flex-wrap gap-2">
-                  {[...data.types].map(t=>(
-                    <Tag key={t} label={t} onClick={()=>{setSearch(t);setOpen(false)}}/>
-                  ))}
-                </div>
+                <p className="font-semibold text-xs mt-2">STAY TYPES</p>
+                <Row items={[...structured[state].types]} set={setQuery} close={setOpen} />
               </div>
             ))}
 
-            <p className="font-semibold mt-4">Trending Searches</p>
-            <Row items={trendingTypes}/>
-
-            <p className="font-semibold mt-4">Trending Locations</p>
-            <Row items={trendingLocations}/>
-
+            {/* Trending only City Names */}
+            <p className="font-semibold text-sm mt-6">Trending Locations</p>
+            <Row items={TrendingLocations} set={setQuery} close={setOpen}/>
           </div>
         </div>
       )}
-
     </div>
   );
 }
 
-const Tag = ({label,onClick})=>(
-  <span onClick={onClick}
-    className="px-3 py-1 bg-gray-100 text-xs rounded-full cursor-pointer hover:bg-gray-200">
-    {label}
-  </span>
-);
+function Row({items,set,close}) {
+  return (
+    <div className="flex flex-wrap gap-2 mt-2 mb-2">
+      {items.map(v=>(
+        <span key={v}
+          onClick={()=>{set(v); close(false);}}
+          className="px-3 py-1 bg-gray-100 hover:bg-gray-200 cursor-pointer rounded-full text-xs">
+          {v}
+        </span>
+      ))}
+    </div>
+  );
+}
 
-const Row = ({items})=>(
-  <div className="flex flex-wrap gap-2 mt-2">
-    {items.map(i=> <Tag key={i} label={i}/>)}
-  </div>
-);
+const cap = v => v ? v.charAt(0).toUpperCase()+v.slice(1).toLowerCase() : "";
