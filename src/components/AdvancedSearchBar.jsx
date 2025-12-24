@@ -9,29 +9,30 @@ export default function AdvancedSearchBar({ trips = [], onSearch }) {
 
   const panelRef = useRef(null);
 
-  /* Safe Capitalize */
   const cap = (v) =>
-    typeof v === "string" && v.trim()
-      ? v.charAt(0).toUpperCase() + v.slice(1)
+    typeof v === "string" && v.trim().length > 0
+      ? v.charAt(0).toUpperCase() + v.slice(1).toLowerCase()
       : "";
 
-  /* Group by State -> Places + Types */
-  const structured = useMemo(() => {
-    const data = {};
+  /* =============== Group by State -> Places + Stay Types =============== */
+  const grouped = useMemo(() => {
+    const map = {};
     trips.forEach((t) => {
-      const state = cap(t.region || t.state || "Others");
+      const state = cap(t.region || "Others");
       const place = cap(t.location || "");
       const type = cap(t.category || "");
 
-      if (!data[state]) data[state] = { places: new Set(), types: new Set() };
-      if (place) data[state].places.add(place);
-      if (type) data[state].types.add(type);
+      if (!map[state]) map[state] = { places: new Set(), types: new Set() };
+
+      if (place) map[state].places.add(place);
+      if (type) map[state].types.add(type);
     });
-    return data;
+    return map;
   }, [trips]);
 
-  const trendingLocations = [...new Set(trips.map(t => cap(t.location)))].filter(Boolean).slice(0,8);
-  const trendingTypes = [...new Set(trips.map(t => cap(t.category)))].filter(Boolean).slice(0,8);
+  /* ============ Trending (from actual packages only) ============ */
+  const trendingLocations = [...new Set(trips.map(t => cap(t.location)))].filter(Boolean).slice(0,6);
+  const trendingTypes = [...new Set(trips.map(t => cap(t.category)))].filter(Boolean).slice(0,6);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -40,17 +41,19 @@ export default function AdvancedSearchBar({ trips = [], onSearch }) {
   };
 
   const clearAll = () => {
-    setQuery(""); setDate(""); setPeople("");
+    setQuery(""); setPeople(""); setDate("");
   };
 
   const voice = () => {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SR) return alert("Voice not supported");
     const mic = new SR();
-    mic.lang = "en-IN"; mic.start();
+    mic.lang = "en-IN";
+    mic.start();
     mic.onresult = (e) => setQuery(e.results[0][0].transcript);
   };
 
+  /* close modal on outside click */
   useEffect(() => {
     const close = (e) => {
       if (panelRef.current && !panelRef.current.contains(e.target)) setOpen(false);
@@ -60,101 +63,91 @@ export default function AdvancedSearchBar({ trips = [], onSearch }) {
   }, []);
 
   return (
-    <div className="relative w-full flex justify-center">
+    <div className="relative w-full z-[200]">
 
-      {/* 🔍 Main Search Bar (Glass UI like your screenshot) */}
-      <form
-        onSubmit={handleSubmit}
-        className="w-[95%] max-w-[1050px] bg-white/65 backdrop-blur-xl shadow-lg rounded-full flex items-center gap-4 py-4 px-6 mt-3"
-      >
-        {/* LOCATION */}
-        <div className="flex flex-col flex-1 cursor-pointer" onClick={()=>setOpen(true)}>
-          <label className="text-[12px] font-bold text-gray-700 flex items-center gap-1">
-            <MapPin className="text-orange-500" size={16}/> LOCATION
-          </label>
-          <input readOnly value={query} placeholder="Enter the Destination"
-            className="outline-none text-sm bg-transparent"/>
+      {/* 🔍 Main Search Bar (Working version) */}
+      <form onSubmit={handleSubmit}
+        className="w-full max-w-6xl mx-auto bg-white/70 backdrop-blur-xl rounded-full shadow-md flex items-center gap-3 px-5 py-3">
+        
+        <div className="flex items-center gap-2 flex-1 cursor-pointer"
+          onClick={() => setOpen(true)}>
+          <MapPin className="text-orange-500" size={18}/>
+          <input readOnly value={query} placeholder="Search Ooty, Poombarai, Manali..."
+            className="bg-transparent outline-none text-sm w-full"/>
         </div>
 
-        <div className="hidden md:flex flex-col border-l pl-6 flex-1">
-          <label className="text-[12px] font-bold text-gray-700 flex items-center gap-1">
-            <Calendar className="text-orange-500" size={16}/> DATE
-          </label>
-          <input type="date" value={date}
-            onChange={e=>setDate(e.target.value)}
-            className="outline-none text-sm mt-1"/>
+        <Mic size={18} className="text-orange-600 cursor-pointer" onClick={voice}/>
+
+        <div className="flex items-center gap-2 flex-1 hidden md:flex">
+          <Calendar size={18} className="text-orange-500"/>
+          <input type="date" value={date} onChange={(e)=>setDate(e.target.value)}
+            className="bg-transparent outline-none text-sm w-full"/>
         </div>
 
-        <div className="hidden md:flex flex-col border-l pl-6 flex-1">
-          <label className="text-[12px] font-bold text-gray-700 flex items-center gap-1">
-            <Users className="text-orange-500" size={16}/> NO OF MEMBERS
-          </label>
-          <input type="number" placeholder="How many People?" min="1"
-            value={people} onChange={e=>setPeople(e.target.value)}
-            className="outline-none text-sm mt-1"/>
+        <div className="flex items-center gap-2 flex-1 hidden md:flex">
+          <Users size={18} className="text-orange-500"/>
+          <input type="number" min="1" value={people} onChange={(e)=>setPeople(e.target.value)}
+            placeholder="People" className="bg-transparent outline-none text-sm w-full"/>
         </div>
-
-        <Mic size={20} onClick={voice} className="cursor-pointer text-orange-600"/>
 
         {(query||date||people)&&(
-          <button type="button" onClick={clearAll}
-            className="bg-gray-200 rounded-full p-2 hover:bg-gray-300"><X size={14}/></button>
+          <button onClick={clearAll} type="button"
+            className="p-2 rounded-full bg-gray-200 hover:bg-gray-300"><X size={14}/></button>
         )}
 
-        <button className="bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-full px-7 py-2">
+        <button type="submit"
+          className="bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-full px-6 py-2 text-sm">
           LET'S GO
         </button>
       </form>
 
-      {/* 🔥 FULL Responsive Modal */}
+      {/* ================= Modal Search Panel ================= */}
       {open && (
-        <div className="fixed inset-0 bg-black/35 z-[9999] backdrop-blur-sm flex justify-center pt-28 px-3 md:pt-36">
+        <div className="fixed inset-0 bg-black/30 flex justify-center items-start p-5 z-[500] overflow-y-auto">
           <div ref={panelRef}
-            className="w-full max-w-[900px] bg-white rounded-2xl shadow-2xl p-5 md:p-7
-                       max-h-[80vh] overflow-y-auto">
+            className="bg-white rounded-3xl shadow-xl w-full max-w-4xl max-h-[80vh] overflow-y-auto p-6">
 
-            {/* Header */}
-            <div className="flex justify-between items-center mb-3 sticky top-0 bg-white pb-2 z-50">
-              <h2 className="text-lg font-bold">Search</h2>
-              <X onClick={()=>setOpen(false)} size={28} className="cursor-pointer"/>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold">Search</h2>
+              <X onClick={()=>setOpen(false)} size={22} className="cursor-pointer"/>
             </div>
 
-            {/* Search Input inside modal */}
-            <div className="flex items-center bg-gray-100 rounded-full px-4 py-3 mb-5 sticky top-10 z-50">
-              <MapPin className="text-orange-600"/>
+            <div className="flex items-center bg-gray-100 rounded-full px-4 py-2 mb-4 gap-3">
+              <MapPin className="text-orange-500"/>
               <input autoFocus value={query} onChange={(e)=>setQuery(e.target.value)}
                 placeholder="Search place or stay type..."
-                className="flex-1 outline-none bg-transparent text-sm"/>
-              <Mic className="text-orange-600 cursor-pointer" size={18} onClick={voice}/>
-              {query && <X size={16} onClick={()=>setQuery("")} className="cursor-pointer"/>}
+                className="bg-transparent outline-none text-sm w-full"/>
+              <Mic size={18} className="text-orange-600 cursor-pointer" onClick={voice}/>
+              {query && <X size={16} className="cursor-pointer" onClick={()=>setQuery("")}/>}
             </div>
 
-            {/* STATES DISPLAY */}
-            {Object.keys(structured).map(state => (
+            {/* State → Places + Stay Types */}
+            {Object.keys(grouped).map(state => (
               <div key={state} className="mb-6">
-                <p className="font-bold text-gray-800 text-[16px]">{state}</p>
+                <p className="font-bold text-gray-700 text-[15px]">{state}</p>
 
-                <p className="text-xs mt-2 text-gray-600">PLACES</p>
-                <Row items={[...structured[state].places]} pick={v=>{setQuery(v);setOpen(false)}}/>
+                <p className="text-xs text-gray-500 mt-1">PLACES</p>
+                <Row items={[...grouped[state].places]} pick={(v)=>{setQuery(v);setOpen(false)}}/>
 
-                <p className="text-xs mt-2 text-gray-600">STAY TYPES</p>
-                <Row items={[...structured[state].types]} pick={v=>{setQuery(v);setOpen(false)}}/>
+                <p className="text-xs text-gray-500 mt-2">STAY TYPES</p>
+                <Row items={[...grouped[state].types]} pick={(v)=>{setQuery(v);setOpen(false)}}/>
               </div>
             ))}
 
             {trendingTypes.length>0 && (
               <>
-                <p className="font-bold mt-5">Trending Searches</p>
-                <Row items={trendingTypes} pick={v=>{setQuery(v);setOpen(false)}}/>
+                <p className="font-bold mt-4">Trending Searches</p>
+                <Row items={trendingTypes} pick={(v)=>{setQuery(v);setOpen(false)}}/>
               </>
             )}
 
             {trendingLocations.length>0 && (
               <>
-                <p className="font-bold mt-5">Trending Locations</p>
-                <Row items={trendingLocations} pick={v=>{setQuery(v);setOpen(false)}}/>
+                <p className="font-bold mt-4">Trending Locations</p>
+                <Row items={trendingLocations} pick={(v)=>{setQuery(v);setOpen(false)}}/>
               </>
             )}
+
           </div>
         </div>
       )}
@@ -162,17 +155,15 @@ export default function AdvancedSearchBar({ trips = [], onSearch }) {
   );
 }
 
-/* Tag Reusable */
-const Tag = ({label,onClick})=>(
+const Chip = ({text,onClick})=>(
   <span onClick={onClick}
-    className="px-3 py-1 text-xs bg-gray-100 rounded-full cursor-pointer hover:bg-gray-200">
-    {label}
+    className="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-full text-xs cursor-pointer">
+    {text}
   </span>
 );
 
-/* Row */
 const Row = ({items,pick})=>(
-  <div className="flex flex-wrap gap-2 mt-2">
-    {items.map(i=> <Tag key={i} label={i} onClick={()=>pick(i)}/>)}
+  <div className="flex flex-wrap gap-2 mt-1">
+    {items.map(v=><Chip key={v} text={v} onClick={()=>pick(v)}/>)}
   </div>
 );
