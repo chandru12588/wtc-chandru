@@ -7,152 +7,131 @@ export default function AdvancedSearchBar({ trips = [], onSearch }) {
   const [people, setPeople] = useState("");
   const [open, setOpen] = useState(false);
 
-  const modalRef = useRef(null);
-  const cap = (v) => v?.charAt(0).toUpperCase() + v.slice(1).toLowerCase();
+  const panelRef = useRef(null);
 
-  /* ---------- Group packages ---------- */
+  /* 🟢 Group states → places dynamically */
   const grouped = useMemo(() => {
-    const data = {};
-    trips.forEach(p => {
-      const state = cap(p.region || p.state || "Others");
-      if (!data[state]) data[state] = { places: new Set(), types: new Set() };
-
-      p.location && data[state].places.add(cap(p.location));
-      p.category && data[state].types.add(cap(p.category));
+    const map = {};
+    trips.forEach(t => {
+      const state = t.region || "Others";
+      if (!map[state]) map[state] = new Set();
+      if (t.location) map[state].add(t.location);
+      if (t.title) map[state].add(t.title);
     });
-    return data;
+    return map;
   }, [trips]);
 
-  const trendingLocations = [...new Set(trips.map(p => cap(p.location)))].slice(0,8);
-  const trendingTypes     = [...new Set(trips.map(p => cap(p.category)))].slice(0,8);
-
-  /* ---------- Voice Search ---------- */
-  const voice = () => {
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SR) return alert("Voice not supported");
-    let mic = new SR();
-    mic.lang = "en-IN";
-    mic.start();
-    mic.onresult = e => setQuery(e.results[0][0].transcript);
-  };
-
-  /* ---------- Submit ---------- */
-  const submit = (e) => {
+  const handleSubmit = e => {
     e.preventDefault();
-    onSearch?.({ location: query, date, people });
+    onSearch?.({ location: query, people });
     setOpen(false);
   };
 
-  const clearAll = () => { setQuery(""); setDate(""); setPeople(""); };
+  const clearAll = () => {
+    setQuery("");
+    setPeople("");
+    setDate("");
+    onSearch?.({ location: "", people: "" });
+  };
 
-  /* ---------- Close on outside click ---------- */
+  /* Voice Search */
+  const voice = () => {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) return alert("Voice not supported");
+    const rec = new SR();
+    rec.lang = "en-IN";
+    rec.start();
+    rec.onresult = e => setQuery(e.results[0][0].transcript);
+  };
+
   useEffect(() => {
-    const click = (e) => {
-      if (modalRef.current && !modalRef.current.contains(e.target))
+    const close = e => {
+      if (panelRef.current && !panelRef.current.contains(e.target))
         setOpen(false);
     };
-    document.addEventListener("mousedown", click);
-    return () => document.removeEventListener("mousedown", click);
+    document.addEventListener("mousedown", close);
+    return () => document.removeEventListener("mousedown", close);
   }, []);
 
   return (
-    <div className="relative w-full flex justify-center z-[9999]">  {/* <<< FIXED */}
+    <div className="relative w-full z-[200]">
 
-      {/* ---------- Main Search Bar ---------- */}
-      <form
-        onSubmit={submit}
-        className="w-[95%] max-w-[1050px] bg-white shadow-xl rounded-full
-                   flex items-center gap-4 px-6 py-4 mt-10"
-      >
-        {/* Location */}
-        <div className="flex flex-col flex-1 cursor-pointer" onClick={() => setOpen(true)}>
-          <label className="text-[12px] font-bold text-gray-700 flex gap-2 items-center">
-            <MapPin className="text-orange-500" size={18}/> LOCATION
-          </label>
-          <input className="outline-none text-[13px] mt-1 bg-transparent"
-                 placeholder="Enter the Destination"
-                 value={query} readOnly />
+      {/* 🔍 Main Search Bar */}
+      <form onSubmit={handleSubmit}
+        className="w-full max-w-6xl mx-auto bg-white/70 backdrop-blur-xl rounded-full shadow-md flex items-center gap-3 px-5 py-3">
+        
+        {/* Search */}
+        <div className="flex items-center gap-2 flex-1 cursor-pointer"
+          onClick={() => setOpen(true)}>
+          <MapPin className="text-orange-500" size={18}/>
+          <input readOnly value={query} placeholder="Search Ooty, Poombarai, Tree House..."
+            className="bg-transparent outline-none text-sm w-full"/>
         </div>
 
-        {/* Date */}
-        <div className="flex flex-col flex-1 border-l pl-6">
-          <label className="text-[12px] font-bold text-gray-700 flex gap-2 items-center">
-            <Calendar className="text-orange-500" size={18}/> DATE
-          </label>
-          <input type="date" value={date}
-                 className="outline-none text-[13px] mt-1 bg-transparent"
-                 onChange={(e)=>setDate(e.target.value)} />
+        <Mic size={18} className="text-orange-600 cursor-pointer" onClick={voice}/>
+
+        <div className="flex items-center gap-2 flex-1">
+          <Calendar size={18} className="text-orange-500"/>
+          <input type="date" value={date} onChange={(e)=>setDate(e.target.value)}
+            className="bg-transparent outline-none text-sm w-full"/>
         </div>
 
-        {/* Members */}
-        <div className="flex flex-col flex-1 border-l pl-6">
-          <label className="text-[12px] font-bold text-gray-700 flex gap-2 items-center">
-            <Users className="text-orange-500" size={18}/> NO OF MEMBERS
-          </label>
-          <input placeholder="How many People?" type="number" min="1"
-                 value={people}
-                 className="outline-none text-[13px] mt-1 bg-transparent"
-                 onChange={(e)=>setPeople(e.target.value)} />
+        <div className="flex items-center gap-2 flex-1">
+          <Users size={18} className="text-orange-500"/>
+          <input type="number" min="1" value={people} onChange={(e)=>setPeople(e.target.value)}
+            placeholder="People" className="bg-transparent text-sm outline-none w-full"/>
         </div>
 
-        <Mic size={20} onClick={voice} className="cursor-pointer text-orange-600" />
+        {(query||date||people)&&(
+          <button onClick={clearAll} type="button"
+            className="p-2 rounded-full bg-gray-200 hover:bg-gray-300"><X size={14}/></button>
+        )}
 
-        <button className="bg-orange-500 hover:bg-orange-600 text-white font-bold
-                           rounded-full px-7 py-2 text-[14px]">
+        <button type="submit"
+          className="bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-full px-6 py-2 text-sm">
           LET'S GO
         </button>
       </form>
 
-      {/* ---------- Popup Modal (Now Works) ---------- */}
+      {/* 📌 Dropdown Modal */}
       {open && (
-        <div ref={modalRef}
-             className="absolute top-[120%] w-[90%] max-w-[900px] bg-white
-                        rounded-2xl shadow-2xl p-6 max-h-[70vh] overflow-y-auto z-[99999]">
-
-          <div className="flex items-center gap-2 bg-gray-100 px-4 py-2 rounded-full mb-5">
-            <MapPin className="text-orange-600"/>
-            <input autoFocus value={query}
-                   placeholder="Search destination or stay type..."
-                   className="flex-1 outline-none bg-transparent"
-                   onChange={(e)=>setQuery(e.target.value)} />
-            <Mic className="text-orange-600 cursor-pointer" size={18} onClick={voice}/>
-            {query && <X size={16} className="cursor-pointer" onClick={()=>setQuery("")}/>}
-          </div>
-
-          {Object.entries(grouped).map(([state,data]) => (
-            <div key={state} className="mb-6">
-              <p className="font-bold text-[16px]">{state}</p>
-
-              <p className="text-xs mt-2 text-gray-500">PLACES</p>
-              <Row items={[...data.places]} pick={(v)=>{setQuery(v);setOpen(false)}}/>
-
-              <p className="text-xs mt-3 text-gray-500">STAY TYPES</p>
-              <Row items={[...data.types]} pick={(v)=>{setQuery(v);setOpen(false)}}/>
+        <div className="fixed inset-0 bg-black/30 flex justify-center items-start p-5 z-[500]">
+          <div ref={panelRef}
+            className="bg-white rounded-3xl shadow-xl w-full max-w-4xl max-h-[80vh] overflow-y-auto p-6">
+            
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold">Search</h2>
+              <X onClick={()=>setOpen(false)} size={20} className="cursor-pointer"/>
             </div>
-          ))}
 
-          <p className="font-bold mt-4">TRENDING LOCATIONS</p>
-          <Row items={trendingLocations} pick={(v)=>{setQuery(v);setOpen(false)}}/>
+            {/* Input inside modal */}
+            <div className="flex items-center bg-gray-100 rounded-full px-4 py-2 mb-4 gap-2">
+              <MapPin className="text-orange-500"/>
+              <input autoFocus value={query}
+                onChange={(e)=>setQuery(e.target.value)}
+                placeholder="Type destination..."
+                className="bg-transparent outline-none w-full"/>
+              <Mic onClick={voice} className="text-orange-600 cursor-pointer"/>
+              {query && <X size={16} className="cursor-pointer" onClick={()=>setQuery("")}/>}
+            </div>
 
-          <p className="font-bold mt-4">TRENDING STAY TYPES</p>
-          <Row items={trendingTypes} pick={(v)=>{setQuery(v);setOpen(false)}}/>
+            {/* 🟩 Group Output State Wise */}
+            {Object.keys(grouped).map(state=>(
+              <div key={state} className="mb-5">
+                <p className="font-bold text-[15px] mb-2 text-gray-700">{state}</p>
+                <div className="flex flex-wrap gap-2">
+                  {[...grouped[state]].map(item=>(
+                    <span key={item} onClick={()=>{setQuery(item);setOpen(false);}}
+                      className="px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-full text-xs cursor-pointer">
+                      {item}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>
   );
 }
-
-
-/* Chips UI */
-const Row = ({items,pick}) => (
-  <div className="flex flex-wrap gap-2 mt-2">
-    {items.map(v => (
-      <span key={v}
-        onClick={()=>pick(v)}
-        className="px-3 py-1 bg-gray-100 hover:bg-gray-200
-                   rounded-full text-xs cursor-pointer">
-        {v}
-      </span>
-    ))}
-  </div>
-);
