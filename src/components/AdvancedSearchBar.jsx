@@ -5,22 +5,20 @@ export default function AdvancedSearchBar({ trips = [], onSearch }) {
   const [query, setQuery] = useState("");
   const [date, setDate] = useState("");
   const [people, setPeople] = useState("");
-
   const [open, setOpen] = useState(false);
-  const panelRef = useRef(null);
 
-  /* =====================================================
-     🔥 BUILD SUGGESTIONS FROM ADMIN + HOST PACKAGES
-  ===================================================== */
+  const panelRef = useRef(null);
+  const inputRef = useRef(null);
+
+  /* 🟢 Build suggestions dynamically from admin+host packages */
   const suggestions = useMemo(() => {
     const set = new Set();
 
     trips.forEach((t) => {
-      if (t.title) set.add(t.title);
-      if (t.location) set.add(t.location);
-      if (t.region) set.add(t.region);
-      if (t.category) set.add(t.category);       // Tree House, Tent, Dome, etc
-      if (t.stayType) set.add(t.stayType);       // optional future field
+      t.title && set.add(t.title);
+      t.location && set.add(t.location);
+      t.region && set.add(t.region);
+      t.category && set.add(t.category); // stay type
     });
 
     return Array.from(set);
@@ -30,33 +28,24 @@ export default function AdvancedSearchBar({ trips = [], onSearch }) {
     ? suggestions.filter((s) =>
         s.toLowerCase().includes(query.toLowerCase())
       )
-    : suggestions.slice(0, 15);
+    : suggestions.slice(0, 15); // show limited list
 
-  /* =====================================================
-     🎤 VOICE SEARCH
-  ===================================================== */
-  const startVoiceSearch = () => {
-    const SpeechRecognition =
-      window.SpeechRecognition || window.webkitSpeechRecognition;
+  /* 🎤 Voice Search */
+  const startVoiceSearch = (e) => {
+    e.stopPropagation();
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) return alert("Voice search not supported");
 
-    if (!SpeechRecognition) {
-      alert("Voice search not supported");
-      return;
-    }
-
-    const recognition = new SpeechRecognition();
-    recognition.lang = "en-IN";
-    recognition.start();
-
-    recognition.onresult = (e) => {
+    const rec = new SR();
+    rec.lang = "en-IN";
+    rec.start();
+    rec.onresult = (e) => {
       setQuery(e.results[0][0].transcript);
       setOpen(true);
     };
   };
 
-  /* =====================================================
-     SUBMIT SEARCH
-  ===================================================== */
+  /* Search submit */
   const handleSubmit = (e) => {
     e.preventDefault();
     onSearch?.({ location: query, people });
@@ -70,62 +59,60 @@ export default function AdvancedSearchBar({ trips = [], onSearch }) {
     onSearch?.({ location: "", people: "" });
   };
 
-  /* CLOSE ON OUTSIDE CLICK */
+  /* Close dropdown on outside click */
   useEffect(() => {
-    const handler = (e) => {
+    const close = (e) => {
       if (panelRef.current && !panelRef.current.contains(e.target)) {
         setOpen(false);
       }
     };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
+    document.addEventListener("mousedown", close);
+    return () => document.removeEventListener("mousedown", close);
   }, []);
 
   return (
-    <div className="relative w-full">
-      {/* ================= SEARCH BAR ================= */}
+    <div className="relative w-full z-[9999]">
+
+      {/* 🔥 Top Search Bar */}
       <form
         onSubmit={handleSubmit}
         className="
-          w-full max-w-5xl mx-auto
-          backdrop-blur-xl bg-white/70
-          rounded-full shadow-xl
-          px-4 py-3
-          flex flex-col md:flex-row items-center gap-4
+          w-full max-w-6xl mx-auto
+          bg-white/60 backdrop-blur-md
+          rounded-full shadow-xl border border-white/30
+          px-5 py-3 flex flex-col md:flex-row gap-3 items-center
         "
       >
-        {/* LOCATION */}
-        <div className="flex items-center gap-3 flex-1">
+        {/* Location Input */}
+        <div className="flex items-center gap-2 flex-1">
           <MapPin className="text-orange-500" size={18} />
           <input
+            ref={inputRef}
             value={query}
-            onChange={(e) => {
-              setQuery(e.target.value);
-              setOpen(true);
-            }}
+            onChange={(e) => { setQuery(e.target.value); setOpen(true); }}
             onFocus={() => setOpen(true)}
-            placeholder="Location or stay type (Tree House, Dome, Mud House...)"
-            className="bg-transparent outline-none text-sm w-full"
+            placeholder="Search: Ooty, Dome Stay, Treehouse..."
+            className="bg-transparent text-sm outline-none w-full"
           />
           <Mic
+            size={18}
+            className="text-orange-600 cursor-pointer hover:scale-110"
             onClick={startVoiceSearch}
-            className="text-orange-600 cursor-pointer"
-            size={16}
           />
         </div>
 
-        {/* DATE */}
+        {/* Date */}
         <div className="flex items-center gap-2 flex-1">
           <Calendar size={18} className="text-orange-500" />
           <input
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
-            className="bg-transparent outline-none text-sm"
+            className="bg-transparent text-sm outline-none w-full"
           />
         </div>
 
-        {/* PEOPLE */}
+        {/* People */}
         <div className="flex items-center gap-2 flex-1">
           <Users size={18} className="text-orange-500" />
           <input
@@ -134,13 +121,13 @@ export default function AdvancedSearchBar({ trips = [], onSearch }) {
             value={people}
             onChange={(e) => setPeople(e.target.value)}
             placeholder="People"
-            className="bg-transparent outline-none text-sm w-full"
+            className="bg-transparent text-sm outline-none w-full"
           />
         </div>
 
-        {/* ACTIONS */}
+        {/* Buttons */}
         <div className="flex items-center gap-2">
-          {(query || people || date) && (
+          {(query || date || people) && (
             <button
               type="button"
               onClick={clearAll}
@@ -152,36 +139,30 @@ export default function AdvancedSearchBar({ trips = [], onSearch }) {
 
           <button
             type="submit"
-            className="bg-orange-500 hover:bg-orange-600
-              text-white font-semibold rounded-full
-              px-6 py-2 text-sm"
+            className="bg-orange-500 hover:bg-orange-600 text-white rounded-full 
+              px-6 py-2 font-semibold text-sm"
           >
-            LET’S GO
+            LET'S GO
           </button>
         </div>
       </form>
 
-      {/* ================= DROPDOWN ================= */}
-      {open && filtered.length > 0 && (
-        <div className="absolute left-0 right-0 mt-3 z-50 flex justify-center">
+      {/* ================= DROPDOWN (LIKE YOUR PIC) ================= */}
+      {open && (
+        <div className="absolute left-0 right-0 mt-3 flex justify-center z-[9998]">
           <div
             ref={panelRef}
             className="
-              bg-white w-full max-w-4xl
-              rounded-2xl shadow-2xl
-              p-4
-              max-h-[60vh] overflow-y-auto
+              bg-white shadow-2xl rounded-2xl p-4
+              w-full max-w-4xl max-h-[50vh] overflow-y-auto
+              border border-gray-100
             "
           >
             {filtered.map((item) => (
               <div
                 key={item}
-                onClick={() => {
-                  setQuery(item);
-                  setOpen(false);
-                }}
-                className="py-3 px-3 cursor-pointer
-                  hover:bg-gray-100 rounded-md text-sm"
+                onClick={() => { setQuery(item); setOpen(false); }}
+                className="py-2 px-3 text-[14px] cursor-pointer hover:bg-gray-100 rounded"
               >
                 {item}
               </div>
