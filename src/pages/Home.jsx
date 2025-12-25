@@ -48,7 +48,7 @@ export default function Home() {
   }, []);
 
 
-  /* ================= SEARCH FIX — STAY TYPE INCLUDED ================= */
+  /* ================= SEARCH (Supports StayType + City + Title) ================= */
   const handleSearch = ({ location }) => {
     if (!location) {
       setFilteredTrips(allTrips);
@@ -59,7 +59,7 @@ export default function Home() {
 
     const result = allTrips.filter(t =>
       t.location?.toLowerCase().includes(q) ||
-      t.stayType?.toLowerCase().includes(q) ||      // ⭐ Main fix here
+      t.stayType?.toLowerCase().includes(q) ||
       t.category?.toLowerCase().includes(q) ||
       t.title?.toLowerCase().includes(q)
     );
@@ -117,6 +117,32 @@ export default function Home() {
   }
 
 
+  /* ================== THIS WEEK / THIS MONTH FILTER ================== */
+  const handleTripTab = (type) => {
+    if (type === "all") {
+      setFilteredTrips(allTrips);
+      return scrollToTrips();
+    }
+
+    const today = new Date();
+
+    const result = allTrips.filter(t => {
+      if (!t.startDate) return false;
+
+      const tripDate = new Date(t.startDate);
+      const diffDays = (tripDate - today) / (1000 * 60 * 60 * 24);
+
+      if (type === "week") return diffDays >= 0 && diffDays <= 7;
+      if (type === "month") return diffDays >= 0 && diffDays <= 30;
+
+      return false;
+    });
+
+    setFilteredTrips(result);
+    scrollToTrips();
+  };
+
+
   const scrollToTrips = () =>
     document.getElementById("featured-trips")?.scrollIntoView({ behavior: "smooth" });
 
@@ -133,8 +159,8 @@ export default function Home() {
           <h1 className="text-4xl md:text-6xl font-bold">Camping in India</h1>
           <h2 className="text-2xl md:text-4xl font-bold mt-3">Made Easy & Safe</h2>
 
-          <div className="mt-6"><RotatingBadge/></div>
-          <div className="absolute top-10 right-10 hidden md:block"><RotatingReviewBadge/></div>
+          <div className="mt-6"><RotatingBadge /></div>
+          <div className="absolute top-10 right-10 hidden md:block"><RotatingReviewBadge /></div>
         </div>
 
         <div className="absolute bottom-8 w-full px-4">
@@ -146,7 +172,9 @@ export default function Home() {
 
 
       <CategoriesBar onCategorySelect={handleCategoryFilter} />
-      <TripTabs onTabSelect={() => setFilteredTrips(allTrips)} />
+
+      {/* Updated → TripTabs sends filter type */}
+      <TripTabs onTabSelect={handleTripTab} />
 
 
       {/* POPUPS */}
@@ -169,9 +197,9 @@ export default function Home() {
         <ExploreMoreButton />
       </section>
 
-      <PopularDestinations/>
-      <BlogSection/>
-      <TestimonialsSlider/>
+      <PopularDestinations />
+      <BlogSection />
+      <TestimonialsSlider />
 
       <StickyFilterBar onOpenFilter={() => setIsFilterOpen(true)} />
       <FilterDrawer isOpen={isFilterOpen} onClose={() => setIsFilterOpen(false)} />
