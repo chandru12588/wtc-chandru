@@ -1,12 +1,12 @@
 // frontend/src/pages/Home.jsx
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useLocation } from "react-router-dom";
 
 import AdvancedSearchBar from "../components/AdvancedSearchBar";
 import CategoriesBar from "../components/CategoriesBar";
 import TripCard from "../components/TripCard";
 import TripTabs from "../components/TripTabs";
+
 import HeroSlider from "../components/HeroSlider";
 import TestimonialsSlider from "../components/TestimonialsSlider";
 import ExploreMoreButton from "../components/ExploreMoreButton";
@@ -25,9 +25,7 @@ export default function Home() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const location = useLocation();
-
-  /* ================= Fetch Trips ================= */
+  /* ================= Load Trips ================= */
   useEffect(() => {
     const loadTrips = async () => {
       try {
@@ -35,7 +33,7 @@ export default function Home() {
         setAllTrips(res.data || []);
         setFilteredTrips(res.data || []);
       } catch (err) {
-        console.error("API Error:", err);
+        console.error("Error loading trips:", err);
       } finally {
         setLoading(false);
       }
@@ -43,54 +41,45 @@ export default function Home() {
     loadTrips();
   }, []);
 
-  /* ================= Handle Search ================= */
+  /* ================= Search ================= */
   const handleSearch = ({ location, people }) => {
-    let result = [...allTrips];
+    if (!location && !people) return setFilteredTrips(allTrips);
 
+    let results = [...allTrips];
     if (location) {
       const q = location.toLowerCase();
-      result = result.filter(t =>
+      results = results.filter((t) =>
         `${t.title} ${t.location} ${t.region} ${t.category}`
-        .toLowerCase()
-        .includes(q)
+          .toLowerCase()
+          .includes(q)
       );
     }
-
     if (people) {
-      result = result.filter(t =>
+      results = results.filter((t) =>
         t.minPeople ? Number(people) >= t.minPeople : true
       );
     }
-
-    setFilteredTrips(result);
-    document.getElementById("featured-trips")?.scrollIntoView({ behavior: "smooth" });
+    setFilteredTrips(results);
+    setTimeout(() => {
+      document.getElementById("featured-trips")?.scrollIntoView({ behavior: "smooth" });
+    }, 100);
   };
 
-
-  /* ================= CATEGORY FILTER (MAIN FIX) ================= */
-  const handleCategoryFilter = (selected) => {
+  /* ================= CATEGORY FILTER (NEW) ================= */
+  const handleCategoryFilter = (cat) => {
     let result = [...allTrips];
 
-    if (selected.category) {
-      result = result.filter(p =>
-        p.category?.toLowerCase() === selected.category.toLowerCase()
-      );
-    }
+    if (cat.key)
+      result = result.filter(p => p.category?.toLowerCase() === cat.key.toLowerCase());
 
-    if (selected.region) {
-      result = result.filter(p =>
-        p.region?.toLowerCase().includes(selected.region.toLowerCase())
-      );
-    }
+    if (cat.region)
+      result = result.filter(p => p.region?.toLowerCase() === cat.region.toLowerCase());
 
-    if (selected.type) {
-      result = result.filter(p =>
-        p.tags?.some(tag => tag.toLowerCase().includes(selected.type.toLowerCase()))
-      );
-    }
+    if (cat.type)
+      result = result.filter(p => p.tags?.includes(cat.type));
 
     if (result.length === 0) {
-      alert(`🚧 No ${selected.name} trips available — Coming Soon!`);
+      alert(`🚧 No ${cat.name} trips available — Coming Soon!`);
       return;
     }
 
@@ -98,24 +87,21 @@ export default function Home() {
     document.getElementById("featured-trips")?.scrollIntoView({ behavior: "smooth" });
   };
 
-
-  /* ================= Tab Filter ================= */
+  /* ================= TAB FILTER (Week/Month) ================= */
   const handleTabSelect = (tab) => {
     if (tab === "all") return setFilteredTrips(allTrips);
 
     const today = new Date();
-
     if (tab === "week") {
       const start = new Date();
       const day = start.getDay() || 7;
       start.setDate(start.getDate() - day + 1);
-      start.setHours(0,0,0,0);
-
+      start.setHours(0, 0, 0, 0);
       const end = new Date(start);
       end.setDate(start.getDate() + 6);
-      end.setHours(23,59,59,999);
+      end.setHours(23, 59, 59, 999);
 
-      setFilteredTrips(allTrips.filter(t => {
+      setFilteredTrips(allTrips.filter((t) => {
         const d = new Date(t.startDate);
         return d >= start && d <= end;
       }));
@@ -124,15 +110,16 @@ export default function Home() {
     if (tab === "month") {
       const m = today.getMonth();
       const y = today.getFullYear();
-      setFilteredTrips(allTrips.filter(t => {
+      setFilteredTrips(allTrips.filter((t) => {
         const d = new Date(t.startDate);
         return d.getMonth() === m && d.getFullYear() === y;
       }));
     }
 
-    document.getElementById("featured-trips")?.scrollIntoView({ behavior: "smooth" });
+    setTimeout(() => {
+      document.getElementById("featured-trips")?.scrollIntoView({ behavior: "smooth" });
+    }, 100);
   };
-
 
   return (
     <div className="w-full overflow-x-hidden">
@@ -140,9 +127,9 @@ export default function Home() {
       {/* ================= HERO ================= */}
       <section className="relative w-full h-[75vh] md:h-[80vh] overflow-hidden">
         <HeroSlider />
-        <div className="absolute inset-0 bg-black/25"></div>
+        <div className="absolute inset-0 bg-black/25" />
 
-        <div className="absolute inset-0 flex flex-col justify-center items-center text-white text-center">
+        <div className="absolute inset-0 flex flex-col justify-center items-center text-white text-center px-4">
           <h1 className="text-4xl md:text-6xl font-bold">Camping in India</h1>
           <h2 className="text-2xl md:text-4xl font-bold mt-3">Made Easy & Safe</h2>
 
@@ -160,7 +147,9 @@ export default function Home() {
         </div>
       </section>
 
+      {/* CATEGORY BAR WITH FILTERING */}
       <CategoriesBar onCategorySelect={handleCategoryFilter} />
+
       <TripTabs onTabSelect={handleTabSelect} />
 
       {/* ================= RESULTS ================= */}
@@ -172,7 +161,7 @@ export default function Home() {
         ) : (
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
             {filteredTrips.length > 0 ? (
-              filteredTrips.map(trip => <TripCard key={trip._id} trip={trip} />)
+              filteredTrips.map((trip) => <TripCard key={trip._id} trip={trip} />)
             ) : (
               <p className="text-gray-600">No trips found</p>
             )}
@@ -185,8 +174,13 @@ export default function Home() {
       <PopularDestinations />
       <BlogSection />
       <TestimonialsSlider />
+
       <StickyFilterBar onOpenFilter={() => setIsFilterOpen(true)} />
-      <FilterDrawer isOpen={isFilterOpen} onClose={() => setIsFilterOpen(false)} onApply={() => setIsFilterOpen(false)} />
+      <FilterDrawer
+        isOpen={isFilterOpen}
+        onClose={() => setIsFilterOpen(false)}
+        onApply={() => setIsFilterOpen(false)}
+      />
     </div>
   );
 }

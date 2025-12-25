@@ -1,82 +1,82 @@
+// frontend/src/components/CategoriesBar.jsx
 import React, { useRef } from "react";
 import { useNavigate } from "react-router-dom";
+
 import {
   Mountain, Trees, CloudSun, Backpack, Building2, Umbrella, Castle,
   Users, MapPinned, Filter, UsersRound, Timer
 } from "lucide-react";
 
-// Category name must match DB "category" field exactly
-const categories = [
-  { name: "Forest", icon: Trees, key:"forest" },
-  { name: "Glamping", icon: CloudSun, key:"glamping" },
-  { name: "Mountain", icon: Mountain, key:"mountain" },
-  { name: "Backpacker", icon: Backpack, key:"backpacker" },
-  { name: "Beach", icon: Umbrella, key:"beach" },
-  { name: "Desert", icon: CloudSun, key:"desert" },
-
-  // Filter via region instead of category
-  { name: "Chennai", icon: Castle, region:"Chennai" },
-  { name: "Bangalore", icon: Building2, region:"Bangalore" },
-
-  // Type-based filters
-  { name: "Family", icon: Users, type:"family" },
-  { name: "Friends", icon: UsersRound, type:"friends" },
-
-  { name: "New Year Trip", icon: Timer, key:"newyear" },
-];
-
 export default function CategoriesBar({ onCategorySelect }) {
+
   const scrollRef = useRef(null);
 
-  const scrollLeft = () => scrollRef.current.scrollBy({ left: -300, behavior: "smooth" });
-  const scrollRight = () => scrollRef.current.scrollBy({ left: 300, behavior: "smooth" });
+  const categories = [
+    { name: "Forest", icon: Trees, category:"forest" },
+    { name: "Mountain", icon: Mountain, category:"mountain" },
+    { name: "Backpacker", icon: Backpack, category:"backpacker" },
+    { name: "Beach", icon: Umbrella, category:"beach" },
+    { name: "Friends", icon: UsersRound, category:"friends" }, // FIXED 🔥
+    { name: "Family", icon: Users, category:"family" },
+    { name: "Glamping", icon: CloudSun, category:"glamping" },
+    { name: "Desert", icon: CloudSun, category:"desert" },
+
+    // REGION BASED (not category)
+    { name: "Chennai", icon: Castle, region:"chennai" },
+    { name: "Bangalore", icon: Building2, region:"bangalore" },
+
+    { name: "New Year Trip", icon: Timer, category:"newyear" },
+
+    // GENERAL
+    { name: "Locations", icon: MapPinned, noFilter:true }
+  ];
+
+  const scrollLeft = () => scrollRef.current.scrollBy({ left:-200, behavior:"smooth" });
+  const scrollRight = () => scrollRef.current.scrollBy({ left:200, behavior:"smooth" });
+
+  const selectCategory = (item) => {
+    if(item.noFilter){
+      alert("Browse using search or tabs 🔍");
+      return;
+    }
+
+    onCategorySelect(item);
+  };
 
   return (
-    <div className="relative mt-8 py-6
-      bg-white/40 backdrop-blur-xl border border-white/30
-      shadow-lg rounded-3xl overflow-hidden">
+    <div className="relative mt-5 py-5 bg-white/40 backdrop-blur-xl border border-white/20 shadow-lg rounded-3xl">
 
-      {/* Left Scroll */}
+      {/* LEFT BUTTON */}
       <button onClick={scrollLeft}
-        className="absolute left-3 top-1/2 -translate-y-1/2
-        bg-white/70 backdrop-blur-xl border p-2 rounded-full shadow-md hover:scale-110">
+        className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/70 p-2 rounded-full shadow hover:scale-110">
         ‹
       </button>
 
-      <div ref={scrollRef} className="flex gap-4 px-10 overflow-x-auto scrollbar-hide scroll-smooth">
-        {categories.map((c, i) => {
-          const Icon = c.icon;
-          return (
-            <div key={i}
-              onClick={() => onCategorySelect(c)}   // <-- Send selection to home page
-              className="min-w-[120px] text-center cursor-pointer transition-all
-              bg-white/70 backdrop-blur-xl border border-gray-200
-              hover:bg-white hover:shadow-xl hover:scale-105 
-              p-4 rounded-2xl select-none duration-300">
-              
-              <Icon className="text-orange-600 mx-auto" size={28} />
-              <p className="text-xs mt-2 font-semibold text-gray-700">{c.name}</p>
-            </div>
-          );
-        })}
+      <div ref={scrollRef} className="flex gap-4 overflow-x-auto scrollbar-hide px-10">
 
-        {/* Filter Button */}
-        <div
-          className="min-w-[120px] text-center cursor-pointer
-          bg-orange-50 border border-orange-300
-          hover:bg-orange-100 hover:shadow-lg hover:scale-105
-          p-4 rounded-2xl transition duration-300"
-          onClick={() => alert("🔍 Advanced Filters Coming Soon")}
-        >
-          <Filter className="text-orange-600 mx-auto" size={28} />
-          <p className="text-xs mt-2 font-semibold text-gray-700">Filter</p>
+        {categories.map((c,i)=>(
+          <div key={i} onClick={()=>selectCategory(c)}
+            className="min-w-[110px] bg-white/70 p-4 rounded-2xl text-center cursor-pointer
+            hover:bg-white hover:scale-105 hover:shadow-xl transition">
+            
+            <c.icon className="text-orange-600 mx-auto" size={28}/>
+            <p className="text-xs font-semibold mt-2">{c.name}</p>
+          </div>
+        ))}
+
+        {/* FILTER BUTTON */}
+        <div onClick={()=>alert("🔍 Advanced Filter Coming")}
+          className="min-w-[110px] bg-orange-50 border border-orange-300 p-4 rounded-2xl
+          text-center cursor-pointer hover:bg-orange-100 hover:scale-105 transition">
+          <Filter className="text-orange-600 mx-auto" size={26}/>
+          <p className="text-xs mt-2 font-semibold">Filter</p>
         </div>
+
       </div>
 
-      {/* Right Scroll */}
+      {/* RIGHT BUTTON */}
       <button onClick={scrollRight}
-        className="absolute right-3 top-1/2 -translate-y-1/2
-        bg-white/70 backdrop-blur-xl border p-2 rounded-full shadow-md hover:scale-110">
+        className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/70 p-2 rounded-full shadow hover:scale-110">
         ›
       </button>
     </div>
