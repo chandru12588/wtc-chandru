@@ -22,6 +22,7 @@ export default function Home() {
   const [allTrips, setAllTrips] = useState([]);
   const [filteredTrips, setFilteredTrips] = useState([]);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [isStayTypeOpen, setIsStayTypeOpen] = useState(false);        // ⬅ Stay Type Popup State
   const [loading, setLoading] = useState(true);
 
   /* ================= Load Trips ================= */
@@ -65,44 +66,45 @@ export default function Home() {
 
   /* ================= CATEGORY / REGION / TAGS / STAYTYPE FILTER ================= */
   const handleCategoryFilter = (filter) => {
+
+    // 🆕 If StayType button clicked
+    if (filter.type === "stayMenu") {
+      setIsStayTypeOpen(true);
+      return;
+    }
+
     let result = [...allTrips];
 
-    // Category
     if (filter.type === "category") {
       result = result.filter(p =>
         p.category?.toLowerCase() === filter.value.toLowerCase()
       );
     }
 
-    // Region
     if (filter.type === "region") {
       result = result.filter(p =>
         p.region?.toLowerCase().includes(filter.value.toLowerCase())
       );
     }
 
-    // Tags (Friends/Family etc.)
     if (filter.type === "tags") {
       result = result.filter(p =>
-        p.tags?.some(t => t.toLowerCase().includes(filter.value.toLowerCase()))
+        p.tags?.some(t => t.toLowerCase().includes(filter.value.toLowerCase())) ||
+        p.category?.toLowerCase() === filter.value.toLowerCase()
       );
     }
 
-    // Stay Type
     if (filter.type === "stayType") {
       result = result.filter(p =>
         p.stayType?.toLowerCase() === filter.value.toLowerCase()
       );
     }
 
-    if (result.length === 0) {
-      alert(`🚧 No ${filter.value} trips available yet`);
-      return;
-    }
+    if (result.length === 0) return alert(`🚧 No ${filter.value} trips available yet`);
 
     setFilteredTrips(result);
     setTimeout(() => {
-      document.getElementById("featured-trips")?.scrollIntoView({ behavior: "smooth" });
+      document.getElementById("featured-trips")?.scrollIntoView({ behavior:"smooth" });
     }, 150);
   };
 
@@ -142,6 +144,12 @@ export default function Home() {
     }, 100);
   };
 
+  /* ================= STAY TYPE LIST ================= */
+  const stayTypes = [
+    "Tent Stay","A-Frame Stay","Mud House","Glamping Stay","Tree House","Dome Stay",
+    "Cabin / Cottage","Private Villa","Bungalow","Farm Stay","Homestay","Resort Stay"
+  ];
+
   return (
     <div className="w-full overflow-x-hidden">
 
@@ -169,6 +177,38 @@ export default function Home() {
       <CategoriesBar onCategorySelect={handleCategoryFilter} />
 
       <TripTabs onTabSelect={handleTabSelect} />
+
+      {/* =================== STAY TYPE POPUP =================== */}
+      {isStayTypeOpen && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-xl shadow-xl w-[90%] max-w-md">
+
+            <h3 className="text-lg font-bold mb-4 text-center">Choose Stay Type</h3>
+
+            <div className="grid grid-cols-2 gap-3">
+              {stayTypes.map((s,i)=>(
+                <button
+                  key={i}
+                  onClick={()=>{
+                    handleCategoryFilter({type:"stayType", value:s});
+                    setIsStayTypeOpen(false);
+                  }}
+                  className="p-3 border rounded-lg hover:bg-orange-100 transition"
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+
+            <button
+              onClick={()=>setIsStayTypeOpen(false)}
+              className="mt-4 w-full py-2 bg-gray-200 rounded-md hover:bg-gray-300"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* RESULTS */}
       <section id="featured-trips" className="max-w-7xl mx-auto px-4 py-12">
