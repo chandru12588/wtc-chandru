@@ -16,16 +16,21 @@ import BlogSection from "../components/BlogSection";
 import RotatingReviewBadge from "../components/ReviewBadge";
 import RotatingBadge from "../components/RotatingBadge";
 
+import StayTypePopup from "../components/StayTypePopup";
+import CitySelectPopup from "../components/CitySelectPopup";
+
 const API = import.meta.env.VITE_API_URL;
 
 export default function Home() {
   const [allTrips, setAllTrips] = useState([]);
   const [filteredTrips, setFilteredTrips] = useState([]);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [isStayTypeOpen, setIsStayTypeOpen] = useState(false);        // ⬅ Stay Type Popup State
+  const [stayPopup, setStayPopup] = useState(false);
+  const [cityPopup, setCityPopup] = useState(false);
+
+  const [selectedStayType, setSelectedStayType] = useState("");
   const [loading, setLoading] = useState(true);
 
-  /* ================= Load Trips ================= */
   useEffect(() => {
     const loadTrips = async () => {
       try {
@@ -41,10 +46,8 @@ export default function Home() {
     loadTrips();
   }, []);
 
-  /* ================= Search Filter ================= */
-  const handleSearch = ({ location, people }) => {
+  const handleSearch = ({ location }) => {
     let result = [...allTrips];
-
     if (location) {
       const q = location.toLowerCase();
       result = result.filter(t =>
@@ -53,111 +56,57 @@ export default function Home() {
           .includes(q)
       );
     }
-
-    if (people) {
-      result = result.filter(t =>
-        t.minPeople ? Number(people) >= t.minPeople : true
-      );
-    }
-
     setFilteredTrips(result);
-    document.getElementById("featured-trips")?.scrollIntoView({ behavior: "smooth" });
   };
 
-  /* ================= CATEGORY / REGION / TAGS / STAYTYPE FILTER ================= */
+  /* ================= MAIN FILTER LOGIC ================= */
   const handleCategoryFilter = (filter) => {
-
-    // 🆕 If StayType button clicked
-    if (filter.type === "stayMenu") {
-      setIsStayTypeOpen(true);
-      return;
-    }
+    if (filter.type === "stayMenu") return setStayPopup(true);
 
     let result = [...allTrips];
 
-    if (filter.type === "category") {
-      result = result.filter(p =>
-        p.category?.toLowerCase() === filter.value.toLowerCase()
-      );
-    }
+    if (filter.type === "category")
+      result = result.filter(p => p.category?.toLowerCase() === filter.value.toLowerCase());
 
-    if (filter.type === "region") {
-      result = result.filter(p =>
-        p.region?.toLowerCase().includes(filter.value.toLowerCase())
-      );
-    }
+    if (filter.type === "region")
+      result = result.filter(p => p.region?.toLowerCase().includes(filter.value.toLowerCase()));
 
-    if (filter.type === "tags") {
-      result = result.filter(p =>
-        p.tags?.some(t => t.toLowerCase().includes(filter.value.toLowerCase())) ||
-        p.category?.toLowerCase() === filter.value.toLowerCase()
-      );
-    }
+    if (filter.type === "tags")
+      result = result.filter(p => p.tags?.map(t=>t.toLowerCase()).includes(filter.value.toLowerCase()));
 
-    if (filter.type === "stayType") {
-      result = result.filter(p =>
-        p.stayType?.toLowerCase() === filter.value.toLowerCase()
-      );
-    }
+    if (filter.type === "stayType")
+      result = result.filter(p => p.stayType?.toLowerCase() === filter.value.toLowerCase());
 
-    if (result.length === 0) return alert(`🚧 No ${filter.value} trips available yet`);
+    if (result.length === 0) return alert(`No trips found`);
 
     setFilteredTrips(result);
-    setTimeout(() => {
-      document.getElementById("featured-trips")?.scrollIntoView({ behavior:"smooth" });
-    }, 150);
   };
 
-  /* ================= Tab Filter (Week/Month) ================= */
-  const handleTabSelect = (tab) => {
-    if (tab === "all") return setFilteredTrips(allTrips);
+  function applyStayType(type) {
+    setSelectedStayType(type);
+    setStayPopup(false);
+    setCityPopup(true);
+  }
 
-    const today = new Date();
+  function filterByCity(city) {
+    let result = allTrips.filter(p =>
+      p.stayType?.toLowerCase() === selectedStayType.toLowerCase() &&
+      p.location?.toLowerCase() === city.toLowerCase()
+    );
 
-    if (tab === "week") {
-      const start = new Date();
-      const day = start.getDay() || 7;
-      start.setDate(start.getDate() - day + 1);
-      start.setHours(0,0,0,0);
+    if (result.length === 0) alert(`No stays in ${city} for ${selectedStayType}`);
 
-      const end = new Date(start);
-      end.setDate(start.getDate() + 6);
-      end.setHours(23,59,59,999);
-
-      setFilteredTrips(allTrips.filter(t => {
-        const d = new Date(t.startDate);
-        return d >= start && d <= end;
-      }));
-    }
-
-    if (tab === "month") {
-      const m = today.getMonth();
-      const y = today.getFullYear();
-      setFilteredTrips(allTrips.filter(t => {
-        const d = new Date(t.startDate);
-        return d.getMonth() === m && d.getFullYear() === y;
-      }));
-    }
-
-    setTimeout(() => {
-      document.getElementById("featured-trips")?.scrollIntoView({ behavior:"smooth" });
-    }, 100);
-  };
-
-  /* ================= STAY TYPE LIST ================= */
-  const stayTypes = [
-    "Tent Stay","A-Frame Stay","Mud House","Glamping Stay","Tree House","Dome Stay",
-    "Cabin / Cottage","Private Villa","Bungalow","Farm Stay","Homestay","Resort Stay"
-  ];
+    setFilteredTrips(result);
+    setCityPopup(false);
+    document.getElementById("featured-trips")?.scrollIntoView({ behavior:"smooth" });
+  }
 
   return (
     <div className="w-full overflow-x-hidden">
 
-      {/* HERO SECTION */}
       <section className="relative w-full h-[75vh] md:h-[80vh] overflow-hidden">
         <HeroSlider />
         <div className="absolute inset-0 bg-black/25"></div>
-
         <div className="absolute inset-0 flex flex-col justify-center items-center text-white text-center">
           <h1 className="text-4xl md:text-6xl font-bold">Camping in India</h1>
           <h2 className="text-2xl md:text-4xl font-bold mt-3">Made Easy & Safe</h2>
@@ -173,68 +122,31 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CATEGORY BAR */}
       <CategoriesBar onCategorySelect={handleCategoryFilter} />
+      <TripTabs onTabSelect={(tab)=>setFilteredTrips(allTrips)} />
 
-      <TripTabs onTabSelect={handleTabSelect} />
+      {/* Popups */}
+      {stayPopup && <StayTypePopup onSelect={applyStayType} onClose={()=>setStayPopup(false)}/>}
+      {cityPopup && <CitySelectPopup stayType={selectedStayType} trips={allTrips} onSelect={filterByCity} onClose={()=>setCityPopup(false)}/>}
 
-      {/* =================== STAY TYPE POPUP =================== */}
-      {isStayTypeOpen && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-xl shadow-xl w-[90%] max-w-md">
-
-            <h3 className="text-lg font-bold mb-4 text-center">Choose Stay Type</h3>
-
-            <div className="grid grid-cols-2 gap-3">
-              {stayTypes.map((s,i)=>(
-                <button
-                  key={i}
-                  onClick={()=>{
-                    handleCategoryFilter({type:"stayType", value:s});
-                    setIsStayTypeOpen(false);
-                  }}
-                  className="p-3 border rounded-lg hover:bg-orange-100 transition"
-                >
-                  {s}
-                </button>
-              ))}
-            </div>
-
-            <button
-              onClick={()=>setIsStayTypeOpen(false)}
-              className="mt-4 w-full py-2 bg-gray-200 rounded-md hover:bg-gray-300"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* RESULTS */}
       <section id="featured-trips" className="max-w-7xl mx-auto px-4 py-12">
         <h2 className="text-2xl font-semibold mb-6">Featured Trips</h2>
 
-        {loading ? (
-          <p className="text-gray-500">Loading trips...</p>
-        ) : (
+        {loading ? <p>Loading...</p> :
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {filteredTrips.length > 0 ? (
-              filteredTrips.map(trip => <TripCard key={trip._id} trip={trip} />)
-            ) : (
-              <p className="text-gray-600">No trips found</p>
-            )}
+            {filteredTrips.length > 0 ?
+              filteredTrips.map(trip => <TripCard key={trip._id} trip={trip}/>) :
+              <p>No trips found</p>}
           </div>
-        )}
-
+        }
         <ExploreMoreButton />
       </section>
 
       <PopularDestinations />
       <BlogSection />
       <TestimonialsSlider />
-
-      <StickyFilterBar onOpenFilter={() => setIsFilterOpen(true)} />
-      <FilterDrawer isOpen={isFilterOpen} onClose={() => setIsFilterOpen(false)} onApply={() => setIsFilterOpen(false)} />
+      <StickyFilterBar onOpenFilter={()=>setIsFilterOpen(true)} />
+      <FilterDrawer isOpen={isFilterOpen} onClose={()=>setIsFilterOpen(false)} />
     </div>
   );
 }
