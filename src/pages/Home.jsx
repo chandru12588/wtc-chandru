@@ -23,7 +23,6 @@ const API = import.meta.env.VITE_API_URL;
 
 export default function Home() {
 
-  /* ================= STATES ================= */
   const [allTrips, setAllTrips] = useState([]);
   const [filteredTrips, setFilteredTrips] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -35,7 +34,7 @@ export default function Home() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
 
-  /* ================= FETCH TRIPS ================= */
+  /* ============== FETCH ALL PACKAGES ============== */
   useEffect(() => {
     (async () => {
       try {
@@ -48,7 +47,7 @@ export default function Home() {
   }, []);
 
 
-  /* ================= SEARCH (Supports StayType + City + Title) ================= */
+  /* ============== SEARCH (StayType + City + Title) ============== */
   const handleSearch = ({ location }) => {
     if (!location) {
       setFilteredTrips(allTrips);
@@ -71,10 +70,9 @@ export default function Home() {
   };
 
 
-  /* ================= CATEGORY FILTER ================= */
+  /* ============== CATEGORY FILTERS ============== */
   const handleCategoryFilter = (filter) => {
-    if (filter.type === "stayMenu")
-      return setStayPopup(true);
+    if (filter.type === "stayMenu") return setStayPopup(true);
 
     let result = [...allTrips];
 
@@ -85,9 +83,7 @@ export default function Home() {
       result = result.filter(p => p.region?.toLowerCase().includes(filter.value.toLowerCase()));
 
     if (filter.type === "tags")
-      result = result.filter(p =>
-        p.tags?.map(t => t.toLowerCase()).includes(filter.value.toLowerCase())
-      );
+      result = result.filter(p => p.tags?.map(t => t.toLowerCase()).includes(filter.value.toLowerCase()));
 
     if (result.length === 0) return alert("No trips found");
 
@@ -96,7 +92,7 @@ export default function Home() {
   };
 
 
-  /* ================= STAY TYPE → CITY SELECT ================= */
+  /* ============== STAY TYPE -> CITY FLOW ============== */
   function applyStayType(type) {
     setSelectedStayType(type);
     setStayPopup(false);
@@ -119,21 +115,30 @@ export default function Home() {
 
   /* ================== THIS WEEK / THIS MONTH FILTER ================== */
   const handleTripTab = (type) => {
+
     if (type === "all") {
       setFilteredTrips(allTrips);
       return scrollToTrips();
     }
 
     const today = new Date();
+    const currentMonth = today.getMonth();
+    const currentYear = today.getFullYear();
 
-    const result = allTrips.filter(t => {
-      if (!t.startDate) return false;
+    const result = allTrips.filter(pkg => {
+      if (!pkg.startDate) return false;
 
-      const tripDate = new Date(t.startDate);
-      const diffDays = (tripDate - today) / (1000 * 60 * 60 * 24);
+      const tripDate = new Date(pkg.startDate);
+      const diffDays = Math.ceil((tripDate - today) / (1000 * 60 * 60 * 24));
 
       if (type === "week") return diffDays >= 0 && diffDays <= 7;
-      if (type === "month") return diffDays >= 0 && diffDays <= 30;
+
+      if (type === "month") {
+        return (
+          tripDate.getMonth() === currentMonth &&
+          tripDate.getFullYear() === currentYear
+        );
+      }
 
       return false;
     });
@@ -145,6 +150,7 @@ export default function Home() {
 
   const scrollToTrips = () =>
     document.getElementById("featured-trips")?.scrollIntoView({ behavior: "smooth" });
+
 
 
   return (
@@ -173,7 +179,7 @@ export default function Home() {
 
       <CategoriesBar onCategorySelect={handleCategoryFilter} />
 
-      {/* Updated → TripTabs sends filter type */}
+      {/* TripTabs now fully functional */}
       <TripTabs onTabSelect={handleTripTab} />
 
 
