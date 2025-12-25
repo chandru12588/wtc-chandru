@@ -11,28 +11,17 @@ export default function AdvancedSearchBar({ trips = [], onSearch }) {
 
   const cap = (v) =>
     typeof v === "string" && v.trim().length > 0
-      ? v.charAt(0).toUpperCase() + v.slice(1).toLowerCase()
+      ? v.charAt(0).toUpperCase() + v.slice(1)
       : "";
 
-  /* =============== Group by State -> Places + Stay Types =============== */
-  const grouped = useMemo(() => {
-    const map = {};
-    trips.forEach((t) => {
-      const state = cap(t.region || "Others");
-      const place = cap(t.location || "");
-      const type = cap(t.category || "");
+  /* -------- Extract Clean Lists -------- */
+  const stayTypes = [...new Set(trips.map(t => cap(t.stayType)).filter(Boolean))];
+  const categories = [...new Set(trips.map(t => cap(t.category)).filter(Boolean))];
+  const locations = [...new Set(trips.map(t => cap(t.location)).filter(Boolean))];
 
-      if (!map[state]) map[state] = { places: new Set(), types: new Set() };
-
-      if (place) map[state].places.add(place);
-      if (type) map[state].types.add(type);
-    });
-    return map;
-  }, [trips]);
-
-  /* ============ Trending (from actual packages only) ============ */
-  const trendingLocations = [...new Set(trips.map(t => cap(t.location)))].filter(Boolean).slice(0,6);
-  const trendingTypes = [...new Set(trips.map(t => cap(t.category)))].filter(Boolean).slice(0,6);
+  /* trending top 6 each */
+  const trendingStay = stayTypes.slice(0,6);
+  const trendingLocations = locations.slice(0,6);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -53,7 +42,6 @@ export default function AdvancedSearchBar({ trips = [], onSearch }) {
     mic.onresult = (e) => setQuery(e.results[0][0].transcript);
   };
 
-  /* close modal on outside click */
   useEffect(() => {
     const close = (e) => {
       if (panelRef.current && !panelRef.current.contains(e.target)) setOpen(false);
@@ -65,26 +53,26 @@ export default function AdvancedSearchBar({ trips = [], onSearch }) {
   return (
     <div className="relative w-full z-[200]">
 
-      {/* 🔍 Main Search Bar (Working version) */}
+      {/* TOP SEARCH BAR */}
       <form onSubmit={handleSubmit}
         className="w-full max-w-6xl mx-auto bg-white/70 backdrop-blur-xl rounded-full shadow-md flex items-center gap-3 px-5 py-3">
         
         <div className="flex items-center gap-2 flex-1 cursor-pointer"
           onClick={() => setOpen(true)}>
           <MapPin className="text-orange-500" size={18}/>
-          <input readOnly value={query} placeholder="Search Ooty, Poombarai, Manali..."
+          <input readOnly value={query} placeholder="Search Ooty, Kodaikanal, Stay Type..."
             className="bg-transparent outline-none text-sm w-full"/>
         </div>
 
         <Mic size={18} className="text-orange-600 cursor-pointer" onClick={voice}/>
 
-        <div className="flex items-center gap-2 flex-1 hidden md:flex">
+        <div className="hidden md:flex items-center gap-2 flex-1">
           <Calendar size={18} className="text-orange-500"/>
           <input type="date" value={date} onChange={(e)=>setDate(e.target.value)}
             className="bg-transparent outline-none text-sm w-full"/>
         </div>
 
-        <div className="flex items-center gap-2 flex-1 hidden md:flex">
+        <div className="hidden md:flex items-center gap-2 flex-1">
           <Users size={18} className="text-orange-500"/>
           <input type="number" min="1" value={people} onChange={(e)=>setPeople(e.target.value)}
             placeholder="People" className="bg-transparent outline-none text-sm w-full"/>
@@ -101,7 +89,8 @@ export default function AdvancedSearchBar({ trips = [], onSearch }) {
         </button>
       </form>
 
-      {/* ================= Modal Search Panel ================= */}
+
+      {/* ================= MODAL SEARCH PANEL ================= */}
       {open && (
         <div className="fixed inset-0 bg-black/30 flex justify-center items-start p-5 z-[500] overflow-y-auto">
           <div ref={panelRef}
@@ -112,38 +101,39 @@ export default function AdvancedSearchBar({ trips = [], onSearch }) {
               <X onClick={()=>setOpen(false)} size={22} className="cursor-pointer"/>
             </div>
 
+            {/* Search Field */}
             <div className="flex items-center bg-gray-100 rounded-full px-4 py-2 mb-4 gap-3">
               <MapPin className="text-orange-500"/>
               <input autoFocus value={query} onChange={(e)=>setQuery(e.target.value)}
-                placeholder="Search place or stay type..."
+                placeholder="Search location or stay type..."
                 className="bg-transparent outline-none text-sm w-full"/>
               <Mic size={18} className="text-orange-600 cursor-pointer" onClick={voice}/>
               {query && <X size={16} className="cursor-pointer" onClick={()=>setQuery("")}/>}
             </div>
 
-            {/* State → Places + Stay Types */}
-            {Object.keys(grouped).map(state => (
-              <div key={state} className="mb-6">
-                <p className="font-bold text-gray-700 text-[15px]">{state}</p>
+            {/* ========= STAY TYPE SECTION ========= */}
+            <h3 className="font-bold text-gray-800 mt-3 mb-1">Stay Types</h3>
+            <Row items={stayTypes} pick={(v)=>{setQuery(v);setOpen(false)}}/>
 
-                <p className="text-xs text-gray-500 mt-1">PLACES</p>
-                <Row items={[...grouped[state].places]} pick={(v)=>{setQuery(v);setOpen(false)}}/>
+            {/* ========= CATEGORY SECTION ========= */}
+            <h3 className="font-bold text-gray-800 mt-5 mb-1">Categories</h3>
+            <Row items={categories} pick={(v)=>{setQuery(v);setOpen(false)}}/>
 
-                <p className="text-xs text-gray-500 mt-2">STAY TYPES</p>
-                <Row items={[...grouped[state].types]} pick={(v)=>{setQuery(v);setOpen(false)}}/>
-              </div>
-            ))}
+            {/* ========= LOCATION SECTION ========= */}
+            <h3 className="font-bold text-gray-800 mt-5 mb-1">Locations</h3>
+            <Row items={locations} pick={(v)=>{setQuery(v);setOpen(false)}}/>
 
-            {trendingTypes.length>0 && (
+            {/* -------- Trending -------- */}
+            {trendingStay.length>0 && (
               <>
-                <p className="font-bold mt-4">Trending Searches</p>
-                <Row items={trendingTypes} pick={(v)=>{setQuery(v);setOpen(false)}}/>
+                <h3 className="font-bold mt-6 mb-1 text-orange-700">Trending Stays</h3>
+                <Row items={trendingStay} pick={(v)=>{setQuery(v);setOpen(false)}}/>
               </>
             )}
 
             {trendingLocations.length>0 && (
               <>
-                <p className="font-bold mt-4">Trending Locations</p>
+                <h3 className="font-bold mt-6 mb-1 text-orange-700">Trending Locations</h3>
                 <Row items={trendingLocations} pick={(v)=>{setQuery(v);setOpen(false)}}/>
               </>
             )}
