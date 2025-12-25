@@ -6,7 +6,6 @@ import AdvancedSearchBar from "../components/AdvancedSearchBar";
 import CategoriesBar from "../components/CategoriesBar";
 import TripCard from "../components/TripCard";
 import TripTabs from "../components/TripTabs";
-
 import HeroSlider from "../components/HeroSlider";
 import TestimonialsSlider from "../components/TestimonialsSlider";
 import ExploreMoreButton from "../components/ExploreMoreButton";
@@ -41,67 +40,80 @@ export default function Home() {
     loadTrips();
   }, []);
 
-  /* ================= Search ================= */
+  /* ================= Search Filter ================= */
   const handleSearch = ({ location, people }) => {
-    if (!location && !people) return setFilteredTrips(allTrips);
+    let result = [...allTrips];
 
-    let results = [...allTrips];
     if (location) {
       const q = location.toLowerCase();
-      results = results.filter((t) =>
+      result = result.filter(t =>
         `${t.title} ${t.location} ${t.region} ${t.category}`
           .toLowerCase()
           .includes(q)
       );
     }
+
     if (people) {
-      results = results.filter((t) =>
+      result = result.filter(t =>
         t.minPeople ? Number(people) >= t.minPeople : true
       );
-    }
-    setFilteredTrips(results);
-    setTimeout(() => {
-      document.getElementById("featured-trips")?.scrollIntoView({ behavior: "smooth" });
-    }, 100);
-  };
-
-  /* ================= CATEGORY FILTER (NEW) ================= */
-  const handleCategoryFilter = (cat) => {
-    let result = [...allTrips];
-
-    if (cat.key)
-      result = result.filter(p => p.category?.toLowerCase() === cat.key.toLowerCase());
-
-    if (cat.region)
-      result = result.filter(p => p.region?.toLowerCase() === cat.region.toLowerCase());
-
-    if (cat.type)
-      result = result.filter(p => p.tags?.includes(cat.type));
-
-    if (result.length === 0) {
-      alert(`🚧 No ${cat.name} trips available — Coming Soon!`);
-      return;
     }
 
     setFilteredTrips(result);
     document.getElementById("featured-trips")?.scrollIntoView({ behavior: "smooth" });
   };
 
-  /* ================= TAB FILTER (Week/Month) ================= */
+  /* ================= CATEGORY FILTER (Main Fix) ================= */
+  const handleCategoryFilter = (cat) => {
+    let result = [...allTrips];
+
+    // Filter by category
+    if (cat.category) {
+      result = result.filter(p =>
+        p.category?.toLowerCase() === cat.category.toLowerCase()
+      );
+    }
+
+    // Filter by region
+    if (cat.region) {
+      result = result.filter(p =>
+        p.region?.toLowerCase().includes(cat.region.toLowerCase())
+      );
+    }
+
+    // Filter by tags for Friends/Family
+    if (cat.type) {
+      result = result.filter(p =>
+        p.tags?.some(t => t.toLowerCase().includes(cat.type.toLowerCase()))
+      );
+    }
+
+    if (result.length === 0) {
+      alert(`🚧 No ${cat.name} Trips Available — Coming Soon`);
+      return;
+    }
+
+    setFilteredTrips(result);
+    document.getElementById("featured-trips")?.scrollIntoView({ behavior:"smooth" });
+  };
+
+  /* ================= Tab Filter (Week/Month) ================= */
   const handleTabSelect = (tab) => {
     if (tab === "all") return setFilteredTrips(allTrips);
 
     const today = new Date();
+
     if (tab === "week") {
       const start = new Date();
       const day = start.getDay() || 7;
       start.setDate(start.getDate() - day + 1);
-      start.setHours(0, 0, 0, 0);
+      start.setHours(0,0,0,0);
+
       const end = new Date(start);
       end.setDate(start.getDate() + 6);
-      end.setHours(23, 59, 59, 999);
+      end.setHours(23,59,59,999);
 
-      setFilteredTrips(allTrips.filter((t) => {
+      setFilteredTrips(allTrips.filter(t => {
         const d = new Date(t.startDate);
         return d >= start && d <= end;
       }));
@@ -110,34 +122,31 @@ export default function Home() {
     if (tab === "month") {
       const m = today.getMonth();
       const y = today.getFullYear();
-      setFilteredTrips(allTrips.filter((t) => {
+      setFilteredTrips(allTrips.filter(t => {
         const d = new Date(t.startDate);
         return d.getMonth() === m && d.getFullYear() === y;
       }));
     }
 
     setTimeout(() => {
-      document.getElementById("featured-trips")?.scrollIntoView({ behavior: "smooth" });
+      document.getElementById("featured-trips")?.scrollIntoView({ behavior:"smooth" });
     }, 100);
   };
 
   return (
     <div className="w-full overflow-x-hidden">
 
-      {/* ================= HERO ================= */}
+      {/* HERO SECTION */}
       <section className="relative w-full h-[75vh] md:h-[80vh] overflow-hidden">
         <HeroSlider />
-        <div className="absolute inset-0 bg-black/25" />
+        <div className="absolute inset-0 bg-black/25"></div>
 
-        <div className="absolute inset-0 flex flex-col justify-center items-center text-white text-center px-4">
+        <div className="absolute inset-0 flex flex-col justify-center items-center text-white text-center">
           <h1 className="text-4xl md:text-6xl font-bold">Camping in India</h1>
           <h2 className="text-2xl md:text-4xl font-bold mt-3">Made Easy & Safe</h2>
 
           <div className="mt-6"><RotatingBadge /></div>
-
-          <div className="absolute top-10 right-10 hidden md:block">
-            <RotatingReviewBadge />
-          </div>
+          <div className="absolute top-10 right-10 hidden md:block"><RotatingReviewBadge /></div>
         </div>
 
         <div className="absolute bottom-8 w-full px-4">
@@ -147,12 +156,12 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CATEGORY BAR WITH FILTERING */}
+      {/* CATEGORY BAR */}
       <CategoriesBar onCategorySelect={handleCategoryFilter} />
 
       <TripTabs onTabSelect={handleTabSelect} />
 
-      {/* ================= RESULTS ================= */}
+      {/* RESULTS */}
       <section id="featured-trips" className="max-w-7xl mx-auto px-4 py-12">
         <h2 className="text-2xl font-semibold mb-6">Featured Trips</h2>
 
@@ -161,7 +170,7 @@ export default function Home() {
         ) : (
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
             {filteredTrips.length > 0 ? (
-              filteredTrips.map((trip) => <TripCard key={trip._id} trip={trip} />)
+              filteredTrips.map(trip => <TripCard key={trip._id} trip={trip} />)
             ) : (
               <p className="text-gray-600">No trips found</p>
             )}
@@ -176,11 +185,7 @@ export default function Home() {
       <TestimonialsSlider />
 
       <StickyFilterBar onOpenFilter={() => setIsFilterOpen(true)} />
-      <FilterDrawer
-        isOpen={isFilterOpen}
-        onClose={() => setIsFilterOpen(false)}
-        onApply={() => setIsFilterOpen(false)}
-      />
+      <FilterDrawer isOpen={isFilterOpen} onClose={() => setIsFilterOpen(false)} onApply={() => setIsFilterOpen(false)} />
     </div>
   );
 }
