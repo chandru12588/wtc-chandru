@@ -1,10 +1,13 @@
 import React, { useRef } from "react";
 import {
   Mountain, Trees, CloudSun, Backpack, Building2, Umbrella, Castle,
-  Users, MapPinned, Filter, UsersRound, Timer, Tent
+  Users, Filter, UsersRound, Timer
 } from "lucide-react";
 
-// Must match EXACT values stored in DB (category or stayType or region)
+/* ================================
+   ONLY CATEGORY + REGION + TAGS
+   (NO STAY TYPE HERE AS REQUESTED)
+================================ */
 const categories = [
   // 🏞 Category Filters
   { name: "Forest", icon: Trees, filterType:"category", value:"Forest" },
@@ -15,32 +18,24 @@ const categories = [
   { name: "Desert", icon: CloudSun, filterType:"category", value:"Desert" },
   { name: "New Year Trip", icon: Timer, filterType:"category", value:"New Year Trip" },
 
-  // 📍 Region filters
+  // 📍 Region Filters
   { name: "Chennai", icon: Castle, filterType:"region", value:"Tamil Nadu" },
   { name: "Bangalore", icon: Building2, filterType:"region", value:"Karnataka" },
 
   // 👨‍👩‍👧 Trip Type (stored in tags)
   { name: "Family", icon: Users, filterType:"tags", value:"Family" },
   { name: "Friends", icon: UsersRound, filterType:"tags", value:"Friends" },
-
-  // 🏕 Stay Type filters (based on stayType field just added)
-  { name: "Tent Stay", icon: Tent, filterType:"stayType", value:"Tent / Camping Stay" },
-  { name: "A-Frame Stay", icon: Mountain, filterType:"stayType", value:"A-Frame Stay" },
-  { name: "Mud House", icon: CloudSun, filterType:"stayType", value:"Mud House Stay" },
-  { name: "Private Villa", icon: Building2, filterType:"stayType", value:"Private Villa" },
-  { name: "Bungalow", icon: Castle, filterType:"stayType", value:"Individual Bungalow" },
 ];
 
 export default function CategoriesBar({ onCategorySelect }) {
   const scrollRef = useRef(null);
 
-  const scrollLeft = () => scrollRef.current.scrollBy({ left:-300, behavior:"smooth" });
+  const scrollLeft  = () => scrollRef.current.scrollBy({ left:-300, behavior:"smooth" });
   const scrollRight = () => scrollRef.current.scrollBy({ left:300, behavior:"smooth" });
 
   const handleClick = (item) => {
-    // Send filter details to parent
     onCategorySelect({
-      type: item.filterType,  // "category" | "region" | "tags" | "stayType"
+      type: item.filterType,  // "category" | "region" | "tags"
       value: item.value
     });
   };
@@ -55,7 +50,7 @@ export default function CategoriesBar({ onCategorySelect }) {
 
         {categories.map((c,i)=>{
           const Icon = c.icon;
-          return(
+          return (
             <div key={i}
               onClick={()=>handleClick(c)}
               className="min-w-[120px] p-4 rounded-2xl bg-white/70 backdrop-blur-xl border 
@@ -68,7 +63,7 @@ export default function CategoriesBar({ onCategorySelect }) {
 
         {/* Future Filters Button */}
         <div onClick={()=>alert("🔍 Advanced Filters Coming Soon")}
-            className="min-w-[120px] text-center p-4 rounded-2xl bg-orange-100 hover:scale-105 cursor-pointer">
+          className="min-w-[120px] text-center p-4 rounded-2xl bg-orange-100 hover:scale-105 cursor-pointer">
           <Filter className="text-orange-600 mx-auto" size={26}/>
           <p className="text-xs mt-2 font-semibold">Filter</p>
         </div>
