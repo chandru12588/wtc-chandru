@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
   Menu,
@@ -24,22 +24,35 @@ export default function Navbar() {
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [avatarOpen, setAvatarOpen] = useState(false);
-  const [hostMenu, setHostMenu] = useState(false); // ⭐ NEW - prevents instant hide
+  const [hostMenu, setHostMenu] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [user, setUser] = useState(null);
 
-  /* Sync Login State */
+  const hostRef = useRef(null);
+
+  /** Sync user state */
   useEffect(() => {
     const saved = localStorage.getItem("wtc_user");
     setUser(saved ? JSON.parse(saved) : null);
     setAvatarOpen(false);
   }, [location.pathname]);
 
-  /* Scroll shrink effect */
+  /** Scroll shrink effect */
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  /** Close dropdown if clicked outside */
+  useEffect(() => {
+    const handler = (e) => {
+      if (hostRef.current && !hostRef.current.contains(e.target)) {
+        setHostMenu(false);
+      }
+    };
+    document.addEventListener("click", handler);
+    return () => document.removeEventListener("click", handler);
   }, []);
 
   const handleLogout = () => {
@@ -52,10 +65,10 @@ export default function Navbar() {
 
   return (
     <>
-      {/* ================= NAVBAR ================= */}
       <header
-        className={`fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-xl border-b
-        transition-all duration-300 ${scrolled ? "h-[56px] shadow-md" : "h-[72px]"}`}
+        className={`fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-xl border-b transition-all duration-300 ${
+          scrolled ? "h-[56px] shadow-md" : "h-[72px]"
+        }`}
       >
         <nav className="w-full h-full flex items-center px-4 md:px-8">
 
@@ -64,7 +77,7 @@ export default function Navbar() {
             <img src={logo3} alt="WrongTurn Club" className={`${scrolled ? "h-10" : "h-12"}`} />
           </Link>
 
-          {/* ================= DESKTOP ================= */}
+          {/* ================= Desktop Menu ================= */}
           <div className="ml-auto hidden md:flex items-center gap-6 text-sm font-medium">
             <NavLink to="/">Home</NavLink>
 
@@ -72,28 +85,28 @@ export default function Navbar() {
 
             <NavLink to="/trips">Trips</NavLink>
 
+            {/* Bookings */}
             {user && (
               <NavLink to="/my-bookings" className="text-emerald-700 font-semibold">
                 My Bookings
               </NavLink>
             )}
 
-            {/* ⭐ HOST MENU Desktop (Fixed dropdown) */}
-            <div
-              className="relative"
-              onMouseEnter={() => setHostMenu(true)}
-              onMouseLeave={() => setHostMenu(false)}
-            >
-              <button className="border px-4 py-1.5 rounded-full text-xs flex items-center gap-1">
-                Become a Host <ChevronDown size={14} />
+            {/* ⭐ Become Host Dropdown (Fixed) */}
+            <div ref={hostRef} className="relative">
+              <button
+                onClick={() => setHostMenu((prev) => !prev)}
+                className="border px-4 py-1.5 rounded-full text-xs flex items-center gap-1 hover:bg-gray-50"
+              >
+                Become a Host <ChevronDown size={14} className={`${hostMenu && "rotate-180"} duration-200`} />
               </button>
 
               {hostMenu && (
-                <div className="absolute right-0 mt-2 bg-white shadow-lg rounded-lg w-40">
-                  <Link to="/host/login" className="block px-4 py-3 hover:bg-gray-100">
+                <div className="absolute right-0 mt-2 bg-white shadow-lg rounded-lg w-44 overflow-hidden animate-fadeIn">
+                  <Link to="/host/login" onClick={() => setHostMenu(false)} className="block px-4 py-3 hover:bg-gray-100">
                     Host Login
                   </Link>
-                  <Link to="/host/register" className="block px-4 py-3 hover:bg-gray-100">
+                  <Link to="/host/register" onClick={() => setHostMenu(false)} className="block px-4 py-3 hover:bg-gray-100">
                     Host Register
                   </Link>
                 </div>
@@ -112,7 +125,7 @@ export default function Navbar() {
               </>
             )}
 
-            {/* Avatar menu */}
+            {/* Avatar Menu */}
             {user && (
               <div className="relative flex items-center gap-3">
                 <span className="text-sm font-medium text-gray-700">Hi {user.name || "Explorer"} 👋</span>
@@ -121,7 +134,9 @@ export default function Navbar() {
                   src={cammp1}
                   alt="User"
                   onClick={() => setAvatarOpen(!avatarOpen)}
-                  className={`cursor-pointer rounded-full ring-2 ring-orange-400 ${scrolled ? "h-9 w-9" : "h-11 w-11"}`}
+                  className={`cursor-pointer rounded-full ring-2 ring-orange-400 ${
+                    scrolled ? "h-9 w-9" : "h-11 w-11"
+                  }`}
                 />
 
                 {avatarOpen && (
@@ -138,14 +153,14 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* ================= Mobile menu btn ================= */}
+          {/* ================= Mobile Menu Btn ================= */}
           <button onClick={() => setMobileOpen(true)} className="ml-auto md:hidden">
             <Menu size={28} />
           </button>
         </nav>
       </header>
 
-      {/* ================= MOBILE DRAWER ================= */}
+      {/* ================= Mobile Drawer ================= */}
       {mobileOpen && (
         <div className="fixed inset-0 z-[999] bg-black/40 md:hidden">
           <div className="absolute right-0 top-0 h-full w-[78%] bg-white">
@@ -166,7 +181,6 @@ export default function Navbar() {
 
               <hr />
 
-              {/* ⭐ Added Host options in mobile view */}
               <NavLink to="/host/login" onClick={() => setMobileOpen(false)}>
                 <LogIn size={18} /> Host Login
               </NavLink>
