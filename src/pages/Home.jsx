@@ -15,7 +15,7 @@ import FilterDrawer from "../components/FilterDrawer";
 import PopularDestinations from "../components/PopularDestinations";
 import BlogSection from "../components/BlogSection";
 import RotatingReviewBadge from "../components/ReviewBadge";
-import RotatingBadge from "../components/RotatingBadge";   // <-- ADDED 🔥
+import RotatingBadge from "../components/RotatingBadge";
 
 const API = import.meta.env.VITE_API_URL;
 
@@ -30,10 +30,8 @@ export default function Home() {
     const loadTrips = async () => {
       try {
         const res = await axios.get(`${API}/api/packages`);
-        const trips = res.data || [];
-
-        setAllTrips(trips);
-        setFilteredTrips(trips);
+        setAllTrips(res.data || []);
+        setFilteredTrips(res.data || []);
       } catch (err) {
         console.error("Error loading trips:", err);
       } finally {
@@ -43,12 +41,9 @@ export default function Home() {
     loadTrips();
   }, []);
 
-  /* ================= Search Filter ================= */
+  /* ================= Search ================= */
   const handleSearch = ({ location, people }) => {
-    if (!location && !people) {
-      setFilteredTrips(allTrips);
-      return;
-    }
+    if (!location && !people) return setFilteredTrips(allTrips);
 
     let results = [...allTrips];
     if (location) {
@@ -59,54 +54,66 @@ export default function Home() {
           .includes(q)
       );
     }
-
     if (people) {
       results = results.filter((t) =>
         t.minPeople ? Number(people) >= t.minPeople : true
       );
     }
-
     setFilteredTrips(results);
-
     setTimeout(() => {
       document.getElementById("featured-trips")?.scrollIntoView({ behavior: "smooth" });
     }, 100);
   };
 
-  /* ================= Week / Month Filter ================= */
+  /* ================= CATEGORY FILTER (NEW) ================= */
+  const handleCategoryFilter = (cat) => {
+    let result = [...allTrips];
+
+    if (cat.key)
+      result = result.filter(p => p.category?.toLowerCase() === cat.key.toLowerCase());
+
+    if (cat.region)
+      result = result.filter(p => p.region?.toLowerCase() === cat.region.toLowerCase());
+
+    if (cat.type)
+      result = result.filter(p => p.tags?.includes(cat.type));
+
+    if (result.length === 0) {
+      alert(`🚧 No ${cat.name} trips available — Coming Soon!`);
+      return;
+    }
+
+    setFilteredTrips(result);
+    document.getElementById("featured-trips")?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  /* ================= TAB FILTER (Week/Month) ================= */
   const handleTabSelect = (tab) => {
     if (tab === "all") return setFilteredTrips(allTrips);
 
     const today = new Date();
-
     if (tab === "week") {
       const start = new Date();
       const day = start.getDay() || 7;
       start.setDate(start.getDate() - day + 1);
       start.setHours(0, 0, 0, 0);
-
       const end = new Date(start);
       end.setDate(start.getDate() + 6);
       end.setHours(23, 59, 59, 999);
 
-      setFilteredTrips(
-        allTrips.filter((t) => {
-          const d = new Date(t.startDate);
-          return d >= start && d <= end;
-        })
-      );
+      setFilteredTrips(allTrips.filter((t) => {
+        const d = new Date(t.startDate);
+        return d >= start && d <= end;
+      }));
     }
 
     if (tab === "month") {
       const m = today.getMonth();
       const y = today.getFullYear();
-
-      setFilteredTrips(
-        allTrips.filter((t) => {
-          const d = new Date(t.startDate);
-          return d.getMonth() === m && d.getFullYear() === y;
-        })
-      );
+      setFilteredTrips(allTrips.filter((t) => {
+        const d = new Date(t.startDate);
+        return d.getMonth() === m && d.getFullYear() === y;
+      }));
     }
 
     setTimeout(() => {
@@ -117,7 +124,7 @@ export default function Home() {
   return (
     <div className="w-full overflow-x-hidden">
 
-      {/* ================= HERO SECTION ================= */}
+      {/* ================= HERO ================= */}
       <section className="relative w-full h-[75vh] md:h-[80vh] overflow-hidden">
         <HeroSlider />
         <div className="absolute inset-0 bg-black/25" />
@@ -126,17 +133,13 @@ export default function Home() {
           <h1 className="text-4xl md:text-6xl font-bold">Camping in India</h1>
           <h2 className="text-2xl md:text-4xl font-bold mt-3">Made Easy & Safe</h2>
 
-          {/* 🔥 Rotating Badge Added */}
-          <div className="mt-6">
-            <RotatingBadge />
-          </div>
+          <div className="mt-6"><RotatingBadge /></div>
 
           <div className="absolute top-10 right-10 hidden md:block">
             <RotatingReviewBadge />
           </div>
         </div>
 
-        {/* Search Bar */}
         <div className="absolute bottom-8 w-full px-4">
           <div className="max-w-6xl mx-auto">
             <AdvancedSearchBar trips={allTrips} onSearch={handleSearch} />
@@ -144,7 +147,9 @@ export default function Home() {
         </div>
       </section>
 
-      <CategoriesBar />
+      {/* CATEGORY BAR WITH FILTERING */}
+      <CategoriesBar onCategorySelect={handleCategoryFilter} />
+
       <TripTabs onTabSelect={handleTabSelect} />
 
       {/* ================= RESULTS ================= */}
