@@ -23,7 +23,7 @@ const API = import.meta.env.VITE_API_URL;
 
 export default function Home() {
 
-  /* ================= STATES ================= */
+  /* ============ STATES ============ */
   const [allTrips, setAllTrips] = useState([]);
   const [filteredTrips, setFilteredTrips] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -31,10 +31,11 @@ export default function Home() {
   const [stayPopup, setStayPopup] = useState(false);
   const [cityPopup, setCityPopup] = useState(false);
   const [selectedStayType, setSelectedStayType] = useState("");
+
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
 
-  /* ================= LOAD TRIPS FROM DB ================= */
+  /* ============ Load Trips On Page Load ============ */
   useEffect(() => {
     (async () => {
       try {
@@ -43,41 +44,43 @@ export default function Home() {
         setFilteredTrips(res.data || []);
       } catch (e) {
         console.log("API ERROR:", e);
-      } finally {
-        setLoading(false);
-      }
+      } finally { setLoading(false); }
     })();
   }, []);
 
 
-  /* ================= SEARCH BAR ================= */
+  /* ============ SEARCH ============ */
   const handleSearch = ({ location }) => {
     let result = allTrips;
+
     if(location){
       const q = location.toLowerCase();
-      result = result.filter(t => `${t.title} ${t.location} ${t.region} ${t.category}`
-        .toLowerCase().includes(q)
+      result = result.filter(t =>
+        `${t.title} ${t.location} ${t.region} ${t.category}`
+          .toLowerCase()
+          .includes(q)
       );
     }
+
     setFilteredTrips(result);
+    scrollToTrips();
   };
 
 
-  /* ================= CATEGORY BAR FILTER ================= */
+  /* ============ CATEGORY BAR FILTER ============ */
   const handleCategoryFilter = (filter) => {
 
-    // 🔥 Trigger Stay Popup
-    if (filter.type === "stayMenu") return setStayPopup(true);
+    if(filter.type === "stayMenu") return setStayPopup(true); // open Stay Popup
 
     let result = [...allTrips];
 
-    if (filter.type === "category")
+    if(filter.type === "category")
       result = result.filter(p => p.category?.toLowerCase() === filter.value.toLowerCase());
 
-    if (filter.type === "region")
+    if(filter.type === "region")
       result = result.filter(p => p.region?.toLowerCase().includes(filter.value.toLowerCase()));
 
-    if (filter.type === "tags")
+    if(filter.type === "tags")
       result = result.filter(p => p.tags?.map(t=>t.toLowerCase()).includes(filter.value.toLowerCase()));
 
     if(result.length === 0) return alert("No trips found");
@@ -87,24 +90,23 @@ export default function Home() {
   };
 
 
-  /* ================= STAY TYPE WORKFLOW ================= */
+  /* ============ STAY TYPE WORKFLOW ============ */
 
-  // STEP 1: Choose Stay Type → open city modal
+  // step 1 → after selecting staytype, open city popup
   function applyStayType(type) {
     setSelectedStayType(type);
     setStayPopup(false);
     setTimeout(()=> setCityPopup(true), 200);
   }
 
-  // STEP 2: Filter based on selected city + stay type
+  // step 2 → filter by selected city + stayType
   function filterByCity(city) {
     let result = allTrips.filter(p =>
       p.stayType?.toLowerCase() === selectedStayType.toLowerCase() &&
       p.location?.toLowerCase() === city.toLowerCase()
     );
 
-    if(result.length === 0)
-      alert(`No ${selectedStayType} available in ${city}`);
+    if(result.length === 0) alert(`No ${selectedStayType} available in ${city}`);
 
     setFilteredTrips(result);
     setCityPopup(false);
@@ -112,7 +114,7 @@ export default function Home() {
   }
 
 
-  /* SCROLL TO RESULT */
+  /* ============ Scroll to Results ============ */
   const scrollToTrips = () => {
     document.getElementById("featured-trips")?.scrollIntoView({behavior:"smooth"});
   };
@@ -121,7 +123,7 @@ export default function Home() {
   return (
     <div className="w-full overflow-x-hidden">
 
-      {/* ================= HERO ================= */}
+      {/* ===== HERO SECTION ===== */}
       <section className="relative w-full h-[75vh] md:h-[80vh] overflow-hidden">
         <HeroSlider />
         <div className="absolute inset-0 bg-black/30" />
@@ -142,16 +144,17 @@ export default function Home() {
       </section>
 
 
-      {/* ================= FILTER BARS ================= */}
+      {/* ===== FILTER BARS ===== */}
       <CategoriesBar onCategorySelect={handleCategoryFilter}/>
       <TripTabs onTabSelect={()=> setFilteredTrips(allTrips)}/>
 
-      {/* ================= POPUPS ================= */}
-      {stayPopup   && <StayTypePopup onSelect={applyStayType} onClose={()=>setStayPopup(false)}/>}
-      {cityPopup   && <CitySelectPopup stayType={selectedStayType} trips={allTrips} onSelect={filterByCity} onClose={()=>setCityPopup(false)}/>}
+
+      {/* ===== POPUPS ===== */}
+      {stayPopup && <StayTypePopup onSelect={applyStayType} onClose={()=>setStayPopup(false)}/>}
+      {cityPopup && <CitySelectPopup stayType={selectedStayType} trips={allTrips} onSelect={filterByCity} onClose={()=>setCityPopup(false)}/>}
 
 
-      {/* ================= RESULTS ================= */}
+      {/* ===== TRIP RESULTS ===== */}
       <section id="featured-trips" className="max-w-7xl mx-auto px-4 py-12">
         <h2 className="text-2xl font-semibold mb-6">Featured Trips</h2>
 
