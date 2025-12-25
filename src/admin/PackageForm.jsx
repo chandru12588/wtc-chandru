@@ -2,6 +2,23 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { api } from "../api.js";
 
+/* ================= CATEGORIES LIST ================= */
+const CATEGORY_OPTIONS = [
+  "Backpacker",
+  "Forest",
+  "Family",
+  "Friends",
+  "Solo Traveller",
+  "Bike Traveller",
+  "New Year Trip",
+  "Glamping",
+  "Mountain",
+  "Beach",
+  "Desert",
+  "Bangalore",
+  "Chennai",
+];
+
 export default function PackageForm() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -12,10 +29,9 @@ export default function PackageForm() {
     price: "",
     location: "",
     region: "",
-    category: "",
+    category: "",       // Now dropdown
+    tags: [],           // New (multiple future filters)
     days: "",
-
-    // ⭐ NEW — DATES
     startDate: "",
     endDate: "",
   });
@@ -26,9 +42,7 @@ export default function PackageForm() {
 
   const isEdit = Boolean(id);
 
-  /* =============================
-      LOAD PACKAGE (EDIT MODE)
-  ============================== */
+  /* ============= LOAD PACKAGE WHEN EDIT ============= */
   useEffect(() => {
     if (!isEdit) return;
 
@@ -44,15 +58,10 @@ export default function PackageForm() {
           location: pkg.location || "",
           region: pkg.region || "",
           category: pkg.category || "",
+          tags: pkg.tags || [],
           days: pkg.days || "",
-
-          // ⭐ NEW — LOAD DATES
-          startDate: pkg.startDate
-            ? pkg.startDate.split("T")[0]
-            : "",
-          endDate: pkg.endDate
-            ? pkg.endDate.split("T")[0]
-            : "",
+          startDate: pkg.startDate ? pkg.startDate.split("T")[0] : "",
+          endDate: pkg.endDate ? pkg.endDate.split("T")[0] : "",
         });
 
         setOldImages(pkg.images || []);
@@ -60,41 +69,32 @@ export default function PackageForm() {
         console.log("LOAD ERROR:", err);
       }
     };
-
     load();
   }, [id]);
 
-  const update = (key, value) =>
-    setForm((prev) => ({ ...prev, [key]: value }));
+  const update = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
 
-  /* =============================
-      IMAGE UPLOAD HANDLING
-  ============================== */
+  /* ================= IMAGE HANDLERS ================= */
   const handleImageSelect = (e) => {
     const files = [...e.target.files];
     setNewImages(files);
-    setPreviewImages(files.map((file) => URL.createObjectURL(file)));
+    setPreviewImages(files.map((f) => URL.createObjectURL(f)));
   };
 
-  const removeOldImage = (url) =>
-    setOldImages((prev) => prev.filter((img) => img !== url));
-
-  const removeNewImage = (index) => {
-    setNewImages((prev) => prev.filter((_, i) => i !== index));
-    setPreviewImages((prev) => prev.filter((_, i) => i !== index));
+  const removeNewImage = (i) => {
+    setNewImages((p) => p.filter((_, x) => x !== i));
+    setPreviewImages((p) => p.filter((_, x) => x !== i));
   };
 
-  /* =============================
-          SAVE PACKAGE
-  ============================== */
+  /* ================= SAVE ================= */
   const save = async (e) => {
     e.preventDefault();
 
     try {
       const fd = new FormData();
-
       Object.keys(form).forEach((key) => {
-        fd.append(key, form[key]);
+        if (key === "tags") fd.append("tags", JSON.stringify(form.tags));
+        else fd.append(key, form[key]);
       });
 
       newImages.forEach((file) => fd.append("images", file));
@@ -102,16 +102,16 @@ export default function PackageForm() {
       if (isEdit) {
         fd.append("oldImages", JSON.stringify(oldImages));
         await api.put(`/api/admin/packages/${id}`, fd);
-        alert("Package updated successfully");
+        alert("Package Updated ✔");
       } else {
-        await api.post("/api/admin/packages", fd);
-        alert("Package created successfully");
+        await api.post(`/api/admin/packages`, fd);
+        alert("Package Created 🎉");
       }
 
       navigate("/admin/packages");
     } catch (err) {
-      console.log("SAVE ERROR:", err.response?.data || err);
-      alert("Save Failed");
+      console.log("SAVE ERR:", err);
+      alert("Something went wrong");
     }
   };
 
@@ -121,97 +121,78 @@ export default function PackageForm() {
         {isEdit ? "Edit Package" : "Add New Package"}
       </h2>
 
-      {/* FORM */}
       <form onSubmit={save} className="space-y-4">
-        <input
-          className="border p-3 rounded w-full"
+
+        <input className="border p-3 rounded w-full"
           placeholder="Package Title"
           value={form.title}
           onChange={(e) => update("title", e.target.value)}
-          required
-        />
+          required/>
 
-        <textarea
-          className="border p-3 rounded w-full"
-          rows={4}
+        <textarea className="border p-3 rounded w-full" rows={4}
           placeholder="Description"
           value={form.description}
-          onChange={(e) => update("description", e.target.value)}
-        />
+          onChange={(e) => update("description", e.target.value)}/>
 
-        <input
-          type="number"
-          className="border p-3 rounded w-full"
+        <input className="border p-3 rounded w-full" type="number"
           placeholder="Price"
           value={form.price}
-          onChange={(e) => update("price", e.target.value)}
-        />
+          onChange={(e) => update("price", e.target.value)}/>
 
-        <input
-          className="border p-3 rounded w-full"
-          placeholder="Location (Ooty)"
+        <input className="border p-3 rounded w-full"
+          placeholder="Location (Ooty...)"
           value={form.location}
           onChange={(e) => update("location", e.target.value)}
-          required
-        />
+          required/>
 
-        <input
-          className="border p-3 rounded w-full"
+        <input className="border p-3 rounded w-full"
           placeholder="Region (Tamil Nadu)"
           value={form.region}
           onChange={(e) => update("region", e.target.value)}
-          required
-        />
+          required/>
 
-        <input
+        {/* ⭐ CATEGORY DROPDOWN */}
+        <select
           className="border p-3 rounded w-full"
-          placeholder="Category"
           value={form.category}
           onChange={(e) => update("category", e.target.value)}
+          required>
+          <option value="">Select Category</option>
+          {CATEGORY_OPTIONS.map((o) => (
+            <option key={o} value={o}>{o}</option>
+          ))}
+        </select>
+
+        {/* Optional Tags */}
+        <input className="border p-3 rounded w-full"
+          placeholder="Tags (comma separated, optional)"
+          value={form.tags.join(", ")}
+          onChange={(e) => update("tags", e.target.value.split(",").map(v=>v.trim()))}
         />
 
-        <input
-          className="border p-3 rounded w-full"
-          placeholder="Days (e.g., 3D/2N)"
+        <input className="border p-3 rounded w-full"
+          placeholder="Days (e.g. 3D/2N)"
           value={form.days}
-          onChange={(e) => update("days", e.target.value)}
-        />
+          onChange={(e) => update("days", e.target.value)}/>
 
-        {/* ⭐ NEW — DATE FIELDS */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="text-sm font-medium block mb-1">
-              Start Date *
-            </label>
-            <input
-              type="date"
-              className="border p-3 rounded w-full"
-              value={form.startDate}
-              onChange={(e) => update("startDate", e.target.value)}
-              required
-            />
-          </div>
-
-          <div>
-            <label className="text-sm font-medium block mb-1">
-              End Date (optional)
-            </label>
-            <input
-              type="date"
-              className="border p-3 rounded w-full"
-              value={form.endDate}
-              onChange={(e) => update("endDate", e.target.value)}
-            />
-          </div>
+        {/* DATES */}
+        <div className="grid grid-cols-2 gap-4">
+          <input type="date" className="border p-3 rounded"
+            value={form.startDate}
+            onChange={(e) => update("startDate", e.target.value)}
+            required/>
+          <input type="date" className="border p-3 rounded"
+            value={form.endDate}
+            onChange={(e) => update("endDate", e.target.value)}/>
         </div>
 
-        {/* IMAGE INPUT */}
-        <div className="border p-4 rounded-lg">
-          <p className="font-medium mb-2">Upload Images</p>
-          <input type="file" multiple onChange={handleImageSelect} />
+        {/* IMAGE UPLOAD */}
+        <div className="border p-4 rounded">
+          <p className="font-medium">Upload Images</p>
+          <input type="file" multiple onChange={handleImageSelect}/>
         </div>
 
-        <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg text-lg">
+        <button className="bg-indigo-600 text-white px-6 py-3 rounded text-lg">
           {isEdit ? "Update Package" : "Create Package"}
         </button>
       </form>
