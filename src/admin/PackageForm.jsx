@@ -19,6 +19,43 @@ const CATEGORY_OPTIONS = [
   "Chennai",
 ];
 
+/* ================= STAY TYPE LIST ================= */
+const STAY_TYPES = [
+  // Backpacker / Budget
+  "Backpacker Hostel",
+  "Dormitory / Bed Sharing",
+  "Budget Stay",
+
+  // Unique Stays
+  "A-Frame Stay",
+  "Tent / Camping Stay",
+  "Pyramid Stay",
+  "Mud House Stay",
+  "Glamping Stay",
+  "Igloo Stay",
+  "Tree House",
+  "Glass House / Dome Stay",
+  "Cabin / Wooden Cottage",
+
+  // Private Properties
+  "Private Villa",
+  "Individual Bungalow",
+  "Farm Stay",
+  "Homestay",
+
+  // Hotels / Resorts
+  "Hotel / Rooms",
+  "Luxury Hotel",
+  "Resort Stay",
+  "Luxury Resort",
+
+  // Nature Based
+  "Beach Side Stay",
+  "Forest Stay",
+  "Hill View Stay",
+  "Lake View Stay",
+];
+
 export default function PackageForm() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -29,8 +66,9 @@ export default function PackageForm() {
     price: "",
     location: "",
     region: "",
-    category: "",       // Now dropdown
-    tags: [],           // New (multiple future filters)
+    category: "",
+    stayType: "",  // ⭐ newly added
+    tags: [],
     days: "",
     startDate: "",
     endDate: "",
@@ -58,6 +96,7 @@ export default function PackageForm() {
           location: pkg.location || "",
           region: pkg.region || "",
           category: pkg.category || "",
+          stayType: pkg.stayType || "",  // ⭐ load existing
           tags: pkg.tags || [],
           days: pkg.days || "",
           startDate: pkg.startDate ? pkg.startDate.split("T")[0] : "",
@@ -94,7 +133,7 @@ export default function PackageForm() {
       const fd = new FormData();
       Object.keys(form).forEach((key) => {
         if (key === "tags") fd.append("tags", JSON.stringify(form.tags));
-        else fd.append(key, form[key]);
+        else fd.append(key, form[key]); // ⭐ stayType auto included
       });
 
       newImages.forEach((file) => fd.append("images", file));
@@ -160,6 +199,18 @@ export default function PackageForm() {
           <option value="">Select Category</option>
           {CATEGORY_OPTIONS.map((o) => (
             <option key={o} value={o}>{o}</option>
+          ))}
+        </select>
+
+        {/* ⭐ STAY TYPE DROPDOWN */}
+        <select
+          className="border p-3 rounded w-full"
+          value={form.stayType}
+          onChange={(e) => update("stayType", e.target.value)}
+          required>
+          <option value="">Select Stay Type</option>
+          {STAY_TYPES.map((type) => (
+            <option key={type} value={type}>{type}</option>
           ))}
         </select>
 

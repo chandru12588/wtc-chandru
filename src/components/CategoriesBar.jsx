@@ -1,27 +1,34 @@
 import React, { useRef } from "react";
 import {
   Mountain, Trees, CloudSun, Backpack, Building2, Umbrella, Castle,
-  Users, MapPinned, Filter, UsersRound, Timer
+  Users, MapPinned, Filter, UsersRound, Timer, Tent
 } from "lucide-react";
 
-// Naming must match DB "category" field exactly (case-insensitive)
+// Must match EXACT values stored in DB (category or stayType or region)
 const categories = [
-  { name: "Forest", icon: Trees, category:"Forest" },
-  { name: "Glamping", icon: CloudSun, category:"Glamping" },
-  { name: "Mountain", icon: Mountain, category:"Mountain" },
-  { name: "Backpacker", icon: Backpack, category:"Backpacker" },
-  { name: "Beach", icon: Umbrella, category:"Beach" },
-  { name: "Desert", icon: CloudSun, category:"Desert" },
+  // 🏞 Category Filters
+  { name: "Forest", icon: Trees, filterType:"category", value:"Forest" },
+  { name: "Glamping", icon: CloudSun, filterType:"category", value:"Glamping" },
+  { name: "Mountain", icon: Mountain, filterType:"category", value:"Mountain" },
+  { name: "Backpacker", icon: Backpack, filterType:"category", value:"Backpacker" },
+  { name: "Beach", icon: Umbrella, filterType:"category", value:"Beach" },
+  { name: "Desert", icon: CloudSun, filterType:"category", value:"Desert" },
+  { name: "New Year Trip", icon: Timer, filterType:"category", value:"New Year Trip" },
 
-  // Region based filters
-  { name: "Chennai", icon: Castle, region:"Tamilnadu" },
-  { name: "Bangalore", icon: Building2, region:"Karnataka" },
+  // 📍 Region filters
+  { name: "Chennai", icon: Castle, filterType:"region", value:"Tamil Nadu" },
+  { name: "Bangalore", icon: Building2, filterType:"region", value:"Karnataka" },
 
-  // Type based filters (from tags)
-  { name: "Family", icon: Users, type:"family" },
-  { name: "Friends", icon: UsersRound, type:"friends" },
+  // 👨‍👩‍👧 Trip Type (stored in tags)
+  { name: "Family", icon: Users, filterType:"tags", value:"Family" },
+  { name: "Friends", icon: UsersRound, filterType:"tags", value:"Friends" },
 
-  { name: "New Year Trip", icon: Timer, category:"NewYear" },
+  // 🏕 Stay Type filters (based on stayType field just added)
+  { name: "Tent Stay", icon: Tent, filterType:"stayType", value:"Tent / Camping Stay" },
+  { name: "A-Frame Stay", icon: Mountain, filterType:"stayType", value:"A-Frame Stay" },
+  { name: "Mud House", icon: CloudSun, filterType:"stayType", value:"Mud House Stay" },
+  { name: "Private Villa", icon: Building2, filterType:"stayType", value:"Private Villa" },
+  { name: "Bungalow", icon: Castle, filterType:"stayType", value:"Individual Bungalow" },
 ];
 
 export default function CategoriesBar({ onCategorySelect }) {
@@ -30,15 +37,19 @@ export default function CategoriesBar({ onCategorySelect }) {
   const scrollLeft = () => scrollRef.current.scrollBy({ left:-300, behavior:"smooth" });
   const scrollRight = () => scrollRef.current.scrollBy({ left:300, behavior:"smooth" });
 
-  const handleClick = (cat) => onCategorySelect(cat);
+  const handleClick = (item) => {
+    // Send filter details to parent
+    onCategorySelect({
+      type: item.filterType,  // "category" | "region" | "tags" | "stayType"
+      value: item.value
+    });
+  };
 
   return (
     <div className="relative mt-8 py-6 bg-white/40 backdrop-blur-xl rounded-3xl shadow-lg">
 
       <button onClick={scrollLeft}
-        className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/70 p-2 rounded-full shadow hover:scale-110">
-        ‹
-      </button>
+        className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/70 p-2 rounded-full shadow hover:scale-110">‹</button>
 
       <div ref={scrollRef} className="flex gap-4 px-10 overflow-x-auto scrollbar-hide">
 
@@ -55,8 +66,9 @@ export default function CategoriesBar({ onCategorySelect }) {
           );
         })}
 
+        {/* Future Filters Button */}
         <div onClick={()=>alert("🔍 Advanced Filters Coming Soon")}
-            className="min-w-[120px] text-center p-4 rounded-2xl bg-orange-100 hover:scale-105">
+            className="min-w-[120px] text-center p-4 rounded-2xl bg-orange-100 hover:scale-105 cursor-pointer">
           <Filter className="text-orange-600 mx-auto" size={26}/>
           <p className="text-xs mt-2 font-semibold">Filter</p>
         </div>
@@ -64,9 +76,7 @@ export default function CategoriesBar({ onCategorySelect }) {
       </div>
 
       <button onClick={scrollRight}
-        className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/70 p-2 rounded-full shadow hover:scale-110">
-        ›
-      </button>
+        className="absolute right-3 top-1/2 -translate-y-1/2 bg-white/70 p-2 rounded-full shadow hover:scale-110">›</button>
     </div>
   );
 }

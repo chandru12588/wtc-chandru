@@ -63,38 +63,47 @@ export default function Home() {
     document.getElementById("featured-trips")?.scrollIntoView({ behavior: "smooth" });
   };
 
-  /* ================= CATEGORY FILTER (Main Fix) ================= */
-  const handleCategoryFilter = (cat) => {
+  /* ================= CATEGORY / REGION / TAGS / STAYTYPE FILTER ================= */
+  const handleCategoryFilter = (filter) => {
     let result = [...allTrips];
 
-    // Filter by category
-    if (cat.category) {
+    // Category
+    if (filter.type === "category") {
       result = result.filter(p =>
-        p.category?.toLowerCase() === cat.category.toLowerCase()
+        p.category?.toLowerCase() === filter.value.toLowerCase()
       );
     }
 
-    // Filter by region
-    if (cat.region) {
+    // Region
+    if (filter.type === "region") {
       result = result.filter(p =>
-        p.region?.toLowerCase().includes(cat.region.toLowerCase())
+        p.region?.toLowerCase().includes(filter.value.toLowerCase())
       );
     }
 
-    // Filter by tags for Friends/Family
-    if (cat.type) {
+    // Tags (Friends/Family etc.)
+    if (filter.type === "tags") {
       result = result.filter(p =>
-        p.tags?.some(t => t.toLowerCase().includes(cat.type.toLowerCase()))
+        p.tags?.some(t => t.toLowerCase().includes(filter.value.toLowerCase()))
+      );
+    }
+
+    // Stay Type
+    if (filter.type === "stayType") {
+      result = result.filter(p =>
+        p.stayType?.toLowerCase() === filter.value.toLowerCase()
       );
     }
 
     if (result.length === 0) {
-      alert(`🚧 No ${cat.name} Trips Available — Coming Soon`);
+      alert(`🚧 No ${filter.value} trips available yet`);
       return;
     }
 
     setFilteredTrips(result);
-    document.getElementById("featured-trips")?.scrollIntoView({ behavior:"smooth" });
+    setTimeout(() => {
+      document.getElementById("featured-trips")?.scrollIntoView({ behavior: "smooth" });
+    }, 150);
   };
 
   /* ================= Tab Filter (Week/Month) ================= */
