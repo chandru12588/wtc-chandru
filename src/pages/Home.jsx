@@ -22,45 +22,51 @@ import CitySelectPopup from "../components/CitySelectPopup";
 const API = import.meta.env.VITE_API_URL;
 
 export default function Home() {
+
+  /* ================= STATES ================= */
   const [allTrips, setAllTrips] = useState([]);
   const [filteredTrips, setFilteredTrips] = useState([]);
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [stayPopup, setStayPopup] = useState(false);
-  const [cityPopup, setCityPopup] = useState(false);
-
-  const [selectedStayType, setSelectedStayType] = useState("");
   const [loading, setLoading] = useState(true);
 
+  const [stayPopup, setStayPopup] = useState(false);
+  const [cityPopup, setCityPopup] = useState(false);
+  const [selectedStayType, setSelectedStayType] = useState("");
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+
+
+  /* ================= LOAD TRIPS FROM DB ================= */
   useEffect(() => {
-    const loadTrips = async () => {
+    (async () => {
       try {
         const res = await axios.get(`${API}/api/packages`);
         setAllTrips(res.data || []);
         setFilteredTrips(res.data || []);
-      } catch (err) {
-        console.error("Error loading trips:", err);
+      } catch (e) {
+        console.log("API ERROR:", e);
       } finally {
         setLoading(false);
       }
-    };
-    loadTrips();
+    })();
   }, []);
 
+
+  /* ================= SEARCH BAR ================= */
   const handleSearch = ({ location }) => {
-    let result = [...allTrips];
-    if (location) {
+    let result = allTrips;
+    if(location){
       const q = location.toLowerCase();
-      result = result.filter(t =>
-        `${t.title} ${t.location} ${t.region} ${t.category}`
-          .toLowerCase()
-          .includes(q)
+      result = result.filter(t => `${t.title} ${t.location} ${t.region} ${t.category}`
+        .toLowerCase().includes(q)
       );
     }
     setFilteredTrips(result);
   };
 
-  /* ================= MAIN FILTER LOGIC ================= */
+
+  /* ================= CATEGORY BAR FILTER ================= */
   const handleCategoryFilter = (filter) => {
+
+    // 🔥 Trigger Stay Popup
     if (filter.type === "stayMenu") return setStayPopup(true);
 
     let result = [...allTrips];
@@ -74,79 +80,100 @@ export default function Home() {
     if (filter.type === "tags")
       result = result.filter(p => p.tags?.map(t=>t.toLowerCase()).includes(filter.value.toLowerCase()));
 
-    if (filter.type === "stayType")
-      result = result.filter(p => p.stayType?.toLowerCase() === filter.value.toLowerCase());
-
-    if (result.length === 0) return alert(`No trips found`);
+    if(result.length === 0) return alert("No trips found");
 
     setFilteredTrips(result);
+    scrollToTrips();
   };
 
+
+  /* ================= STAY TYPE WORKFLOW ================= */
+
+  // STEP 1: Choose Stay Type → open city modal
   function applyStayType(type) {
     setSelectedStayType(type);
     setStayPopup(false);
-    setCityPopup(true);
+    setTimeout(()=> setCityPopup(true), 200);
   }
 
+  // STEP 2: Filter based on selected city + stay type
   function filterByCity(city) {
     let result = allTrips.filter(p =>
       p.stayType?.toLowerCase() === selectedStayType.toLowerCase() &&
       p.location?.toLowerCase() === city.toLowerCase()
     );
 
-    if (result.length === 0) alert(`No stays in ${city} for ${selectedStayType}`);
+    if(result.length === 0)
+      alert(`No ${selectedStayType} available in ${city}`);
 
     setFilteredTrips(result);
     setCityPopup(false);
-    document.getElementById("featured-trips")?.scrollIntoView({ behavior:"smooth" });
+    scrollToTrips();
   }
+
+
+  /* SCROLL TO RESULT */
+  const scrollToTrips = () => {
+    document.getElementById("featured-trips")?.scrollIntoView({behavior:"smooth"});
+  };
+
 
   return (
     <div className="w-full overflow-x-hidden">
 
+      {/* ================= HERO ================= */}
       <section className="relative w-full h-[75vh] md:h-[80vh] overflow-hidden">
         <HeroSlider />
-        <div className="absolute inset-0 bg-black/25"></div>
+        <div className="absolute inset-0 bg-black/30" />
+
         <div className="absolute inset-0 flex flex-col justify-center items-center text-white text-center">
           <h1 className="text-4xl md:text-6xl font-bold">Camping in India</h1>
           <h2 className="text-2xl md:text-4xl font-bold mt-3">Made Easy & Safe</h2>
 
-          <div className="mt-6"><RotatingBadge /></div>
-          <div className="absolute top-10 right-10 hidden md:block"><RotatingReviewBadge /></div>
+          <div className="mt-6"><RotatingBadge/></div>
+          <div className="absolute top-10 right-10 hidden md:block"><RotatingReviewBadge/></div>
         </div>
 
         <div className="absolute bottom-8 w-full px-4">
           <div className="max-w-6xl mx-auto">
-            <AdvancedSearchBar trips={allTrips} onSearch={handleSearch} />
+            <AdvancedSearchBar trips={allTrips} onSearch={handleSearch}/>
           </div>
         </div>
       </section>
 
-      <CategoriesBar onCategorySelect={handleCategoryFilter} />
-      <TripTabs onTabSelect={(tab)=>setFilteredTrips(allTrips)} />
 
-      {/* Popups */}
-      {stayPopup && <StayTypePopup onSelect={applyStayType} onClose={()=>setStayPopup(false)}/>}
-      {cityPopup && <CitySelectPopup stayType={selectedStayType} trips={allTrips} onSelect={filterByCity} onClose={()=>setCityPopup(false)}/>}
+      {/* ================= FILTER BARS ================= */}
+      <CategoriesBar onCategorySelect={handleCategoryFilter}/>
+      <TripTabs onTabSelect={()=> setFilteredTrips(allTrips)}/>
 
+      {/* ================= POPUPS ================= */}
+      {stayPopup   && <StayTypePopup onSelect={applyStayType} onClose={()=>setStayPopup(false)}/>}
+      {cityPopup   && <CitySelectPopup stayType={selectedStayType} trips={allTrips} onSelect={filterByCity} onClose={()=>setCityPopup(false)}/>}
+
+
+      {/* ================= RESULTS ================= */}
       <section id="featured-trips" className="max-w-7xl mx-auto px-4 py-12">
         <h2 className="text-2xl font-semibold mb-6">Featured Trips</h2>
 
         {loading ? <p>Loading...</p> :
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
             {filteredTrips.length > 0 ?
-              filteredTrips.map(trip => <TripCard key={trip._id} trip={trip}/>) :
-              <p>No trips found</p>}
+              filteredTrips.map(t => <TripCard key={t._id} trip={t}/>) :
+              <p>No trip found</p>
+            }
           </div>
         }
-        <ExploreMoreButton />
+
+        <ExploreMoreButton/>
       </section>
 
-      <PopularDestinations />
-      <BlogSection />
-      <TestimonialsSlider />
-      <StickyFilterBar onOpenFilter={()=>setIsFilterOpen(true)} />
-      <FilterDrawer isOpen={isFilterOpen} onClose={()=>setIsFilterOpen(false)} />
+
+      <PopularDestinations/>
+      <BlogSection/>
+      <TestimonialsSlider/>
+
+      <StickyFilterBar onOpenFilter={()=>setIsFilterOpen(true)}/>
+      <FilterDrawer isOpen={isFilterOpen} onClose={()=>setIsFilterOpen(false)}/>
     </div>
   );
 }
