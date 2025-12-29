@@ -34,7 +34,7 @@ export default function Home() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
 
-  /* ============== FETCH ALL PACKAGES ============== */
+  /* ============== LOAD ALL PACKAGES ============== */
   useEffect(() => {
     (async () => {
       try {
@@ -47,7 +47,7 @@ export default function Home() {
   }, []);
 
 
-  /* ============== SEARCH (StayType + City + Title) ============== */
+  /* ============== SEARCH BAR FILTER ============== */
   const handleSearch = ({ location }) => {
     if (!location) {
       setFilteredTrips(allTrips);
@@ -70,7 +70,7 @@ export default function Home() {
   };
 
 
-  /* ============== CATEGORY FILTERS ============== */
+  /* ============== CATEGORY & NEW HOST STAY TYPE FILTER ============== */
   const handleCategoryFilter = (filter) => {
     if (filter.type === "stayMenu") return setStayPopup(true);
 
@@ -83,16 +83,22 @@ export default function Home() {
       result = result.filter(p => p.region?.toLowerCase().includes(filter.value.toLowerCase()));
 
     if (filter.type === "tags")
-      result = result.filter(p => p.tags?.map(t => t.toLowerCase()).includes(filter.value.toLowerCase()));
+      result = result.filter(p =>
+        p.tags?.map(t => t.toLowerCase()).includes(filter.value.toLowerCase())
+      );
 
-    if (result.length === 0) return alert("No trips found");
+    // ⭐ NEW — direct Stay Type selection (Treehouse, Bamboo etc.)
+    if (filter.type === "stayType")
+      result = result.filter(p => p.stayType?.toLowerCase() === filter.value.toLowerCase());
+
+    if (result.length === 0) return alert("No stays found");
 
     setFilteredTrips(result);
     scrollToTrips();
   };
 
 
-  /* ============== STAY TYPE -> CITY FLOW ============== */
+  /* ============== STAY TYPE → CITY POPUP FLOW ============== */
   function applyStayType(type) {
     setSelectedStayType(type);
     setStayPopup(false);
@@ -113,18 +119,14 @@ export default function Home() {
   }
 
 
-  /* ================== THIS WEEK / THIS MONTH FILTER ================== */
+  /* ============== THIS WEEK / THIS MONTH FILTER ============== */
   const handleTripTab = (type) => {
-
     if (type === "all") {
       setFilteredTrips(allTrips);
       return scrollToTrips();
     }
 
     const today = new Date();
-    const currentMonth = today.getMonth();
-    const currentYear = today.getFullYear();
-
     const result = allTrips.filter(pkg => {
       if (!pkg.startDate) return false;
 
@@ -132,13 +134,7 @@ export default function Home() {
       const diffDays = Math.ceil((tripDate - today) / (1000 * 60 * 60 * 24));
 
       if (type === "week") return diffDays >= 0 && diffDays <= 7;
-
-      if (type === "month") {
-        return (
-          tripDate.getMonth() === currentMonth &&
-          tripDate.getFullYear() === currentYear
-        );
-      }
+      if (type === "month") return diffDays >= 0 && diffDays <= 30;
 
       return false;
     });
@@ -152,11 +148,10 @@ export default function Home() {
     document.getElementById("featured-trips")?.scrollIntoView({ behavior: "smooth" });
 
 
-
   return (
     <div className="w-full overflow-x-hidden">
 
-      {/* HERO SECTION */}
+      {/* HERO */}
       <section className="relative w-full h-[75vh] md:h-[80vh] overflow-hidden">
         <HeroSlider />
         <div className="absolute inset-0 bg-black/30" />
@@ -171,19 +166,15 @@ export default function Home() {
 
         <div className="absolute bottom-8 w-full px-4">
           <div className="max-w-6xl mx-auto">
-            <AdvancedSearchBar trips={allTrips} onSearch={handleSearch} />
+            <AdvancedSearchBar trips={allTrips} onSearch={handleSearch}/>
           </div>
         </div>
       </section>
 
 
       <CategoriesBar onCategorySelect={handleCategoryFilter} />
-
-      {/* TripTabs now fully functional */}
       <TripTabs onTabSelect={handleTripTab} />
 
-
-      {/* POPUPS */}
       {stayPopup && <StayTypePopup onSelect={applyStayType} onClose={() => setStayPopup(false)} />}
       {cityPopup && <CitySelectPopup stayType={selectedStayType} trips={allTrips} onSelect={filterByCity} onClose={() => setCityPopup(false)} />}
 
@@ -195,20 +186,21 @@ export default function Home() {
         {loading ? <p>Loading...</p> :
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
             {filteredTrips.length > 0 ?
-              filteredTrips.map(t => <TripCard key={t._id} trip={t} />) :
+              filteredTrips.map(t => <TripCard key={t._id} trip={t}/>) :
               <p>No trip found</p>
             }
           </div>
         }
-        <ExploreMoreButton />
+        <ExploreMoreButton/>
       </section>
 
-      <PopularDestinations />
-      <BlogSection />
-      <TestimonialsSlider />
+      <PopularDestinations/>
+      <BlogSection/>
+      <TestimonialsSlider/>
 
       <StickyFilterBar onOpenFilter={() => setIsFilterOpen(true)} />
       <FilterDrawer isOpen={isFilterOpen} onClose={() => setIsFilterOpen(false)} />
+
     </div>
   );
 }
