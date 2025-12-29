@@ -11,7 +11,7 @@ export default function AddListing() {
     description: "",
     location: "",
     price: "",
-    stayType: "",       // ⭐ New
+    stayType: "",       // ⭐ Required for filtering
     category: "",
     startDate: "",
     endDate: "",
@@ -35,15 +35,14 @@ export default function AddListing() {
     e.preventDefault();
 
     if (!host?._id) return alert("Host not logged in. Please login again.");
-
-    if (!form.startDate || !form.endDate)
-      return alert("Please select start & end dates");
+    if (!form.startDate || !form.endDate) return alert("Select start & end dates");
 
     try {
       await axios.post(
         `${API}/api/host/listings`,
         {
           ...form,
+          stayType: form.stayType,   // ⭐ Make sure saved in DB
           images,
           hostId: host._id,
           isHostListing: true,
@@ -53,7 +52,7 @@ export default function AddListing() {
         }
       );
 
-      alert("Listing submitted for approval!");
+      alert("Listing submitted successfully! Awaiting approval");
       window.location.href = "/host/dashboard";
 
     } catch (err) {
@@ -77,8 +76,7 @@ export default function AddListing() {
         <input name="price" type="number" placeholder="Price per Night"
           className="border p-2 w-full" onChange={handleChange} required />
 
-
-        {/* ⭐ Stay Type Selection */}
+        {/* ⭐ Stay Type DropDown */}
         <select name="stayType" onChange={handleChange}
           className="border p-2 w-full" required>
           <option value="">Choose Stay Type</option>
@@ -92,7 +90,7 @@ export default function AddListing() {
           <option>Private Villa</option>
         </select>
 
-        {/* ⭐ Category */}
+        {/* Category */}
         <select name="category" className="border p-2 w-full"
           onChange={handleChange} required>
           <option value="">Select Category</option>
@@ -101,8 +99,7 @@ export default function AddListing() {
           <option>Experience</option>
         </select>
 
-
-        {/* Dates */}
+        {/* Date Range */}
         <div className="grid grid-cols-2 gap-3">
           <input type="date" name="startDate"
             className="border p-2 w-full" onChange={handleChange} required />
@@ -115,18 +112,18 @@ export default function AddListing() {
 
         <input type="file" multiple onChange={handleImage} />
 
-        {/* Preview */}
+        {/* Image Preview */}
         {images.length > 0 && (
           <div className="grid grid-cols-3 gap-2 mt-2">
             {images.map((img, i) => (
               <img key={i} src={img}
-                className="h-20 w-full object-cover rounded"/>
+                className="h-20 w-full object-cover rounded" />
             ))}
           </div>
         )}
 
         <button className="bg-emerald-600 hover:bg-emerald-700
-         text-white p-2 w-full rounded font-semibold">
+          text-white p-2 w-full rounded font-semibold">
           Submit Listing
         </button>
       </form>

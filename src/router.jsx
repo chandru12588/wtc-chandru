@@ -16,7 +16,7 @@ import Blog from "./pages/Blog.jsx";
 import UserBookings from "./pages/UserBookings.jsx";
 import SearchResults from "./pages/SearchResults.jsx";
 
-// ⭐ Host Listing Details (Public)
+// ⭐ Host Listing Public Page
 import HostListingDetails from "./pages/HostListingDetails.jsx";
 
 // Admin pages
@@ -26,9 +26,9 @@ import AdminPackages from "./admin/AdminPackages.jsx";
 import PackageForm from "./admin/PackageForm.jsx";
 import AdminBookings from "./admin/AdminBookings.jsx";
 import AdminHostListings from "./admin/AdminHostListings.jsx";
-import AdminHostBookings from "./admin/AdminHostBookings.jsx"; // ⭐ NEW
+import AdminHostBookings from "./admin/AdminHostBookings.jsx";
 
-// Layout + protection
+// Layout/Auth protection
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import AdminLayout from "./components/AdminLayout.jsx";
 
@@ -37,15 +37,14 @@ import HostRegister from "./host/HostRegister.jsx";
 import HostLogin from "./host/HostLogin.jsx";
 import HostDashboard from "./host/HostDashboard.jsx";
 import AddListing from "./host/AddListing.jsx";
+import EditListing from "./host/EditListing.jsx";   // ⭐ Added
 import HostRoute from "./host/HostRoute.jsx";
 
 export default function AppRouter() {
   return (
     <Routes>
 
-      {/* ============================
-           PUBLIC ROUTES
-      ============================= */}
+      {/* PUBLIC ROUTES */}
       <Route path="/" element={<Home />} />
       <Route path="/packages" element={<PackagesList />} />
       <Route path="/packages/:id" element={<PackageDetails />} />
@@ -54,68 +53,38 @@ export default function AppRouter() {
       <Route path="/trips/:id" element={<TripDetails />} />
       <Route path="/login" element={<Login />} />
       <Route path="/search" element={<SearchResults />} />
-
-      {/* ⭐ PUBLIC HOST LISTING PAGE */}
-      <Route path="/host-listing/:id" element={<HostListingDetails />} />
-
-      {/* USER BOOKINGS */}
       <Route path="/my-bookings" element={<UserBookings />} />
       <Route path="/faq" element={<FAQ />} />
       <Route path="/safety" element={<Safety />} />
       <Route path="/blog" element={<Blog />} />
 
-      {/* ============================
-           HOST MODULE ROUTES
-      ============================= */}
+      {/* ⭐ Host Listing Public Detail Page */}
+      <Route path="/host-listing/:id" element={<HostListingDetails />} />
+
+      {/* ================= HOST ROUTES ================= */}
       <Route path="/host/register" element={<HostRegister />} />
       <Route path="/host/login" element={<HostLogin />} />
 
-      <Route
-        path="/host/dashboard"
-        element={
-          <HostRoute>
-            <HostDashboard />
-          </HostRoute>
-        }
-      />
+      <Route path="/host/dashboard" element={<HostRoute><HostDashboard /></HostRoute>} />
+      <Route path="/host/add-listing" element={<HostRoute><AddListing /></HostRoute>} />
 
-      <Route
-        path="/host/add-listing"
-        element={
-          <HostRoute>
-            <AddListing />
-          </HostRoute>
-        }
-      />
+      {/* ⭐ NEW - Host Edit Listing (Now works!) */}
+      <Route path="/host/edit/:id" element={<HostRoute><EditListing /></HostRoute>} />
 
-      {/* ============================
-           ADMIN ROUTES
-      ============================= */}
+      {/* ================= ADMIN ROUTES ================= */}
       <Route path="/admin/login" element={<AdminLogin />} />
 
-      <Route
-        path="/admin"
-        element={
-          <ProtectedRoute>
-            <AdminLayout />
-          </ProtectedRoute>
-        }
-      >
+      <Route path="/admin" element={<ProtectedRoute><AdminLayout /></ProtectedRoute>}>
         <Route index element={<AdminDashboard />} />
-
         <Route path="packages" element={<AdminPackages />} />
         <Route path="packages/new" element={<PackageForm />} />
         <Route path="packages/:id/edit" element={<PackageForm />} />
         <Route path="bookings" element={<AdminBookings />} />
         <Route path="host-listings" element={<AdminHostListings />} />
-
-        {/* ⭐ ADMIN HOST BOOKINGS PAGE (NEW) */}
-        <Route path="host-bookings" element={<AdminHostBookings />} />
+        <Route path="host-bookings" element={<AdminHostBookings />} /> {/* NEW */}
       </Route>
 
-      {/* ============================
-           FALLBACK
-      ============================= */}
+      {/* FALLBACK */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

@@ -2,8 +2,8 @@ import React from "react";
 
 const stayTypes = [
   "Tent / Camping Stay","A-Frame Stay","Mud House Stay","Glamping Stay",
-  "Tree House","Glass House / Dome Stay","Cabin / Wooden Cottage",
-  "Private Villa","Individual Bungalow","Farm Stay","Homestay","Resort Stay"
+  "TreeHouse","Glass House / Dome Stay","Cabin / Wooden Cottage",
+  "Private Villa","Individual Bungalow","Farm Stay","Homestay","Resort Stay","Bamboo House"
 ];
 
 export default function StayTypePopup({ onSelect, onClose }) {
