@@ -42,8 +42,21 @@ export default function AdminLogin() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-indigo-50 to-blue-50 px-4">
-      <div className="w-full max-w-sm">
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-indigo-50 to-blue-50 px-4 relative">
+      {/* Background Image */}
+      <div
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        style={{
+          backgroundImage: `url('/src/assets/trip3.avif')`,
+          filter: 'brightness(0.3) blur(1px)'
+        }}
+      ></div>
+
+      {/* Overlay */}
+      <div className="absolute inset-0 bg-indigo-900 bg-opacity-40"></div>
+
+      {/* Content */}
+      <div className="relative z-10 w-full max-w-sm">
         <form
           onSubmit={submit}
           className="bg-white p-8 rounded-2xl shadow-xl border border-indigo-100"

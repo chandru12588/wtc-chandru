@@ -175,8 +175,21 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
-      <div className="bg-white shadow-lg rounded-xl p-6 w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4 relative">
+      {/* Background Image */}
+      <div
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        style={{
+          backgroundImage: `url('/src/assets/bg4.avif')`,
+          filter: 'brightness(0.4) blur(1px)'
+        }}
+      ></div>
+
+      {/* Overlay */}
+      <div className="absolute inset-0 bg-black bg-opacity-30"></div>
+
+      {/* Content */}
+      <div className="relative z-10 bg-white shadow-lg rounded-xl p-6 w-full max-w-md bg-opacity-95 backdrop-blur-sm">
         <h2 className="text-xl font-bold text-center mb-4">
           {authMode === "signup" ? "Sign Up" : authMode === "forgot" ? "Reset Password" : "Login"} to WrongTurn Club
         </h2>
