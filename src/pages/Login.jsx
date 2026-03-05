@@ -183,7 +183,8 @@ export default function Login() {
           backgroundImage: `url('/bg12.jpg')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat'
+          backgroundRepeat: 'no-repeat',
+          filter: 'brightness(0.4) blur(1px)'
         }}
       ></div>
 

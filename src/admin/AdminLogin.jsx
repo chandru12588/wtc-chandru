@@ -50,7 +50,8 @@ export default function AdminLogin() {
           backgroundImage: `url('/bg33.jpg')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat'
+          backgroundRepeat: 'no-repeat',
+          filter: 'brightness(0.3) blur(1px)'
         }}
       ></div>
 
