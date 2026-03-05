@@ -28,6 +28,8 @@ import PackageForm from "./admin/PackageForm.jsx";
 import AdminBookings from "./admin/AdminBookings.jsx";
 import AdminHostListings from "./admin/AdminHostListings.jsx";
 import AdminHostBookings from "./admin/AdminHostBookings.jsx";
+import AdminUsers from "./admin/AdminUsers.jsx";
+import AdminProfile from "./admin/AdminProfile.jsx";
 
 // Layout/Auth protection
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
@@ -83,7 +85,9 @@ export default function AppRouter() {
         <Route path="packages/:id/edit" element={<PackageForm />} />
         <Route path="bookings" element={<AdminBookings />} />
         <Route path="host-listings" element={<AdminHostListings />} />
-        <Route path="host-bookings" element={<AdminHostBookings />} /> {/* NEW */}
+        <Route path="host-bookings" element={<AdminHostBookings />} />
+        <Route path="users" element={<AdminUsers />} />
+        <Route path="profile" element={<AdminProfile />} />
       </Route>
 
       {/* FALLBACK */}

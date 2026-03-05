@@ -67,6 +67,28 @@ export default function AdminLayout() {
             Host Listings
           </NavLink>
 
+          <NavLink
+            to="/admin/users"
+            className={({ isActive }) =>
+              `p-2 rounded-lg ${
+                isActive ? "bg-indigo-100 text-indigo-700" : "text-gray-700"
+              }`
+            }
+          >
+            Users
+          </NavLink>
+
+          <NavLink
+            to="/admin/profile"
+            className={({ isActive }) =>
+              `p-2 rounded-lg ${
+                isActive ? "bg-indigo-100 text-indigo-700" : "text-gray-700"
+              }`
+            }
+          >
+            Admin Profile
+          </NavLink>
+
           <button
             onClick={logout}
             className="mt-4 bg-red-500 text-white p-2 rounded-lg"
