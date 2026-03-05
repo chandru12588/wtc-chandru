@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-
+import bg12 from "../assets/bg12.jpg";
 export default function Login() {
   const navigate = useNavigate();
 
@@ -189,7 +189,7 @@ export default function Login() {
       ></div>
 
       {/* Overlay */}
-      <div className="absolute inset-0 bg-black bg-opacity-50"></div>
+      <div className="absolute inset-0 bg-black bg-opacity-30"></div>
 
       {/* Content */}
       <div className="relative z-10 bg-white shadow-lg rounded-xl p-6 w-full max-w-md bg-opacity-95 backdrop-blur-sm">

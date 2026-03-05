@@ -56,7 +56,7 @@ export default function AdminLogin() {
       ></div>
 
       {/* Overlay */}
-      <div className="absolute inset-0 bg-indigo-900 bg-opacity-60"></div>
+      <div className="absolute inset-0 bg-indigo-900 bg-opacity-40"></div>
 
       {/* Content */}
       <div className="relative z-10 w-full max-w-sm">
