@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-import bg12 from "../assets/bg12.jpg";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -181,7 +180,7 @@ export default function Login() {
       <div
         className="absolute inset-0"
         style={{
-          backgroundImage: `url(${bg12})`,
+          backgroundImage: `url('/bg12.jpg')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat'
