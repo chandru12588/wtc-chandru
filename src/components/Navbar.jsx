@@ -15,7 +15,6 @@ import {
 
 import logo3 from "../assets/log3.png";
 import CampfireAnimated from "../components/CampfireAnimated";
-import cammp1 from "../assets/camp1.png";
 
 export default function Navbar() {
   const location = useLocation();
@@ -23,7 +22,6 @@ export default function Navbar() {
   const isAdminPage = location.pathname.startsWith("/admin");
 
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [avatarOpen, setAvatarOpen] = useState(false);
   const [hostMenu, setHostMenu] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [user, setUser] = useState(null);
@@ -34,7 +32,6 @@ export default function Navbar() {
   useEffect(() => {
     const saved = localStorage.getItem("wtc_user");
     setUser(saved ? JSON.parse(saved) : null);
-    setAvatarOpen(false);
   }, [location.pathname]);
 
   /** Scroll shrink effect */
@@ -125,30 +122,17 @@ export default function Navbar() {
               </>
             )}
 
-            {/* Avatar Menu */}
+            {/* User Profile */}
             {user && (
-              <div className="relative flex items-center gap-3">
+              <div className="flex items-center gap-4">
                 <span className="text-sm font-medium text-gray-700">Hi {user.name || "Explorer"} 👋</span>
-
-                <img
-                  src={cammp1}
-                  alt="User"
-                  onClick={() => setAvatarOpen(!avatarOpen)}
-                  className={`cursor-pointer rounded-full ring-2 ring-orange-400 ${
-                    scrolled ? "h-9 w-9" : "h-11 w-11"
-                  }`}
-                />
-
-                {avatarOpen && (
-                  <div className="absolute right-0 top-full mt-2 w-48 bg-white shadow-xl rounded-xl overflow-hidden">
-                    <Link to="/my-bookings" className="block px-4 py-3 hover:bg-gray-100">
-                      My Bookings
-                    </Link>
-                    <button onClick={handleLogout} className="w-full text-left px-4 py-3 text-red-500 hover:bg-gray-100">
-                      Logout
-                    </button>
-                  </div>
-                )}
+                
+                <button 
+                  onClick={handleLogout} 
+                  className="text-red-500 hover:text-red-700 hover:bg-red-50 px-3 py-1.5 rounded-full font-medium text-sm flex items-center gap-1 transition"
+                >
+                  <LogOut size={16} /> Logout
+                </button>
               </div>
             )}
           </div>
