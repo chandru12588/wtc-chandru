@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { api } from "../api.js";
+import bg33 from "../assets/bg33.jpg";
 
 export default function AdminLogin() {
   const navigate = useNavigate();
@@ -47,7 +48,7 @@ export default function AdminLogin() {
       <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{
-          backgroundImage: `url('/src/assets/bg33.jpg')`,
+          backgroundImage: `url(${bg33})`,
           filter: 'brightness(0.3) blur(1px)'
         }}
       ></div>
