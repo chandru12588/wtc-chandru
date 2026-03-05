@@ -179,15 +179,17 @@ export default function Login() {
     <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4 relative">
       {/* Background Image */}
       <div
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        className="absolute inset-0"
         style={{
           backgroundImage: `url(${bg12})`,
-          filter: 'brightness(0.4) blur(1px)'
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat'
         }}
       ></div>
 
       {/* Overlay */}
-      <div className="absolute inset-0 bg-black bg-opacity-30"></div>
+      <div className="absolute inset-0 bg-black bg-opacity-50"></div>
 
       {/* Content */}
       <div className="relative z-10 bg-white shadow-lg rounded-xl p-6 w-full max-w-md bg-opacity-95 backdrop-blur-sm">
