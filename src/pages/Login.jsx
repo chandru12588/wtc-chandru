@@ -180,7 +180,7 @@ export default function Login() {
       <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{
-          backgroundImage: `url('/src/assets/bg4.avif')`,
+          backgroundImage: `url('/src/assets/bg12.jpg')`,
           filter: 'brightness(0.4) blur(1px)'
         }}
       ></div>
