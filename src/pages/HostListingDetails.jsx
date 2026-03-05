@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import HostBookingForm from "../components/HostBookingForm"; // ⭐ ADD THIS
 
@@ -7,6 +7,7 @@ const API = import.meta.env.VITE_API_URL;
 
 export default function HostListingDetails() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [listing, setListing] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -46,6 +47,14 @@ export default function HostListingDetails() {
 
   return (
     <div className="max-w-6xl mx-auto pt-24 px-4 pb-20">
+
+      {/* BACK BUTTON */}
+      <button
+        onClick={() => navigate('/trips')}
+        className="mb-4 text-indigo-600 hover:text-indigo-800 hover:scale-105 font-semibold flex items-center gap-2 transition cursor-pointer"
+      >
+        ← Back to Trips
+      </button>
 
       {/* TITLE */}
       <h1 className="text-3xl font-bold">{listing.title}</h1>

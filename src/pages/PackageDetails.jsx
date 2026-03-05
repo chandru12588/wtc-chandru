@@ -1,11 +1,12 @@
 // frontend/src/pages/PackageDetails.jsx
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { api } from "../api.js";
 import BookingForm from "../components/BookingForm.jsx";
 
 export default function PackageDetails() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [pkg, setPkg] = useState(null);
   const [showSlider, setShowSlider] = useState(false);
   const [slideIndex, setSlideIndex] = useState(0);
@@ -28,6 +29,14 @@ export default function PackageDetails() {
 
   return (
     <div className="max-w-6xl mx-auto p-4 md:p-8">
+      {/* BACK BUTTON */}
+      <button
+        onClick={() => navigate('/trips')}
+        className="mb-4 text-indigo-600 hover:text-indigo-800 hover:scale-105 font-semibold flex items-center gap-2 transition cursor-pointer"
+      >
+        ← Back to Trips
+      </button>
+
       {/* ------------------------------- */}
       {/* TITLE */}
       {/* ------------------------------- */}

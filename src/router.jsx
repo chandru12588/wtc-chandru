@@ -10,6 +10,7 @@ import BookingPage from "./pages/BookingPage.jsx";
 import Trips from "./pages/Trips.jsx";
 import TripDetails from "./pages/TripDetails.jsx";
 import Login from "./pages/Login.jsx";
+import ResetPassword from "./pages/ResetPassword.jsx";
 import FAQ from "./pages/FAQ.jsx";
 import Safety from "./pages/Safety.jsx";
 import Blog from "./pages/Blog.jsx";
@@ -52,6 +53,7 @@ export default function AppRouter() {
       <Route path="/trips" element={<Trips />} />
       <Route path="/trips/:id" element={<TripDetails />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/reset-password/:token" element={<ResetPassword />} />
       <Route path="/search" element={<SearchResults />} />
       <Route path="/my-bookings" element={<UserBookings />} />
       <Route path="/faq" element={<FAQ />} />

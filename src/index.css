@@ -11,6 +11,13 @@
   animation: pulse 2s infinite;
 }
 
+.trip-swiper .swiper-pagination-bullet {
+  background: white;
+  opacity: 0.7;
+}
+.trip-swiper .swiper-pagination-bullet-active {
+  background: #f97316;
+}
 
 
 

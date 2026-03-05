@@ -1,10 +1,11 @@
 // frontend/src/pages/TripDetails.jsx
 import React, { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { api } from "../api.js";
 
 export default function TripDetails() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [trip, setTrip] = useState(null);
 
   const [showSlider, setShowSlider] = useState(false);
@@ -30,6 +31,14 @@ export default function TripDetails() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-10">
+      {/* BACK BUTTON */}
+      <button
+        onClick={() => navigate('/trips')}
+        className="mb-4 text-indigo-600 hover:text-indigo-800 hover:scale-105 font-semibold flex items-center gap-2 transition cursor-pointer"
+      >
+        ← Back to Trips
+      </button>
+
       {/* TITLE */}
       <h1 className="text-3xl font-bold">{trip.title}</h1>
       <p className="text-gray-600 mt-1">{trip.region || "Beautiful Destination"}</p>

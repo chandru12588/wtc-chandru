@@ -1,98 +1,124 @@
 // frontend/src/components/TripCard.jsx
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { FaWhatsapp } from "react-icons/fa";
-
+import { FaWhatsapp, FaHeart, FaStar, FaMapMarkerAlt } from "react-icons/fa";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination } from "swiper/modules";
+
 import "swiper/css";
 import "swiper/css/pagination";
+
+const WHATSAPP_NUMBER = import.meta.env.VITE_WHATSAPP_NUMBER || "918248579662";
 
 export default function TripCard({ trip }) {
   const navigate = useNavigate();
 
   const handleDetails = () => {
-    if (trip.isHostListing) {
-      navigate(`/host-listing/${trip._id}`);
-    } else {
-      navigate(`/packages/${trip._id}`);
-    }
+    navigate(
+      trip.isHostListing
+        ? `/host-listing/${trip._id}`
+        : `/packages/${trip._id}`
+    );
   };
 
   const handleWhatsApp = () => {
-    const msg = `Hello,
+    const msg = `Hello 👋
 I want to book:
 ${trip.title}
-Location: ${trip.location}
-Price: ₹${trip.price}`;
+📍 ${trip.location}
+💰 ₹${trip.price || "Contact"}`;
     window.open(
-      `https://wa.me/918248579662?text=${encodeURIComponent(msg)}`,
+      `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`,
       "_blank"
     );
   };
 
-  const media = trip.images?.length ? trip.images : ["/no-image.jpg"];
+  const images = trip.images?.length ? trip.images : ["/no-image.jpg"];
 
   return (
-    <div className="bg-white rounded-3xl shadow-md hover:shadow-xl transition overflow-hidden flex flex-col">
+    <div className="bg-white rounded-3xl shadow-md hover:shadow-xl transition overflow-hidden group cursor-pointer" onClick={handleDetails}>
 
-      {/* ===== IMAGE / VIDEO (BIGGER) ===== */}
-      <div className="relative h-[320px]">
+      {/* ================= IMAGE SLIDER ================= */}
+      <div className="relative h-[300px] overflow-hidden">
         <Swiper
           modules={[Pagination]}
           pagination={{ clickable: true }}
-          className="h-full"
+          className="h-full trip-swiper"
         >
-          {media.map((src, i) => (
+          {images.map((src, i) => (
             <SwiperSlide key={i}>
-              {src.endsWith(".mp4") ? (
-                <video
-                  src={src}
-                  muted
-                  loop
-                  autoPlay
-                  playsInline
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <img
-                  src={src}
-                  alt={trip.title}
-                  className="w-full h-full object-cover"
-                />
-              )}
+              <img
+                src={src}
+                alt={trip.title}
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+              />
             </SwiperSlide>
           ))}
         </Swiper>
 
-        {/* PRICE FLOAT (LIKE EXOTICAMP) */}
+        {/* ❤️ Wishlist */}
+        <button className="absolute top-4 right-4 bg-white/90 p-2 rounded-full shadow hover:scale-110 transition">
+          <FaHeart className="text-gray-600 hover:text-red-500" />
+        </button>
+
+        {/* ⚡ Featured / Instant */}
+        {trip.instantBooking && (
+          <span className="absolute top-4 left-4 bg-yellow-400 text-xs font-bold px-3 py-1 rounded-full shadow">
+            ⚡ Instant
+          </span>
+        )}
+
+        {/* ⭐ Rating */}
+        {trip.rating && (
+          <div className="absolute bottom-4 right-4 bg-black/80 text-white px-2 py-1 rounded-full text-xs flex items-center gap-1">
+            <FaStar className="text-yellow-400" />
+            {trip.rating}
+          </div>
+        )}
+
+        {/* 💰 Price Pill */}
         <div className="absolute bottom-4 left-4 bg-white/95 backdrop-blur px-4 py-1.5 rounded-full text-sm font-semibold shadow">
-          From ₹{trip.price} / person
+          From ₹{trip.price || "Contact"}
         </div>
       </div>
 
-      {/* ===== CONTENT ===== */}
-      <div className="p-6 flex flex-col flex-1 space-y-2">
-        <h3 className="text-lg font-semibold leading-snug line-clamp-2">
+      {/* ================= CONTENT ================= */}
+      <div className="p-5 space-y-2">
+
+        <h3 className="text-base font-semibold line-clamp-2">
           {trip.title}
         </h3>
 
+        {/* 📍 Location */}
         <p className="text-sm text-gray-500 flex items-center gap-1">
-          📍 {trip.location}
+          <FaMapMarkerAlt className="text-orange-500" />
+          {trip.location}
         </p>
 
-        {/* CTA */}
-        <div className="mt-auto flex gap-3 pt-4">
+        {/* 🏷️ DATE BADGES */}
+        {trip.startDate && (
+          <div className="flex flex-wrap gap-2 mt-2">
+            <span className="border border-orange-400 text-orange-600 text-xs px-3 py-1 rounded-full">
+              {new Date(trip.startDate).toLocaleDateString("en-IN", {
+                day: "numeric",
+                month: "short",
+              })}
+            </span>
+          </div>
+        )}
+
+        {/* ================= CTA ================= */}
+        <div className="flex gap-3 pt-3">
           <button
-            onClick={handleDetails}
-            className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-full text-sm font-semibold transition"
+            onClick={(e) => { e.stopPropagation(); handleDetails(); }}
+            className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-full text-sm font-semibold transition cursor-pointer"
           >
             View Details
           </button>
 
           <button
-            onClick={handleWhatsApp}
-            className="flex-1 bg-green-500 hover:bg-green-600 text-white py-2.5 rounded-full flex items-center justify-center gap-2 text-sm font-semibold transition"
+            onClick={(e) => { e.stopPropagation(); handleWhatsApp(); }}
+            className="flex-1 bg-green-500 hover:bg-green-600 text-white py-2.5 rounded-full flex items-center justify-center gap-2 text-sm font-semibold transition cursor-pointer"
           >
             <FaWhatsapp size={18} />
             WhatsApp

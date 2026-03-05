@@ -12,7 +12,7 @@ export default function HeroSection({ onSearch }) {
       <HeroSlider />
 
       {/* Overlay */}
-      <div className="absolute inset-0 bg-black/40 z-10" />
+      <div className="absolute inset-0 bg-black/ z-10" />
 
       {/* Navbar */}
       <div className="absolute top-0 left-0 right-0 z-50">
