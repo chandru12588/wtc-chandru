@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { api } from "../api.js";
+import bgImage from "../assets/bg1.jpg";
 
 export default function AdminLogin() {
   const navigate = useNavigate();
@@ -42,21 +43,20 @@ export default function AdminLogin() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-indigo-50 to-blue-50 px-4 relative">
+    <div className="flex items-center justify-center min-h-screen px-4 relative">
       {/* Background Image */}
       <div
-        className="absolute inset-0"
+        className="absolute inset-0 -z-10"
         style={{
-          backgroundImage: `url('/bg33.jpg')`,
+          backgroundImage: `url(${bgImage})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-          filter: 'brightness(0.3) blur(1px)'
+          backgroundRepeat: 'no-repeat'
         }}
       ></div>
 
-      {/* Overlay */}
-      <div className="absolute inset-0 bg-indigo-900 bg-opacity-40"></div>
+      {/* Dark overlay for readability */}
+      <div className="absolute inset-0 bg-black/40 -z-10"></div>
 
       {/* Content */}
       <div className="relative z-10 w-full max-w-sm">
@@ -111,7 +111,7 @@ export default function AdminLogin() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-indigo-600 active:scale-90 transition-all duration-150 p-1 rounded hover:bg-indigo-50"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-indigo-600 active:scale-90 transition-all duration-150 p-1 rounded hover:bg-indigo-50 cursor-pointer"
               >
                 {showPassword ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
               </button>
@@ -121,7 +121,7 @@ export default function AdminLogin() {
           {/* Login Button */}
           <button
             disabled={loading}
-            className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400 text-white font-semibold py-2.5 rounded-lg transition-colors duration-200 mb-4"
+            className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-400 text-white font-semibold py-2.5 rounded-lg transition-colors duration-200 mb-4 cursor-pointer"
           >
             {loading ? "Logging in..." : "Sign In"}
           </button>
@@ -129,16 +129,11 @@ export default function AdminLogin() {
           {/* Back to Home */}
           <a
             href="/"
-            className="block text-center text-indigo-600 hover:text-indigo-700 text-sm font-medium"
+            className="block text-center text-indigo-600 hover:text-indigo-700 text-sm font-medium cursor-pointer"
           >
             ← Back to Home
           </a>
         </form>
-
-        {/* Footer */}
-        <p className="text-center text-gray-500 text-xs mt-6">
-          © 2026 WrongTurn Club. All rights reserved.
-        </p>
       </div>
     </div>
   );
