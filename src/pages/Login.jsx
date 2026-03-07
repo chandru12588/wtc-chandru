@@ -6,390 +6,443 @@ import { SiApple } from "react-icons/si";
 import bgImage from "../assets/bg4.avif";
 
 export default function Login() {
-
 const navigate = useNavigate();
 const API = import.meta.env.VITE_API_URL;
 
-const [mode,setMode] = useState("password"); 
-// password | otp | reset
+const [mode, setMode] = useState("password");
+// password | otp | signup | reset
+const [signupMethod, setSignupMethod] = useState("otp");
+// otp | password
 
-const [form,setForm] = useState({
-email:"",
-password:""
+const [form, setForm] = useState({
+name: "",
+dob: "",
+email: "",
+password: ""
 });
 
-const [otp,setOtp] = useState("");
-const [otpSent,setOtpSent] = useState(false);
-const [showPassword,setShowPassword] = useState(false);
-const [message,setMessage] = useState("");
-const [loading,setLoading] = useState(false);
+const [otp, setOtp] = useState("");
+const [otpSent, setOtpSent] = useState(false);
+const [showPassword, setShowPassword] = useState(false);
+const [message, setMessage] = useState("");
+const [messageType, setMessageType] = useState("error");
+const [loading, setLoading] = useState(false);
 
-useEffect(()=>{
-
+useEffect(() => {
 const params = new URLSearchParams(window.location.search);
 const token = params.get("token");
 
-if(token){
+if (token) {
+localStorage.setItem("wtc_token", token);
 
-localStorage.setItem("wtc_token",token);
-
-fetch(`${API}/api/auth/me`,{
-headers:{Authorization:`Bearer ${token}`}
+fetch(`${API}/api/auth/me`, {
+headers: { Authorization: `Bearer ${token}` }
 })
-.then(res=>res.json())
-.then(data=>{
-if(data.user){
-localStorage.setItem("wtc_user",JSON.stringify(data.user));
+.then((res) => res.json())
+.then((data) => {
+if (data.user) {
+localStorage.setItem("wtc_user", JSON.stringify(data.user));
 navigate("/");
 }
 });
-
 }
+}, []);
 
-},[]);
-
-const handleChange=(e)=>{
-setForm({...form,[e.target.name]:e.target.value});
+const handleChange = (e) => {
+setForm({ ...form, [e.target.name]: e.target.value });
 };
 
+const switchMode = (nextMode) => {
+setMode(nextMode);
+setOtp("");
+setOtpSent(false);
+setMessage("");
+setLoading(false);
+if (nextMode !== "signup") {
+setSignupMethod("otp");
+}
+};
 
+const showFeedback = (text, type = "error") => {
+setMessage(text);
+setMessageType(type);
+};
 
+const sendOtp = async (targetMode = mode) => {
+if (!form.email) {
+showFeedback("Email required");
+return;
+}
 
-/* PASSWORD LOGIN */
-
-const loginPassword = async()=>{
-
-try{
+if (targetMode === "signup" && (!form.name || !form.dob)) {
+showFeedback("Name, DOB and email required");
+return;
+}
 
 setLoading(true);
-
-const res = await fetch(`${API}/api/auth/login`,{
-method:"POST",
-headers:{ "Content-Type":"application/json" },
-body:JSON.stringify(form)
-});
-
-const data = await res.json();
-
-if(!res.ok) throw new Error(data.message);
-
-localStorage.setItem("wtc_token",data.token);
-localStorage.setItem("wtc_user",JSON.stringify(data.user));
-
-navigate("/");
-
-}catch(err){
-
-setMessage(err.message);
-
+try {
+const payload = { email: form.email };
+if (targetMode === "signup") {
+payload.name = form.name;
+payload.dob = form.dob;
 }
 
-setLoading(false);
-
-};
-
-
-
-/* SEND OTP */
-
-const sendOtp = async()=>{
-
-try{
-
-const res = await fetch(`${API}/api/auth/send-otp`,{
-method:"POST",
-headers:{ "Content-Type":"application/json"},
-body:JSON.stringify({email:form.email})
+const res = await fetch(`${API}/api/auth/send-otp`, {
+method: "POST",
+headers: { "Content-Type": "application/json" },
+body: JSON.stringify(payload)
 });
-
 const data = await res.json();
-
-if(!res.ok) throw new Error(data.message);
+if (!res.ok) throw new Error(data.message);
 
 setOtpSent(true);
-setMessage("OTP sent to your email");
-
-}catch(err){
-
-setMessage(err.message);
-
+showFeedback("OTP sent to your email", "success");
+} catch (err) {
+showFeedback(err.message);
+} finally {
+setLoading(false);
 }
-
 };
 
+const verifyOtp = async () => {
+if (!form.email || !otp) {
+showFeedback("Email and OTP required");
+return;
+}
 
-
-/* VERIFY OTP LOGIN */
-
-const verifyOtp = async()=>{
-
-try{
-
-const res = await fetch(`${API}/api/auth/verify-otp-login`,{
-method:"POST",
-headers:{ "Content-Type":"application/json"},
-body:JSON.stringify({
-email:form.email,
-otp:otp
-})
+setLoading(true);
+try {
+const res = await fetch(`${API}/api/auth/verify-otp`, {
+method: "POST",
+headers: { "Content-Type": "application/json" },
+body: JSON.stringify({ email: form.email, otp })
 });
-
 const data = await res.json();
+if (!res.ok) throw new Error(data.message);
 
-if(!res.ok) throw new Error(data.message);
-
-localStorage.setItem("wtc_token",data.token);
-localStorage.setItem("wtc_user",JSON.stringify(data.user));
-
+localStorage.setItem("wtc_token", data.token);
+localStorage.setItem("wtc_user", JSON.stringify(data.user));
 navigate("/");
-
-}catch(err){
-
-setMessage(err.message);
-
+} catch (err) {
+showFeedback(err.message);
+} finally {
+setLoading(false);
 }
-
 };
 
+const loginPassword = async () => {
+if (!form.email || !form.password) {
+showFeedback("Email and password required");
+return;
+}
 
+setLoading(true);
+try {
+const res = await fetch(`${API}/api/auth/login`, {
+method: "POST",
+headers: { "Content-Type": "application/json" },
+body: JSON.stringify({ email: form.email, password: form.password })
+});
+const data = await res.json();
+if (!res.ok) throw new Error(data.message);
 
-/* RESET PASSWORD */
+localStorage.setItem("wtc_token", data.token);
+localStorage.setItem("wtc_user", JSON.stringify(data.user));
+navigate("/");
+} catch (err) {
+showFeedback(err.message);
+} finally {
+setLoading(false);
+}
+};
 
-const resetPassword = async()=>{
+const signupPassword = async () => {
+if (!form.name || !form.dob || !form.email || !form.password) {
+showFeedback("Name, DOB, email and password required");
+return;
+}
 
-try{
-
-const res = await fetch(`${API}/api/auth/reset-password`,{
-method:"POST",
-headers:{ "Content-Type":"application/json"},
-body:JSON.stringify({
-email:form.email,
-otp:otp,
-password:form.password
+setLoading(true);
+try {
+const res = await fetch(`${API}/api/auth/register`, {
+method: "POST",
+headers: { "Content-Type": "application/json" },
+body: JSON.stringify({
+name: form.name,
+dob: form.dob,
+email: form.email,
+password: form.password
 })
 });
-
 const data = await res.json();
+if (!res.ok) throw new Error(data.message);
 
-if(!res.ok) throw new Error(data.message);
-
-setMessage("Password reset successful");
-setMode("password");
-
-}catch(err){
-
-setMessage(err.message);
-
+localStorage.setItem("wtc_token", data.token);
+localStorage.setItem("wtc_user", JSON.stringify(data.user));
+navigate("/");
+} catch (err) {
+showFeedback(err.message);
+} finally {
+setLoading(false);
 }
-
 };
 
+const resetPassword = async () => {
+if (!form.email || !otp || !form.password) {
+showFeedback("Email, OTP and new password required");
+return;
+}
 
+setLoading(true);
+try {
+const res = await fetch(`${API}/api/auth/reset-password`, {
+method: "POST",
+headers: { "Content-Type": "application/json" },
+body: JSON.stringify({
+email: form.email,
+otp,
+password: form.password
+})
+});
+const data = await res.json();
+if (!res.ok) throw new Error(data.message);
 
-return(
+showFeedback("Password updated. Please login with password.", "success");
+setOtp("");
+setOtpSent(false);
+setForm({ ...form, password: "" });
+setMode("password");
+} catch (err) {
+showFeedback(err.message);
+} finally {
+setLoading(false);
+}
+};
 
-<div className="relative min-h-screen flex items-center justify-center">
+const handleSubmit = async (e) => {
+e.preventDefault();
+setMessage("");
 
+if (mode === "password") {
+await loginPassword();
+return;
+}
+
+if (mode === "otp") {
+if (!otpSent) await sendOtp("otp");
+else await verifyOtp();
+return;
+}
+
+if (mode === "signup") {
+if (signupMethod === "password") {
+await signupPassword();
+} else {
+if (!otpSent) await sendOtp("signup");
+else await verifyOtp();
+}
+return;
+}
+
+if (mode === "reset") {
+if (!otpSent) await sendOtp("reset");
+else await resetPassword();
+}
+};
+
+const submitLabel = () => {
+if (mode === "password") return loading ? "Logging in..." : "Login with Password";
+if (mode === "otp") return otpSent ? (loading ? "Verifying..." : "Verify OTP Login") : (loading ? "Sending OTP..." : "Send Login OTP");
+if (mode === "signup" && signupMethod === "password") return loading ? "Creating Account..." : "Sign Up with Password";
+if (mode === "signup" && signupMethod === "otp") return otpSent ? (loading ? "Verifying..." : "Verify & Create Account") : (loading ? "Sending OTP..." : "Sign Up with OTP");
+if (mode === "reset") return otpSent ? (loading ? "Updating..." : "Reset Password") : (loading ? "Sending OTP..." : "Send Reset OTP");
+return "Continue";
+};
+
+return (
+<div className="relative min-h-screen flex items-center justify-center px-4 py-10">
 <div
-className="fixed inset-0 bg-cover bg-center -z-10"
-style={{backgroundImage:`url(${bgImage})`}}
+className="fixed inset-0 bg-cover bg-center -z-20"
+style={{ backgroundImage: `url(${bgImage})` }}
 ></div>
+<div className="fixed inset-0 bg-slate-900/55 -z-10"></div>
 
-<div className="fixed inset-0 bg-black/40 -z-10"></div>
-
-<div className="w-full max-w-md px-6">
-
-<div className="bg-white rounded-2xl shadow-2xl p-8">
-
-<h1 className="text-3xl font-bold text-center mb-1">
+<div className="w-full max-w-lg">
+<div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl p-6 md:p-8">
+<h1 className="text-5xl font-black text-center tracking-tight text-slate-900">
 WrongTurn
 </h1>
-
-<p className="text-center text-gray-500 text-sm mb-6">
+<p className="text-center text-slate-500 mt-1 mb-6 text-lg">
 Your Adventure Hub
 </p>
 
+<div className="grid grid-cols-3 gap-2 mb-5">
+<button
+type="button"
+onClick={() => switchMode("password")}
+className={`rounded-xl py-2 text-sm font-semibold transition ${mode === "password" ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-700"}`}
+>
+Login
+</button>
+<button
+type="button"
+onClick={() => switchMode("signup")}
+className={`rounded-xl py-2 text-sm font-semibold transition ${mode === "signup" ? "bg-emerald-600 text-white" : "bg-slate-100 text-slate-700"}`}
+>
+Sign Up
+</button>
+<button
+type="button"
+onClick={() => switchMode("reset")}
+className={`rounded-xl py-2 text-sm font-semibold transition ${mode === "reset" ? "bg-orange-500 text-white" : "bg-slate-100 text-slate-700"}`}
+>
+Reset
+</button>
+</div>
+
+{(mode === "password" || mode === "otp") && (
+<div className="grid grid-cols-2 gap-2 mb-5">
+<button
+type="button"
+onClick={() => switchMode("password")}
+className={`rounded-lg py-2 text-sm font-medium transition ${mode === "password" ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-700"}`}
+>
+Password
+</button>
+<button
+type="button"
+onClick={() => switchMode("otp")}
+className={`rounded-lg py-2 text-sm font-medium transition ${mode === "otp" ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-700"}`}
+>
+OTP
+</button>
+</div>
+)}
+
+{mode === "signup" && (
+<div className="grid grid-cols-2 gap-2 mb-5">
+<button
+type="button"
+onClick={() => {
+setSignupMethod("otp");
+setOtp("");
+setOtpSent(false);
+setMessage("");
+}}
+className={`rounded-lg py-2 text-sm font-medium transition ${signupMethod === "otp" ? "bg-emerald-600 text-white" : "bg-slate-100 text-slate-700"}`}
+>
+Sign Up with OTP
+</button>
+<button
+type="button"
+onClick={() => {
+setSignupMethod("password");
+setOtp("");
+setOtpSent(false);
+setMessage("");
+}}
+className={`rounded-lg py-2 text-sm font-medium transition ${signupMethod === "password" ? "bg-emerald-700 text-white" : "bg-slate-100 text-slate-700"}`}
+>
+Sign Up with Password
+</button>
+</div>
+)}
 
 {message && (
-<div className="bg-red-100 text-red-600 p-2 rounded mb-4 text-sm">
+<div className={`p-3 rounded-lg mb-4 text-sm ${messageType === "success" ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-red-50 text-red-700 border border-red-200"}`}>
 {message}
 </div>
 )}
 
+<form onSubmit={handleSubmit} className="space-y-3">
+{mode === "signup" && (
+<>
+<input
+type="text"
+name="name"
+placeholder="Full Name"
+value={form.name}
+onChange={handleChange}
+className="w-full border border-slate-300 focus:border-slate-500 focus:outline-none rounded-xl px-4 py-3"
+/>
+<input
+type="date"
+name="dob"
+value={form.dob}
+onChange={handleChange}
+className="w-full border border-slate-300 focus:border-slate-500 focus:outline-none rounded-xl px-4 py-3"
+/>
+</>
+)}
 
 <input
 type="email"
 name="email"
 placeholder="Email"
+value={form.email}
 onChange={handleChange}
-className="w-full border px-4 py-3 rounded-lg mb-3"
+className="w-full border border-slate-300 focus:border-slate-500 focus:outline-none rounded-xl px-4 py-3"
 />
 
-
-{/* PASSWORD MODE */}
-
-{mode==="password" && (
-
-<div className="relative mb-3">
-
+{(mode === "password" || (mode === "signup" && signupMethod === "password") || (mode === "reset" && otpSent)) && (
+<div className="relative">
 <input
-type={showPassword?"text":"password"}
+type={showPassword ? "text" : "password"}
 name="password"
-placeholder="Password"
+placeholder={mode === "reset" ? "New Password" : "Password"}
+value={form.password}
 onChange={handleChange}
-className="w-full border px-4 py-3 rounded-lg pr-10"
+className="w-full border border-slate-300 focus:border-slate-500 focus:outline-none rounded-xl px-4 py-3 pr-12"
 />
-
 <button
-onClick={()=>setShowPassword(!showPassword)}
-className="absolute right-3 top-3 cursor-pointer"
+type="button"
+onClick={() => setShowPassword(!showPassword)}
+className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500"
 >
-{showPassword?<FaEyeSlash/>:<FaEye/>}
+{showPassword ? <FaEyeSlash /> : <FaEye />}
 </button>
-
 </div>
-
 )}
 
-
-{/* OTP INPUT */}
-
-{(mode==="otp" || mode==="reset") && otpSent && (
-
+{(mode === "otp" || (mode === "signup" && signupMethod === "otp") || mode === "reset") && otpSent && (
 <input
+type="text"
 placeholder="Enter OTP"
 value={otp}
-onChange={(e)=>setOtp(e.target.value)}
-className="w-full border px-4 py-3 rounded-lg mb-3"
+onChange={(e) => setOtp(e.target.value)}
+className="w-full border border-slate-300 focus:border-slate-500 focus:outline-none rounded-xl px-4 py-3"
 />
-
 )}
 
-
-{/* RESET PASSWORD FIELD */}
-
-{mode==="reset" && (
-
-<input
-type="password"
-name="password"
-placeholder="New Password"
-onChange={handleChange}
-className="w-full border px-4 py-3 rounded-lg mb-3"
-/>
-
-)}
-
-
-
-{/* BUTTONS */}
-
-{mode==="password" && (
-
 <button
-onClick={loginPassword}
-className="w-full bg-rose-500 text-white py-3 rounded-lg font-bold cursor-pointer"
+type="submit"
+disabled={loading}
+className={`w-full text-white py-3 rounded-xl font-semibold transition ${mode === "reset" ? "bg-orange-500 hover:bg-orange-600" : mode === "signup" ? "bg-emerald-600 hover:bg-emerald-700" : mode === "otp" ? "bg-blue-600 hover:bg-blue-700" : "bg-slate-900 hover:bg-slate-800"} ${loading ? "opacity-80 cursor-wait" : ""}`}
 >
-
-{loading ? "Please wait..." : "Login"}
-
+{submitLabel()}
 </button>
+</form>
 
-)}
+<div className="my-5 h-px bg-slate-200"></div>
 
-
-{mode==="otp" && !otpSent && (
-
+<div className="grid grid-cols-2 gap-3">
 <button
-onClick={sendOtp}
-className="w-full bg-blue-500 text-white py-3 rounded-lg cursor-pointer"
+type="button"
+onClick={() => (window.location.href = `${API}/api/auth/google`)}
+className="border border-slate-300 py-2.5 rounded-xl flex items-center justify-center gap-2 font-medium text-slate-700 hover:bg-slate-50"
 >
-Send OTP
+<FcGoogle size={20} /> Google
 </button>
-
-)}
-
-
-{mode==="otp" && otpSent && (
-
 <button
-onClick={verifyOtp}
-className="w-full bg-green-500 text-white py-3 rounded-lg cursor-pointer"
+type="button"
+onClick={() => showFeedback("Apple Sign-In is not configured yet. Please use Email/OTP/Google login.")}
+className="border border-slate-300 py-2.5 rounded-xl flex items-center justify-center gap-2 font-medium text-slate-500 cursor-not-allowed"
 >
-Verify OTP Login
+<SiApple size={20} /> Apple
 </button>
-
-)}
-
-
-{mode==="reset" && otpSent && (
-
-<button
-onClick={resetPassword}
-className="w-full bg-orange-500 text-white py-3 rounded-lg cursor-pointer"
->
-Reset Password
-</button>
-
-)}
-
-
-
-{/* LINKS */}
-
-<div className="flex justify-between text-sm mt-4">
-
-<button
-onClick={()=>setMode("otp")}
-className="text-blue-500 cursor-pointer"
->
-Login with OTP
-</button>
-
-<button
-onClick={()=>{
-setMode("reset");
-sendOtp();
-}}
-className="text-blue-500 cursor-pointer"
->
-Forgot Password
-</button>
-
 </div>
-
-
-{/* SOCIAL LOGIN */}
-
-<div className="flex gap-3 mt-6">
-
-<button
-onClick={()=>window.location.href=`${API}/auth/google`}
-className="flex-1 border py-2 rounded-lg flex items-center justify-center gap-2 cursor-pointer"
->
-
-<FcGoogle size={20}/> Google
-
-</button>
-
-<button
-onClick={()=>alert("Apple login coming soon")}
-className="flex-1 border py-2 rounded-lg flex items-center justify-center gap-2 cursor-pointer"
->
-
-<SiApple size={20}/> Apple
-
-</button>
-
 </div>
-
-
 </div>
-
 </div>
-
-</div>
-
 );
-
 }
