@@ -1,6 +1,6 @@
 import React, { useRef } from "react";
 import {
-  Mountain, Trees, CloudSun, Backpack, Building2, Umbrella, Castle,
+  Mountain, Trees, CloudSun, Backpack, Building2, Umbrella, Castle, Bike,
   Users, UsersRound, Timer, Home, Tent, Warehouse, TreePine, SlidersHorizontal
 } from "lucide-react";
 
@@ -10,6 +10,7 @@ const categories = [
   { name: "Glamping", icon: CloudSun, filterType:"category", value:"Glamping" },
   { name: "Mountain", icon: Mountain, filterType:"category", value:"Mountain" },
   { name: "Backpacker", icon: Backpack, filterType:"category", value:"Backpacker" },
+  { name: "Bike Pillion", icon: Bike, filterType:"category", value:"Bike Pillion Tour" },
   { name: "Beach", icon: Umbrella, filterType:"category", value:"Beach" },
   { name: "Desert", icon: CloudSun, filterType:"category", value:"Desert" },
   { name: "New Year Trip", icon: Timer, filterType:"category", value:"New Year Trip" },

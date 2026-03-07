@@ -20,6 +20,7 @@ export default function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
   const isAdminPage = location.pathname.startsWith("/admin");
+  const OWNER_EMAIL = "chandru.balasub12588@gmail.com";
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [hostMenu, setHostMenu] = useState(false);
@@ -57,6 +58,10 @@ export default function Navbar() {
     setUser(null);
     navigate("/");
   };
+
+  const isOwnerUser =
+    !!user?.email &&
+    String(user.email).trim().toLowerCase() === OWNER_EMAIL.toLowerCase();
 
   if (isAdminPage) return null;
 
@@ -106,6 +111,9 @@ export default function Navbar() {
                   <Link to="/host/register" onClick={() => setHostMenu(false)} className="block px-4 py-3 hover:bg-gray-100">
                     Host Register
                   </Link>
+                  <Link to="/bike-rider/register" onClick={() => setHostMenu(false)} className="block px-4 py-3 hover:bg-gray-100">
+                    Bike Rider Register
+                  </Link>
                 </div>
               )}
             </div>
@@ -116,10 +124,13 @@ export default function Navbar() {
                 <Link to="/login" className="bg-emerald-600 text-white px-4 py-1.5 rounded-full text-xs">
                   Login
                 </Link>
-                <Link to="/admin/login" className="bg-gray-800 text-white px-4 py-1.5 rounded-full text-xs">
-                  Admin
-                </Link>
               </>
+            )}
+
+            {isOwnerUser && (
+              <Link to="/admin/login" className="bg-gray-800 text-white px-4 py-1.5 rounded-full text-xs">
+                Admin
+              </Link>
             )}
 
             {/* User Profile */}
@@ -173,9 +184,15 @@ export default function Navbar() {
                 <UserPlus size={18} /> Host Register
               </NavLink>
 
-              <NavLink to="/admin/login" onClick={() => setMobileOpen(false)}>
-                <ShieldCheck size={18} /> Admin
+              <NavLink to="/bike-rider/register" onClick={() => setMobileOpen(false)}>
+                <UserPlus size={18} /> Bike Rider Register
               </NavLink>
+
+              {isOwnerUser && (
+                <NavLink to="/admin/login" onClick={() => setMobileOpen(false)}>
+                  <ShieldCheck size={18} /> Admin
+                </NavLink>
+              )}
 
               {!user ? (
                 <NavLink to="/login" onClick={() => setMobileOpen(false)}>

@@ -5,7 +5,8 @@ export default function AdminLayout() {
   const navigate = useNavigate();
 
   const logout = () => {
-    localStorage.removeItem("admin_token");
+    localStorage.removeItem("wtc_admin_token");
+    localStorage.removeItem("wtc_admin");
     navigate("/admin/login");
   };
 
@@ -76,6 +77,17 @@ export default function AdminLayout() {
             }
           >
             Users
+          </NavLink>
+
+          <NavLink
+            to="/admin/bike-riders"
+            className={({ isActive }) =>
+              `p-2 rounded-lg ${
+                isActive ? "bg-indigo-100 text-indigo-700" : "text-gray-700"
+              }`
+            }
+          >
+            Bike Riders
           </NavLink>
 
           <NavLink

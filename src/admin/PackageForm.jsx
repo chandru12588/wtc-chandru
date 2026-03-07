@@ -10,6 +10,7 @@ const CATEGORY_OPTIONS = [
   "Friends",
   "Solo Traveller",
   "Bike Traveller",
+  "Bike Pillion Tour",
   "New Year Trip",
   "Glamping",
   "Mountain",
@@ -54,6 +55,7 @@ const STAY_TYPES = [
   "Forest Stay",
   "Hill View Stay",
   "Lake View Stay",
+  "Pillion Bike Tour",
 ];
 
 export default function PackageForm() {

@@ -16,6 +16,7 @@ import Safety from "./pages/Safety.jsx";
 import Blog from "./pages/Blog.jsx";
 import UserBookings from "./pages/UserBookings.jsx";
 import SearchResults from "./pages/SearchResults.jsx";
+import BikeRiderRegister from "./pages/BikeRiderRegister.jsx";
 
 // ⭐ Host Listing Public Page
 import HostListingDetails from "./pages/HostListingDetails.jsx";
@@ -30,6 +31,7 @@ import AdminHostListings from "./admin/AdminHostListings.jsx";
 import AdminHostBookings from "./admin/AdminHostBookings.jsx";
 import AdminUsers from "./admin/AdminUsers.jsx";
 import AdminProfile from "./admin/AdminProfile.jsx";
+import AdminBikeRiders from "./admin/AdminBikeRiders.jsx";
 
 // Layout/Auth protection
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
@@ -61,6 +63,7 @@ export default function AppRouter() {
       <Route path="/faq" element={<FAQ />} />
       <Route path="/safety" element={<Safety />} />
       <Route path="/blog" element={<Blog />} />
+      <Route path="/bike-rider/register" element={<BikeRiderRegister />} />
 
       {/* ⭐ Host Listing Public Detail Page */}
       <Route path="/host-listing/:id" element={<HostListingDetails />} />
@@ -87,6 +90,7 @@ export default function AppRouter() {
         <Route path="host-listings" element={<AdminHostListings />} />
         <Route path="host-bookings" element={<AdminHostBookings />} />
         <Route path="users" element={<AdminUsers />} />
+        <Route path="bike-riders" element={<AdminBikeRiders />} />
         <Route path="profile" element={<AdminProfile />} />
       </Route>
 

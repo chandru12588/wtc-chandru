@@ -44,7 +44,7 @@ export default function HeroSlider() {
       ))}
 
       {/* OPTIONAL DARK OVERLAY */}
-      <div className="absolute inset-0 bg-black/10 z-[1]" />
+      <div className="absolute inset-0 bg-black/0 z-[1]" />
     </section>
   );
 }

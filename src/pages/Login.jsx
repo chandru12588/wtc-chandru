@@ -280,21 +280,21 @@ Your Adventure Hub
 <button
 type="button"
 onClick={() => switchMode("password")}
-className={`rounded-xl py-2 text-sm font-semibold transition ${mode === "password" ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-700"}`}
+className={`rounded-xl py-2 text-sm font-semibold transition cursor-pointer ${mode === "password" ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-700 hover:bg-slate-200"}`}
 >
 Login
 </button>
 <button
 type="button"
 onClick={() => switchMode("signup")}
-className={`rounded-xl py-2 text-sm font-semibold transition ${mode === "signup" ? "bg-emerald-600 text-white" : "bg-slate-100 text-slate-700"}`}
+className={`rounded-xl py-2 text-sm font-semibold transition cursor-pointer ${mode === "signup" ? "bg-emerald-600 text-white" : "bg-slate-100 text-slate-700 hover:bg-slate-200"}`}
 >
 Sign Up
 </button>
 <button
 type="button"
 onClick={() => switchMode("reset")}
-className={`rounded-xl py-2 text-sm font-semibold transition ${mode === "reset" ? "bg-orange-500 text-white" : "bg-slate-100 text-slate-700"}`}
+className={`rounded-xl py-2 text-sm font-semibold transition cursor-pointer ${mode === "reset" ? "bg-orange-500 text-white" : "bg-slate-100 text-slate-700 hover:bg-slate-200"}`}
 >
 Reset
 </button>
@@ -305,14 +305,14 @@ Reset
 <button
 type="button"
 onClick={() => switchMode("password")}
-className={`rounded-lg py-2 text-sm font-medium transition ${mode === "password" ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-700"}`}
+className={`rounded-lg py-2 text-sm font-medium transition cursor-pointer ${mode === "password" ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-700 hover:bg-slate-200"}`}
 >
 Password
 </button>
 <button
 type="button"
 onClick={() => switchMode("otp")}
-className={`rounded-lg py-2 text-sm font-medium transition ${mode === "otp" ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-700"}`}
+className={`rounded-lg py-2 text-sm font-medium transition cursor-pointer ${mode === "otp" ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-700 hover:bg-slate-200"}`}
 >
 OTP
 </button>
@@ -329,7 +329,7 @@ setOtp("");
 setOtpSent(false);
 setMessage("");
 }}
-className={`rounded-lg py-2 text-sm font-medium transition ${signupMethod === "otp" ? "bg-emerald-600 text-white" : "bg-slate-100 text-slate-700"}`}
+className={`rounded-lg py-2 text-sm font-medium transition cursor-pointer ${signupMethod === "otp" ? "bg-emerald-600 text-white" : "bg-slate-100 text-slate-700 hover:bg-slate-200"}`}
 >
 Sign Up with OTP
 </button>
@@ -341,7 +341,7 @@ setOtp("");
 setOtpSent(false);
 setMessage("");
 }}
-className={`rounded-lg py-2 text-sm font-medium transition ${signupMethod === "password" ? "bg-emerald-700 text-white" : "bg-slate-100 text-slate-700"}`}
+className={`rounded-lg py-2 text-sm font-medium transition cursor-pointer ${signupMethod === "password" ? "bg-emerald-700 text-white" : "bg-slate-100 text-slate-700 hover:bg-slate-200"}`}
 >
 Sign Up with Password
 </button>
@@ -397,7 +397,7 @@ className="w-full border border-slate-300 focus:border-slate-500 focus:outline-n
 <button
 type="button"
 onClick={() => setShowPassword(!showPassword)}
-className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500"
+className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 cursor-pointer"
 >
 {showPassword ? <FaEyeSlash /> : <FaEye />}
 </button>
@@ -417,7 +417,7 @@ className="w-full border border-slate-300 focus:border-slate-500 focus:outline-n
 <button
 type="submit"
 disabled={loading}
-className={`w-full text-white py-3 rounded-xl font-semibold transition ${mode === "reset" ? "bg-orange-500 hover:bg-orange-600" : mode === "signup" ? "bg-emerald-600 hover:bg-emerald-700" : mode === "otp" ? "bg-blue-600 hover:bg-blue-700" : "bg-slate-900 hover:bg-slate-800"} ${loading ? "opacity-80 cursor-wait" : ""}`}
+className={`w-full text-white py-3 rounded-xl font-semibold transition ${mode === "reset" ? "bg-orange-500 hover:bg-orange-600" : mode === "signup" ? "bg-emerald-600 hover:bg-emerald-700" : mode === "otp" ? "bg-blue-600 hover:bg-blue-700" : "bg-slate-900 hover:bg-slate-800"} ${loading ? "opacity-80 cursor-wait" : "cursor-pointer"}`}
 >
 {submitLabel()}
 </button>
@@ -429,14 +429,14 @@ className={`w-full text-white py-3 rounded-xl font-semibold transition ${mode ==
 <button
 type="button"
 onClick={() => (window.location.href = `${API}/api/auth/google`)}
-className="border border-slate-300 py-2.5 rounded-xl flex items-center justify-center gap-2 font-medium text-slate-700 hover:bg-slate-50"
+className="border border-slate-300 py-2.5 rounded-xl flex items-center justify-center gap-2 font-medium text-slate-700 hover:bg-slate-50 cursor-pointer"
 >
 <FcGoogle size={20} /> Google
 </button>
 <button
 type="button"
-onClick={() => showFeedback("Apple Sign-In is not configured yet. Please use Email/OTP/Google login.")}
-className="border border-slate-300 py-2.5 rounded-xl flex items-center justify-center gap-2 font-medium text-slate-500 cursor-not-allowed"
+onClick={() => showFeedback("Apple Sign-In is coming soon.", "success")}
+className="border border-slate-300 py-2.5 rounded-xl flex items-center justify-center gap-2 font-medium text-slate-600 hover:bg-slate-50 cursor-pointer"
 >
 <SiApple size={20} /> Apple
 </button>
