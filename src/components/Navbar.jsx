@@ -15,6 +15,7 @@ import {
 
 import logo3 from "../assets/log3.png";
 import CampfireAnimated from "../components/CampfireAnimated";
+import { getHostUser, logoutHost } from "../utils/hostAuth";
 
 export default function Navbar() {
   const location = useLocation();
@@ -24,15 +25,19 @@ export default function Navbar() {
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [hostMenu, setHostMenu] = useState(false);
+  const [servicesMenu, setServicesMenu] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [user, setUser] = useState(null);
+  const [hostUser, setHostUser] = useState(null);
 
   const hostRef = useRef(null);
+  const servicesRef = useRef(null);
 
   /** Sync user state */
   useEffect(() => {
     const saved = localStorage.getItem("wtc_user");
     setUser(saved ? JSON.parse(saved) : null);
+    setHostUser(getHostUser());
   }, [location.pathname]);
 
   /** Scroll shrink effect */
@@ -48,6 +53,9 @@ export default function Navbar() {
       if (hostRef.current && !hostRef.current.contains(e.target)) {
         setHostMenu(false);
       }
+      if (servicesRef.current && !servicesRef.current.contains(e.target)) {
+        setServicesMenu(false);
+      }
     };
     document.addEventListener("click", handler);
     return () => document.removeEventListener("click", handler);
@@ -56,6 +64,13 @@ export default function Navbar() {
   const handleLogout = () => {
     localStorage.removeItem("wtc_user");
     setUser(null);
+    navigate("/");
+  };
+
+  const handleHostLogout = () => {
+    logoutHost();
+    setHostUser(null);
+    setHostMenu(false);
     navigate("/");
   };
 
@@ -94,22 +109,70 @@ export default function Navbar() {
               </NavLink>
             )}
 
-            {/* ⭐ Become Host Dropdown (Fixed) */}
-            <div ref={hostRef} className="relative">
+            <div ref={servicesRef} className="relative">
+              <button
+                onClick={() => setServicesMenu((prev) => !prev)}
+                className="flex items-center gap-1 rounded-full border px-4 py-2 text-xs hover:bg-gray-50"
+              >
+                Services <ChevronDown size={14} className={`${servicesMenu && "rotate-180"} duration-200`} />
+              </button>
+
+              {servicesMenu && (
+                <div className="absolute right-0 top-full z-50 mt-2 w-56 overflow-hidden rounded-lg bg-white shadow-lg animate-fadeIn">
+                  <Link to="/trips?service=bike" onClick={() => setServicesMenu(false)} className="block px-4 py-3 hover:bg-gray-100">
+                    Pillion Rider Service
+                  </Link>
+                  <Link to="/trips?service=guide" onClick={() => setServicesMenu(false)} className="block px-4 py-3 hover:bg-gray-100">
+                    Tour Guide Service
+                  </Link>
+                  <Link to="/trips?service=host" onClick={() => setServicesMenu(false)} className="block px-4 py-3 hover:bg-gray-100">
+                    Hosted Stays
+                  </Link>
+                  <Link to="/trips?service=driver" onClick={() => setServicesMenu(false)} className="block px-4 py-3 hover:bg-gray-100">
+                    Acting Driver Service
+                  </Link>
+                </div>
+              )}
+            </div>
+
+            {/* Become Host Dropdown */}
+            <div ref={hostRef} className="relative flex items-center gap-2">
               <button
                 onClick={() => setHostMenu((prev) => !prev)}
-                className="border px-4 py-1.5 rounded-full text-xs flex items-center gap-1 hover:bg-gray-50"
+                className="border px-4 py-2 rounded-full text-xs flex items-center gap-1 hover:bg-gray-50"
               >
-                Become a Host <ChevronDown size={14} className={`${hostMenu && "rotate-180"} duration-200`} />
+                {hostUser ? "Hosting" : "Become a Host"} <ChevronDown size={14} className={`${hostMenu && "rotate-180"} duration-200`} />
               </button>
 
               {hostMenu && (
-                <div className="absolute right-0 mt-2 bg-white shadow-lg rounded-lg w-44 overflow-hidden animate-fadeIn">
-                  <Link to="/host/login" onClick={() => setHostMenu(false)} className="block px-4 py-3 hover:bg-gray-100">
-                    Host Login
+                <div className="absolute right-0 top-full z-50 mt-2 w-52 overflow-hidden rounded-lg bg-white shadow-lg animate-fadeIn">
+                  {hostUser ? (
+                    <>
+                      <Link to="/host/dashboard" onClick={() => setHostMenu(false)} className="block px-4 py-3 hover:bg-gray-100">
+                        Host Dashboard
+                      </Link>
+                      <Link to="/host/add-listing" onClick={() => setHostMenu(false)} className="block px-4 py-3 hover:bg-gray-100">
+                        Add Listing
+                      </Link>
+                      <button onClick={handleHostLogout} className="block w-full px-4 py-3 text-left hover:bg-gray-100">
+                        Host Logout
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <Link to="/host/login" onClick={() => setHostMenu(false)} className="block px-4 py-3 hover:bg-gray-100">
+                        Host Login
+                      </Link>
+                      <Link to="/host/register" onClick={() => setHostMenu(false)} className="block px-4 py-3 hover:bg-gray-100">
+                        Host Register
+                      </Link>
+                    </>
+                  )}
+                  <Link to="/guide/register" onClick={() => setHostMenu(false)} className="block px-4 py-3 hover:bg-gray-100">
+                    Guide Register
                   </Link>
-                  <Link to="/host/register" onClick={() => setHostMenu(false)} className="block px-4 py-3 hover:bg-gray-100">
-                    Host Register
+                  <Link to="/acting-driver/register" onClick={() => setHostMenu(false)} className="block px-4 py-3 hover:bg-gray-100">
+                    Acting Driver Register
                   </Link>
                   <Link to="/bike-rider/register" onClick={() => setHostMenu(false)} className="block px-4 py-3 hover:bg-gray-100">
                     Bike Rider Register
@@ -121,6 +184,9 @@ export default function Navbar() {
             {/* Auth Buttons */}
             {!user && (
               <>
+                <Link to="/login?mode=signup" className="rounded-full border border-slate-300 px-4 py-1.5 text-xs text-slate-700">
+                  Signup
+                </Link>
                 <Link to="/login" className="bg-emerald-600 text-white px-4 py-1.5 rounded-full text-xs">
                   Login
                 </Link>
@@ -167,6 +233,7 @@ export default function Navbar() {
             <div className="flex flex-col gap-4 p-6 text-sm">
               <NavLink to="/" onClick={() => setMobileOpen(false)}><Home size={18} /> Home</NavLink>
               <NavLink to="/trips" onClick={() => setMobileOpen(false)}><Compass size={18} /> Trips</NavLink>
+              <NavLink to="/#services" onClick={() => setMobileOpen(false)}><Compass size={18} /> Services</NavLink>
 
               {user && (
                 <NavLink to="/my-bookings" onClick={() => setMobileOpen(false)}>
@@ -180,8 +247,22 @@ export default function Navbar() {
                 <LogIn size={18} /> Host Login
               </NavLink>
 
-              <NavLink to="/host/register" onClick={() => setMobileOpen(false)}>
-                <UserPlus size={18} /> Host Register
+              <NavLink to={hostUser ? "/host/dashboard" : "/host/register"} onClick={() => setMobileOpen(false)}>
+                <UserPlus size={18} /> {hostUser ? "Host Dashboard" : "Host Register"}
+              </NavLink>
+
+              {hostUser && (
+                <NavLink to="/host/add-listing" onClick={() => setMobileOpen(false)}>
+                  <UserPlus size={18} /> Add Listing
+                </NavLink>
+              )}
+
+              <NavLink to="/guide/register" onClick={() => setMobileOpen(false)}>
+                <UserPlus size={18} /> Guide Register
+              </NavLink>
+
+              <NavLink to="/acting-driver/register" onClick={() => setMobileOpen(false)}>
+                <UserPlus size={18} /> Acting Driver Register
               </NavLink>
 
               <NavLink to="/bike-rider/register" onClick={() => setMobileOpen(false)}>
@@ -195,12 +276,23 @@ export default function Navbar() {
               )}
 
               {!user ? (
-                <NavLink to="/login" onClick={() => setMobileOpen(false)}>
-                  <LogIn size={18} /> User Login
-                </NavLink>
+                <>
+                  <NavLink to="/login?mode=signup" onClick={() => setMobileOpen(false)}>
+                    <UserPlus size={18} /> Signup
+                  </NavLink>
+                  <NavLink to="/login" onClick={() => setMobileOpen(false)}>
+                    <LogIn size={18} /> User Login
+                  </NavLink>
+                </>
               ) : (
                 <button onClick={handleLogout} className="text-red-600 flex gap-2">
                   <LogOut size={18} /> Logout
+                </button>
+              )}
+
+              {hostUser && (
+                <button onClick={handleHostLogout} className="text-red-600 flex gap-2">
+                  <LogOut size={18} /> Host Logout
                 </button>
               )}
             </div>

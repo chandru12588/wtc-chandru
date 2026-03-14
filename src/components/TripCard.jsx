@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { FaWhatsapp, FaHeart, FaStar, FaMapMarkerAlt } from "react-icons/fa";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination } from "swiper/modules";
+import { inferServiceType } from "../utils/serviceType";
 
 import "swiper/css";
 import "swiper/css/pagination";
@@ -12,12 +13,15 @@ const WHATSAPP_NUMBER = import.meta.env.VITE_WHATSAPP_NUMBER || "918248579662";
 
 export default function TripCard({ trip }) {
   const navigate = useNavigate();
+  const serviceType = inferServiceType(trip);
 
   const handleDetails = () => {
     navigate(
       trip.isHostListing
         ? `/host-listing/${trip._id}`
-        : `/packages/${trip._id}`
+        : serviceType === "bike"
+          ? `/pillion-request/${trip._id}`
+          : `/packages/${trip._id}`
     );
   };
 

@@ -18,9 +18,10 @@ export default function UserBookings() {
     try {
       setLoading(true);
 
-      const [pkgRes, hostRes] = await Promise.all([
+      const [pkgRes, hostRes, pillionRes] = await Promise.all([
         axios.get(`${API}/api/bookings/user/${userId}`),
         axios.get(`${API}/api/host/bookings/user/${userId}`),
+        axios.get(`${API}/api/pillion-requests/user/${userId}`),
       ]);
 
       const packages = pkgRes.data.map((b) => ({
@@ -35,7 +36,17 @@ export default function UserBookings() {
         finalStatus: b.bookingStatus,
       }));
 
-      const merged = [...packages, ...hosts]
+      const pillionRequests = pillionRes.data.map((b) => ({
+        ...b,
+        source: "pillion",
+        finalStatus: b.status,
+        checkIn: b.startDate,
+        checkOut: b.startDate,
+        people: 1,
+        amount: 0,
+      }));
+
+      const merged = [...packages, ...hosts, ...pillionRequests]
         .filter((b) => b.finalStatus !== "rejected")
         .sort(
           (a, b) =>
@@ -70,6 +81,7 @@ export default function UserBookings() {
   };
 
   const canCancel = (b) => {
+    if (b.source === "pillion") return false;
     if (!["pending", "accepted"].includes(b.finalStatus)) return false;
     return new Date() < new Date(b.checkIn);
   };
@@ -123,16 +135,36 @@ export default function UserBookings() {
                           HOST
                         </span>
                       )}
+                      {b.source === "pillion" && (
+                        <span className="ml-2 text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded">
+                          PILLION
+                        </span>
+                      )}
                     </td>
 
                     <td className="p-3 text-xs">
-                      {new Date(b.checkIn).toLocaleDateString()} →{" "}
-                      {new Date(b.checkOut).toLocaleDateString()}
+                      {b.source === "pillion" ? (
+                        <>
+                          {new Date(b.startDate).toLocaleDateString()}
+                          <div>{b.numberOfDays} day(s)</div>
+                        </>
+                      ) : (
+                        <>
+                          {new Date(b.checkIn).toLocaleDateString()} →{" "}
+                          {new Date(b.checkOut).toLocaleDateString()}
+                        </>
+                      )}
                     </td>
 
-                    <td className="p-3">{b.people || b.guests || 1}</td>
+                    <td className="p-3">
+                      {b.source === "pillion"
+                        ? `${b.startPoint} → ${b.destination}`
+                        : b.people || b.guests || 1}
+                    </td>
 
-                    <td className="p-3 font-semibold">₹{b.amount}</td>
+                    <td className="p-3 font-semibold">
+                      {b.source === "pillion" ? b.bikeBrand : `₹${b.amount}`}
+                    </td>
 
                     <td
                       className={`p-3 font-semibold capitalize ${
@@ -186,15 +218,27 @@ export default function UserBookings() {
                       HOST
                     </span>
                   )}
+                  {b.source === "pillion" && (
+                    <span className="ml-2 text-xs bg-amber-100 text-amber-700 px-2 rounded">
+                      PILLION
+                    </span>
+                  )}
                 </div>
 
                 <div className="text-sm text-gray-600">
-                  📅 {new Date(b.checkIn).toLocaleDateString()} →{" "}
-                  {new Date(b.checkOut).toLocaleDateString()}
+                  {b.source === "pillion"
+                    ? `📅 ${new Date(b.startDate).toLocaleDateString()} • ${b.numberOfDays} day(s)`
+                    : `📅 ${new Date(b.checkIn).toLocaleDateString()} → ${new Date(b.checkOut).toLocaleDateString()}`}
                 </div>
 
-                <div className="text-sm">👥 {b.people || b.guests || 1}</div>
-                <div className="font-semibold">₹{b.amount}</div>
+                <div className="text-sm">
+                  {b.source === "pillion"
+                    ? `🏍 ${b.startPoint} → ${b.destination}`
+                    : `👥 ${b.people || b.guests || 1}`}
+                </div>
+                <div className="font-semibold">
+                  {b.source === "pillion" ? b.bikeBrand : `₹${b.amount}`}
+                </div>
 
                 <div
                   className={`font-semibold capitalize ${

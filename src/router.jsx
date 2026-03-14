@@ -17,6 +17,9 @@ import Blog from "./pages/Blog.jsx";
 import UserBookings from "./pages/UserBookings.jsx";
 import SearchResults from "./pages/SearchResults.jsx";
 import BikeRiderRegister from "./pages/BikeRiderRegister.jsx";
+import GuideRegister from "./pages/GuideRegister.jsx";
+import ActingDriverRegister from "./pages/ActingDriverRegister.jsx";
+import PillionRideRequestPage from "./pages/PillionRideRequestPage.jsx";
 
 // ⭐ Host Listing Public Page
 import HostListingDetails from "./pages/HostListingDetails.jsx";
@@ -32,6 +35,7 @@ import AdminHostBookings from "./admin/AdminHostBookings.jsx";
 import AdminUsers from "./admin/AdminUsers.jsx";
 import AdminProfile from "./admin/AdminProfile.jsx";
 import AdminBikeRiders from "./admin/AdminBikeRiders.jsx";
+import AdminPillionRequests from "./admin/AdminPillionRequests.jsx";
 
 // Layout/Auth protection
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
@@ -64,6 +68,9 @@ export default function AppRouter() {
       <Route path="/safety" element={<Safety />} />
       <Route path="/blog" element={<Blog />} />
       <Route path="/bike-rider/register" element={<BikeRiderRegister />} />
+      <Route path="/guide/register" element={<GuideRegister />} />
+      <Route path="/acting-driver/register" element={<ActingDriverRegister />} />
+      <Route path="/pillion-request/:id" element={<PillionRideRequestPage />} />
 
       {/* ⭐ Host Listing Public Detail Page */}
       <Route path="/host-listing/:id" element={<HostListingDetails />} />
@@ -91,6 +98,7 @@ export default function AppRouter() {
         <Route path="host-bookings" element={<AdminHostBookings />} />
         <Route path="users" element={<AdminUsers />} />
         <Route path="bike-riders" element={<AdminBikeRiders />} />
+        <Route path="pillion-requests" element={<AdminPillionRequests />} />
         <Route path="profile" element={<AdminProfile />} />
       </Route>
 

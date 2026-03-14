@@ -17,6 +17,9 @@ export default function BookingPage() {
 
   const [checkIn, setCheckIn] = useState(null);
   const [checkOut, setCheckOut] = useState(null);
+  const [serviceStartPoint, setServiceStartPoint] = useState("");
+  const [serviceDestination, setServiceDestination] = useState("");
+  const [serviceDays, setServiceDays] = useState(1);
   const [people, setPeople] = useState(1);
   const [idProof, setIdProof] = useState(null);
 
@@ -51,8 +54,15 @@ export default function BookingPage() {
 
   const submitBooking = async (e) => {
     e.preventDefault();
+    const isPillionService = trip?.serviceType === "bike";
     if (!checkIn || !checkOut)
       return alert("Select check-in & check-out dates");
+    if (
+      isPillionService &&
+      (!serviceStartPoint || !serviceDestination || !serviceDays)
+    ) {
+      return alert("Add start point, destination, and number of days");
+    }
 
     setLoading(true);
 
@@ -66,6 +76,9 @@ export default function BookingPage() {
       formData.append("phone", phone);
       formData.append("checkIn", checkIn.toISOString());
       formData.append("checkOut", checkOut.toISOString());
+      formData.append("serviceStartPoint", serviceStartPoint);
+      formData.append("serviceDestination", serviceDestination);
+      formData.append("serviceDays", serviceDays);
       formData.append("people", people);
       formData.append("paymentMethod", paymentMethod);
 
@@ -119,6 +132,7 @@ export default function BookingPage() {
 
   if (!trip) return <p className="text-center py-10">Loading...</p>;
 
+  const isPillionService = trip.serviceType === "bike";
   const totalPrice = trip.price * people;
 
   return (
@@ -161,18 +175,49 @@ export default function BookingPage() {
           <input className="border p-3 rounded-lg w-full" placeholder="Phone"
             value={phone} onChange={(e) => setPhone(e.target.value)} />
 
-          {/* Dates */}
+          {isPillionService && (
+            <>
+              <input className="border p-3 rounded-lg w-full" placeholder="Start Point"
+                value={serviceStartPoint} onChange={(e) => setServiceStartPoint(e.target.value)} />
+              <input className="border p-3 rounded-lg w-full" placeholder="Destination"
+                value={serviceDestination} onChange={(e) => setServiceDestination(e.target.value)} />
+            </>
+          )}
+
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="font-medium">Check-in</label>
-              <DatePicker selected={checkIn} onChange={(d) => { setCheckIn(d); setCheckOut(null); }}
+              <label className="font-medium">{isPillionService ? "Trip Start Date" : "Check-in"}</label>
+              <DatePicker selected={checkIn} onChange={(d) => {
+                setCheckIn(d);
+                if (isPillionService && d) {
+                  const end = new Date(d);
+                  end.setDate(end.getDate() + Number(serviceDays || 1) - 1);
+                  setCheckOut(end);
+                } else {
+                  setCheckOut(null);
+                }
+              }}
                 className="border p-3 rounded-lg w-full" minDate={new Date()} />
             </div>
 
             <div>
-              <label className="font-medium">Check-out</label>
-              <DatePicker selected={checkOut} onChange={setCheckOut}
-                className="border p-3 rounded-lg w-full" minDate={checkIn || new Date()} />
+              <label className="font-medium">{isPillionService ? "Number of Days" : "Check-out"}</label>
+              {isPillionService ? (
+                <input type="number" min="1" className="border p-3 rounded-lg w-full"
+                  value={serviceDays}
+                  onChange={(e) => {
+                    const days = Number(e.target.value || 1);
+                    setServiceDays(days);
+                    if (checkIn) {
+                      const end = new Date(checkIn);
+                      end.setDate(end.getDate() + days - 1);
+                      setCheckOut(end);
+                    }
+                  }} />
+              ) : (
+                <DatePicker selected={checkOut} onChange={setCheckOut}
+                  className="border p-3 rounded-lg w-full" minDate={checkIn || new Date()} />
+              )}
             </div>
           </div>
 

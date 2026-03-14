@@ -51,8 +51,21 @@ export default function Footer() {
           <ul className="space-y-2 text-sm">
             <li><Link to="/trips" className="hover:text-white transition">Trips</Link></li>
             <li><Link to="/host/register" className="hover:text-white transition">Become a Host</Link></li>
+            <li><Link to="/guide/register" className="hover:text-white transition">Become a Guide</Link></li>
+            <li><Link to="/acting-driver/register" className="hover:text-white transition">Become an Acting Driver</Link></li>
             <li><Link to="/faq" className="hover:text-white transition">FAQs</Link></li>
             <li><Link to="/blog" className="hover:text-white transition">Blog</Link></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 className="text-white font-semibold mb-3">Services</h4>
+          <ul className="space-y-2 text-sm">
+            <li><Link to="/trips?service=bike" className="hover:text-white transition">Pillion Rider Service</Link></li>
+            <li><Link to="/trips?service=guide" className="hover:text-white transition">Tour Guide Service</Link></li>
+            <li><Link to="/trips?service=host" className="hover:text-white transition">Hosted Stays</Link></li>
+            <li><Link to="/trips?service=driver" className="hover:text-white transition">Acting Driver Service</Link></li>
+            <li><Link to="/#services" className="hover:text-white transition">View All Services</Link></li>
           </ul>
         </div>
 

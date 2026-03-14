@@ -58,6 +58,13 @@ const STAY_TYPES = [
   "Pillion Bike Tour",
 ];
 
+const SERVICE_TYPE_OPTIONS = [
+  { value: "general", label: "General Package" },
+  { value: "bike", label: "Pillion Rider Service" },
+  { value: "guide", label: "Tour Guide Service" },
+  { value: "driver", label: "Acting Driver Service" },
+];
+
 export default function PackageForm() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -69,6 +76,7 @@ export default function PackageForm() {
     location: "",
     region: "",
     category: "",
+    serviceType: "general",
     stayType: "",  // ⭐ newly added
     tags: [],
     days: "",
@@ -98,6 +106,7 @@ export default function PackageForm() {
           location: pkg.location || "",
           region: pkg.region || "",
           category: pkg.category || "",
+          serviceType: pkg.serviceType || "general",
           stayType: pkg.stayType || "",  // ⭐ load existing
           tags: pkg.tags || [],
           days: pkg.days || "",
@@ -201,6 +210,19 @@ export default function PackageForm() {
           <option value="">Select Category</option>
           {CATEGORY_OPTIONS.map((o) => (
             <option key={o} value={o}>{o}</option>
+          ))}
+        </select>
+
+        <select
+          className="border p-3 rounded w-full"
+          value={form.serviceType}
+          onChange={(e) => update("serviceType", e.target.value)}
+          required
+        >
+          {SERVICE_TYPE_OPTIONS.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
           ))}
         </select>
 

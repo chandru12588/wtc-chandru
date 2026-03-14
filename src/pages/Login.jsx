@@ -28,11 +28,16 @@ const [message, setMessage] = useState("");
 const [messageType, setMessageType] = useState("error");
 const [loading, setLoading] = useState(false);
 
-useEffect(() => {
+  useEffect(() => {
 const params = new URLSearchParams(window.location.search);
-const token = params.get("token");
+  const token = params.get("token");
+  const requestedMode = params.get("mode");
 
-if (token) {
+  if (requestedMode === "signup") {
+  setMode("signup");
+  }
+
+  if (token) {
 localStorage.setItem("wtc_token", token);
 
 fetch(`${API}/api/auth/me`, {

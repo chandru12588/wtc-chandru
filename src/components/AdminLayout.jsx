@@ -91,6 +91,17 @@ export default function AdminLayout() {
           </NavLink>
 
           <NavLink
+            to="/admin/pillion-requests"
+            className={({ isActive }) =>
+              `p-2 rounded-lg ${
+                isActive ? "bg-indigo-100 text-indigo-700" : "text-gray-700"
+              }`
+            }
+          >
+            Pillion Requests
+          </NavLink>
+
+          <NavLink
             to="/admin/profile"
             className={({ isActive }) =>
               `p-2 rounded-lg ${
