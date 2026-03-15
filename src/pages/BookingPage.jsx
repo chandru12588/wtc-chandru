@@ -234,6 +234,7 @@ export default function BookingPage() {
           <div className="border rounded-lg p-3">
             <label>ID Proof (optional)</label>
             <input type="file" className="mt-2"
+              accept="image/*,.pdf"
               onChange={(e) => setIdProof(e.target.files[0])} />
           </div>
 

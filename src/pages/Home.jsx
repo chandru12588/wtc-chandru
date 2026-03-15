@@ -14,6 +14,7 @@ import RotatingReviewBadge from "../components/ReviewBadge";
 import RotatingBadge from "../components/RotatingBadge";
 import FilterDrawer from "../components/FilterDrawer";
 import ServicesHighlight from "../components/ServicesHighlight";
+import { inferServiceType } from "../utils/serviceType";
 
 const API = import.meta.env.VITE_API_URL;
 
@@ -46,8 +47,11 @@ export default function Home() {
     const q = location.toLowerCase();
     const result = allTrips.filter(
       (p) =>
+        inferServiceType(p) === "general" &&
+        (
         p.location?.toLowerCase().includes(q) ||
         p.stayType?.toLowerCase().includes(q)
+        )
     );
 
     setFilteredTrips(result);

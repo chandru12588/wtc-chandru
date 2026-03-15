@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { api } from "../api.js";
 
-/* ================= CATEGORIES LIST ================= */
 const CATEGORY_OPTIONS = [
   "Backpacker",
   "Forest",
@@ -20,14 +19,10 @@ const CATEGORY_OPTIONS = [
   "Chennai",
 ];
 
-/* ================= STAY TYPE LIST ================= */
 const STAY_TYPES = [
-  // Backpacker / Budget
   "Backpacker Hostel",
   "Dormitory / Bed Sharing",
   "Budget Stay",
-
-  // Unique Stays
   "A-Frame Stay",
   "Tent / Camping Stay",
   "Pyramid Stay",
@@ -37,20 +32,14 @@ const STAY_TYPES = [
   "Tree House",
   "Glass House / Dome Stay",
   "Cabin / Wooden Cottage",
-
-  // Private Properties
   "Private Villa",
   "Individual Bungalow",
   "Farm Stay",
   "Homestay",
-
-  // Hotels / Resorts
   "Hotel / Rooms",
   "Luxury Hotel",
   "Resort Stay",
   "Luxury Resort",
-
-  // Nature Based
   "Beach Side Stay",
   "Forest Stay",
   "Hill View Stay",
@@ -65,6 +54,40 @@ const SERVICE_TYPE_OPTIONS = [
   { value: "driver", label: "Acting Driver Service" },
 ];
 
+const SERVICE_PRESETS = {
+  general: {
+    title: "Add New Package",
+    stayTypeLabel: "Stay Type",
+    stayTypeOptions: STAY_TYPES,
+    descriptionPlaceholder: "Description",
+  },
+  bike: {
+    title: "Add Pillion Rider Service",
+    stayTypeLabel: "Service Format",
+    stayTypeOptions: ["Pillion Bike Tour", "Bike Escort Ride", "Road Trip Support"],
+    descriptionPlaceholder:
+      "Explain rider support, safety, petrol sharing, stay sharing, and customer responsibilities.",
+  },
+  guide: {
+    title: "Add Tour Guide Service",
+    stayTypeLabel: "Guide Type",
+    stayTypeOptions: ["Local Guide", "Professional Tour Guide"],
+    descriptionPlaceholder:
+      "Explain guide support, included destinations, supported languages, and private or group mode.",
+  },
+  driver: {
+    title: "Add Acting Driver Service",
+    stayTypeLabel: "Driver Service Type",
+    stayTypeOptions: [
+      "Acting Driver - Local",
+      "Acting Driver - Outstation",
+      "Acting Driver - Business Trip",
+    ],
+    descriptionPlaceholder:
+      "Explain assignment flow, car documents required, and customer responsibility for fuel and trip expenses.",
+  },
+};
+
 export default function PackageForm() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -77,20 +100,23 @@ export default function PackageForm() {
     region: "",
     category: "",
     serviceType: "general",
-    stayType: "",  // ⭐ newly added
+    stayType: "",
     tags: [],
     days: "",
     startDate: "",
     endDate: "",
+    guideType: "Local Guide",
   });
 
   const [oldImages, setOldImages] = useState([]);
   const [newImages, setNewImages] = useState([]);
-  const [previewImages, setPreviewImages] = useState([]);
+  const [replacementImages, setReplacementImages] = useState({});
 
   const isEdit = Boolean(id);
+  const preset = SERVICE_PRESETS[form.serviceType] || SERVICE_PRESETS.general;
+  const isPillionService = form.serviceType === "bike";
+  const isGuideService = form.serviceType === "guide";
 
-  /* ============= LOAD PACKAGE WHEN EDIT ============= */
   useEffect(() => {
     if (!isEdit) return;
 
@@ -107,11 +133,12 @@ export default function PackageForm() {
           region: pkg.region || "",
           category: pkg.category || "",
           serviceType: pkg.serviceType || "general",
-          stayType: pkg.stayType || "",  // ⭐ load existing
+          stayType: pkg.stayType || "",
           tags: pkg.tags || [],
           days: pkg.days || "",
           startDate: pkg.startDate ? pkg.startDate.split("T")[0] : "",
           endDate: pkg.endDate ? pkg.endDate.split("T")[0] : "",
+          guideType: pkg.guideType || "Local Guide",
         });
 
         setOldImages(pkg.images || []);
@@ -119,104 +146,186 @@ export default function PackageForm() {
         console.log("LOAD ERROR:", err);
       }
     };
+
     load();
-  }, [id]);
+  }, [id, isEdit]);
 
-  const update = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
+  const update = (key, value) => {
+    setForm((prev) => ({ ...prev, [key]: value }));
+  };
 
-  /* ================= IMAGE HANDLERS ================= */
+  const handleServiceTypeChange = (value) => {
+    const nextPreset = SERVICE_PRESETS[value] || SERVICE_PRESETS.general;
+
+    setForm((prev) => ({
+      ...prev,
+      serviceType: value,
+      stayType: nextPreset.stayTypeOptions.includes(prev.stayType)
+        ? prev.stayType
+        : nextPreset.stayTypeOptions[0] || "",
+      price:
+        value === "guide"
+          ? prev.price || "0"
+          : value === "driver"
+          ? prev.price || "1500"
+          : prev.price,
+      guideType: value === "guide" ? prev.guideType || "Local Guide" : prev.guideType,
+    }));
+  };
+
   const handleImageSelect = (e) => {
-    const files = [...e.target.files];
-    setNewImages(files);
-    setPreviewImages(files.map((f) => URL.createObjectURL(f)));
+    setNewImages([...e.target.files]);
   };
 
-  const removeNewImage = (i) => {
-    setNewImages((p) => p.filter((_, x) => x !== i));
-    setPreviewImages((p) => p.filter((_, x) => x !== i));
+  const removeExistingImage = (imageUrl) => {
+    setOldImages((prev) => prev.filter((image) => image !== imageUrl));
   };
 
-  /* ================= SAVE ================= */
+  const removeNewImage = (indexToRemove) => {
+    setNewImages((prev) => prev.filter((_, index) => index !== indexToRemove));
+  };
+
+  const handleReplaceImage = (imageUrl, file) => {
+    if (!file) return;
+
+    setReplacementImages((prev) => ({
+      ...prev,
+      [imageUrl]: file,
+    }));
+  };
+
+  const clearReplacementImage = (imageUrl) => {
+    setReplacementImages((prev) => {
+      const next = { ...prev };
+      delete next[imageUrl];
+      return next;
+    });
+  };
+
   const save = async (e) => {
     e.preventDefault();
 
     try {
       const fd = new FormData();
-      Object.keys(form).forEach((key) => {
-        if (key === "tags") fd.append("tags", JSON.stringify(form.tags));
-        else fd.append(key, form[key]); // ⭐ stayType auto included
+      const payload =
+        isPillionService || isGuideService
+          ? {
+              ...form,
+              price: isGuideService ? 0 : form.price,
+              category: isGuideService ? "Guide Service" : form.category,
+              location: isGuideService ? "Customer Requirement" : "Customer Request",
+              region: isGuideService ? "Flexible" : "Flexible",
+              days: "As per customer requirement",
+              startDate: form.startDate || "2099-01-01",
+              endDate: "",
+            }
+          : form;
+
+      Object.keys(payload).forEach((key) => {
+        if (key === "tags") {
+          fd.append(key, JSON.stringify(payload[key]));
+          return;
+        }
+
+        fd.append(key, payload[key] ?? "");
       });
 
       newImages.forEach((file) => fd.append("images", file));
 
       if (isEdit) {
         fd.append("oldImages", JSON.stringify(oldImages));
+        const replacementEntries = Object.entries(replacementImages);
+        fd.append(
+          "replacementTargets",
+          JSON.stringify(replacementEntries.map(([imageUrl]) => imageUrl))
+        );
+        replacementEntries.forEach(([, file]) => fd.append("replacementImages", file));
         await api.put(`/api/admin/packages/${id}`, fd);
-        alert("Package Updated ✔");
+        alert("Package updated");
       } else {
-        await api.post(`/api/admin/packages`, fd);
-        alert("Package Created 🎉");
+        await api.post("/api/admin/packages", fd);
+        alert("Package created");
       }
 
       navigate("/admin/packages");
     } catch (err) {
-      console.log("SAVE ERR:", err);
+      console.log("SAVE ERROR:", err);
       alert("Something went wrong");
     }
   };
 
   return (
-    <div className="max-w-3xl mx-auto">
-      <h2 className="text-2xl font-semibold mb-6">
-        {isEdit ? "Edit Package" : "Add New Package"}
+    <div className="mx-auto max-w-3xl">
+      <h2 className="mb-6 text-2xl font-semibold">
+        {isEdit ? "Edit Package" : preset.title}
       </h2>
 
       <form onSubmit={save} className="space-y-4">
-
-        <input className="border p-3 rounded w-full"
+        <input
+          className="w-full rounded border p-3"
           placeholder="Package Title"
           value={form.title}
           onChange={(e) => update("title", e.target.value)}
-          required/>
+          required
+        />
 
-        <textarea className="border p-3 rounded w-full" rows={4}
-          placeholder="Description"
+        <textarea
+          className="w-full rounded border p-3"
+          rows={5}
+          placeholder={preset.descriptionPlaceholder}
           value={form.description}
-          onChange={(e) => update("description", e.target.value)}/>
+          onChange={(e) => update("description", e.target.value)}
+          required
+        />
 
-        <input className="border p-3 rounded w-full" type="number"
-          placeholder="Price"
-          value={form.price}
-          onChange={(e) => update("price", e.target.value)}/>
+        {!isPillionService && !isGuideService && (
+          <>
+            <input
+              className="w-full rounded border p-3"
+              type="number"
+              placeholder={form.serviceType === "driver" ? "Driver Charge Per Day" : "Price"}
+              value={form.price}
+              onChange={(e) => update("price", e.target.value)}
+            />
 
-        <input className="border p-3 rounded w-full"
-          placeholder="Location (Ooty...)"
-          value={form.location}
-          onChange={(e) => update("location", e.target.value)}
-          required/>
+            <input
+              className="w-full rounded border p-3"
+              placeholder="Location"
+              value={form.location}
+              onChange={(e) => update("location", e.target.value)}
+              required
+            />
 
-        <input className="border p-3 rounded w-full"
-          placeholder="Region (Tamil Nadu)"
-          value={form.region}
-          onChange={(e) => update("region", e.target.value)}
-          required/>
+            <input
+              className="w-full rounded border p-3"
+              placeholder="Region"
+              value={form.region}
+              onChange={(e) => update("region", e.target.value)}
+              required
+            />
+          </>
+        )}
 
-        {/* ⭐ CATEGORY DROPDOWN */}
+        {!isGuideService && (
+          <select
+            className="w-full rounded border p-3 cursor-pointer"
+            value={form.category}
+            onChange={(e) => update("category", e.target.value)}
+            required
+          >
+            <option value="">Select Category</option>
+            {CATEGORY_OPTIONS.map((option) => (
+              <option key={option} value={option}>
+                {option}
+              </option>
+            ))}
+          </select>
+        )}
+
         <select
-          className="border p-3 rounded w-full"
-          value={form.category}
-          onChange={(e) => update("category", e.target.value)}
-          required>
-          <option value="">Select Category</option>
-          {CATEGORY_OPTIONS.map((o) => (
-            <option key={o} value={o}>{o}</option>
-          ))}
-        </select>
-
-        <select
-          className="border p-3 rounded w-full"
+          className="w-full rounded border p-3 cursor-pointer"
           value={form.serviceType}
-          onChange={(e) => update("serviceType", e.target.value)}
+          onChange={(e) => handleServiceTypeChange(e.target.value)}
           required
         >
           {SERVICE_TYPE_OPTIONS.map((option) => (
@@ -226,48 +335,159 @@ export default function PackageForm() {
           ))}
         </select>
 
-        {/* ⭐ STAY TYPE DROPDOWN */}
+        <p className="text-sm font-medium text-gray-700">{preset.stayTypeLabel}</p>
         <select
-          className="border p-3 rounded w-full"
+          className="w-full rounded border p-3 cursor-pointer"
           value={form.stayType}
           onChange={(e) => update("stayType", e.target.value)}
-          required>
-          <option value="">Select Stay Type</option>
-          {STAY_TYPES.map((type) => (
-            <option key={type} value={type}>{type}</option>
+          required
+        >
+          <option value="">Select {preset.stayTypeLabel}</option>
+          {preset.stayTypeOptions.map((type) => (
+            <option key={type} value={type}>
+              {type}
+            </option>
           ))}
         </select>
 
-        {/* Optional Tags */}
-        <input className="border p-3 rounded w-full"
+        {isGuideService && (
+          <>
+            <div className="rounded border p-4">
+              <p className="mb-3 text-sm font-medium text-gray-700">Guide Type</p>
+              <select
+                className="w-full rounded border p-3 cursor-pointer"
+                value={form.guideType}
+                onChange={(e) => update("guideType", e.target.value)}
+              >
+                <option value="Local Guide">Local Guide</option>
+                <option value="Professional Tour Guide">Professional Tour Guide</option>
+              </select>
+            </div>
+            <p className="rounded border border-dashed p-4 text-sm text-gray-600">
+              Private or group mode, language, destination, and pricing will be chosen when the
+              customer submits the guide request.
+            </p>
+          </>
+        )}
+
+        <input
+          className="w-full rounded border p-3"
           placeholder="Tags (comma separated, optional)"
           value={form.tags.join(", ")}
-          onChange={(e) => update("tags", e.target.value.split(",").map(v=>v.trim()))}
+          onChange={(e) =>
+            update(
+              "tags",
+              e.target.value
+                .split(",")
+                .map((value) => value.trim())
+                .filter(Boolean)
+            )
+          }
         />
 
-        <input className="border p-3 rounded w-full"
-          placeholder="Days (e.g. 3D/2N)"
-          value={form.days}
-          onChange={(e) => update("days", e.target.value)}/>
+        {!isPillionService && !isGuideService && (
+          <>
+            <input
+              className="w-full rounded border p-3"
+              placeholder="Days (e.g. 3D/2N)"
+              value={form.days}
+              onChange={(e) => update("days", e.target.value)}
+            />
 
-        {/* DATES */}
-        <div className="grid grid-cols-2 gap-4">
-          <input type="date" className="border p-3 rounded"
-            value={form.startDate}
-            onChange={(e) => update("startDate", e.target.value)}
-            required/>
-          <input type="date" className="border p-3 rounded"
-            value={form.endDate}
-            onChange={(e) => update("endDate", e.target.value)}/>
-        </div>
+            <div className="grid grid-cols-2 gap-4">
+              <input
+                type="date"
+                className="rounded border p-3 cursor-pointer"
+                value={form.startDate}
+                onChange={(e) => update("startDate", e.target.value)}
+                required
+              />
+              <input
+                type="date"
+                className="rounded border p-3 cursor-pointer"
+                value={form.endDate}
+                onChange={(e) => update("endDate", e.target.value)}
+              />
+            </div>
+          </>
+        )}
 
-        {/* IMAGE UPLOAD */}
-        <div className="border p-4 rounded">
+        <div className="rounded border p-4">
           <p className="font-medium">Upload Images</p>
-          <input type="file" multiple onChange={handleImageSelect}/>
+          {isEdit && oldImages.length > 0 && (
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              {oldImages.map((imageUrl) => (
+                <div key={imageUrl} className="rounded-lg border p-3">
+                  <img
+                    src={imageUrl}
+                    alt="Package"
+                    className="h-40 w-full rounded object-cover"
+                  />
+                  {replacementImages[imageUrl] ? (
+                    <p className="mt-2 text-xs text-emerald-700">
+                      Replacement selected: {replacementImages[imageUrl].name}
+                    </p>
+                  ) : null}
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <label className="cursor-pointer rounded bg-indigo-50 px-3 py-2 text-sm font-medium text-indigo-700">
+                      Change Picture
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) =>
+                          handleReplaceImage(imageUrl, e.target.files?.[0] || null)
+                        }
+                      />
+                    </label>
+                    {replacementImages[imageUrl] ? (
+                      <button
+                        type="button"
+                        onClick={() => clearReplacementImage(imageUrl)}
+                        className="rounded bg-gray-100 px-3 py-2 text-sm text-gray-700"
+                      >
+                        Clear Change
+                      </button>
+                    ) : null}
+                    <button
+                      type="button"
+                      onClick={() => removeExistingImage(imageUrl)}
+                      className="rounded bg-red-50 px-3 py-2 text-sm font-medium text-red-700"
+                    >
+                      Delete Picture
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <input
+            type="file"
+            multiple
+            accept="image/*"
+            onChange={handleImageSelect}
+            className="mt-4 cursor-pointer"
+          />
+          {newImages.length > 0 && (
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              {newImages.map((file, index) => (
+                <div key={`${file.name}-${index}`} className="rounded-lg border p-3">
+                  <p className="truncate text-sm text-gray-700">{file.name}</p>
+                  <button
+                    type="button"
+                    onClick={() => removeNewImage(index)}
+                    className="mt-3 rounded bg-red-50 px-3 py-2 text-sm font-medium text-red-700"
+                  >
+                    Remove New Picture
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
-        <button className="bg-indigo-600 text-white px-6 py-3 rounded text-lg">
+        <button className="rounded bg-indigo-600 px-6 py-3 text-lg text-white cursor-pointer">
           {isEdit ? "Update Package" : "Create Package"}
         </button>
       </form>

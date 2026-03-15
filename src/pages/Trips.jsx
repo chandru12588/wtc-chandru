@@ -18,6 +18,7 @@ export default function Trips() {
   const [trips, setTrips] = useState([]);
   const [filtered, setFiltered] = useState([]);
   const [activeCategory, setActiveCategory] = useState("all");
+  const [activeFilter, setActiveFilter] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
@@ -82,19 +83,45 @@ export default function Trips() {
 
     let list = trips.filter(matchesService);
 
-    if (activeCategory !== "all") {
+    if (activeFilter?.type === "category") {
       list = list.filter(
-        (t) =>
-          t.category &&
-          t.category.toLowerCase() === activeCategory.toLowerCase()
+        (t) => String(t.category || "").toLowerCase() === activeFilter.value
+      );
+    }
+
+    if (activeFilter?.type === "region") {
+      list = list.filter((t) => {
+        const region = String(t.region || "").toLowerCase();
+        const location = String(t.location || "").toLowerCase();
+        return region.includes(activeFilter.value) || location.includes(activeFilter.value);
+      });
+    }
+
+    if (activeFilter?.type === "tags") {
+      list = list.filter((t) =>
+        Array.isArray(t.tags) &&
+        t.tags.some((tag) => String(tag).toLowerCase() === activeFilter.value)
+      );
+    }
+
+    if (activeFilter?.type === "stayType") {
+      list = list.filter(
+        (t) => String(t.stayType || "").toLowerCase() === activeFilter.value
       );
     }
 
     setFiltered(list);
-  }, [trips, activeCategory, service]);
+  }, [trips, activeFilter, service]);
 
-  const handleCategoryClick = (catId) => {
-    setActiveCategory(catId);
+  const handleCategoryClick = (selection) => {
+    if (!selection || !selection.type) {
+      setActiveCategory("all");
+      setActiveFilter(null);
+      return;
+    }
+
+    setActiveCategory(selection.value || "all");
+    setActiveFilter(selection);
   };
 
   const serviceTitle =
@@ -112,15 +139,15 @@ export default function Trips() {
     <div className="max-w-7xl mx-auto pt-24 px-4 pb-16">
       {/* CATEGORY BAR */}
       <CategoriesBar
-        active={activeCategory}
-        onSelect={handleCategoryClick}
+        onCategorySelect={handleCategoryClick}
+        onOpenFilter={() => setIsFilterOpen(true)}
       />
 
       {/* HEADER */}
       <h1 className="text-3xl font-bold mt-6 mb-6">
         {activeCategory === "all"
           ? serviceTitle
-          : `${activeCategory.toUpperCase()} Camps`}
+          : `${String(activeCategory).toUpperCase()} Camps`}
       </h1>
 
       {/* TRIPS GRID */}
@@ -153,6 +180,7 @@ export default function Trips() {
       <FilterDrawer
         isOpen={isFilterOpen}
         onClose={() => setIsFilterOpen(false)}
+        allTrips={trips}
       />
     </div>
   );

@@ -224,6 +224,7 @@ export default function HostBookingForm({ listing }) {
         <label className="font-medium">ID Proof (Aadhaar / License)</label>
         <input
           type="file"
+          accept="image/*,.pdf"
           onChange={(e) => setIdProof(e.target.files[0])}
           className="border rounded-xl p-3 w-full"
         />

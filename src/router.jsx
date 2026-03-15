@@ -35,6 +35,7 @@ import AdminHostBookings from "./admin/AdminHostBookings.jsx";
 import AdminUsers from "./admin/AdminUsers.jsx";
 import AdminProfile from "./admin/AdminProfile.jsx";
 import AdminBikeRiders from "./admin/AdminBikeRiders.jsx";
+import AdminGuides from "./admin/AdminGuides.jsx";
 import AdminPillionRequests from "./admin/AdminPillionRequests.jsx";
 
 // Layout/Auth protection
@@ -98,6 +99,7 @@ export default function AppRouter() {
         <Route path="host-bookings" element={<AdminHostBookings />} />
         <Route path="users" element={<AdminUsers />} />
         <Route path="bike-riders" element={<AdminBikeRiders />} />
+        <Route path="guides" element={<AdminGuides />} />
         <Route path="pillion-requests" element={<AdminPillionRequests />} />
         <Route path="profile" element={<AdminProfile />} />
       </Route>

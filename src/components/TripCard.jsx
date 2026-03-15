@@ -47,7 +47,7 @@ ${trip.title}
         <Swiper
           modules={[Pagination]}
           pagination={{ clickable: true }}
-          className="h-full trip-swiper"
+          className="h-full trip-swiper cursor-pointer"
         >
           {images.map((src, i) => (
             <SwiperSlide key={i}>
@@ -61,7 +61,7 @@ ${trip.title}
         </Swiper>
 
         {/* ❤️ Wishlist */}
-        <button className="absolute top-4 right-4 bg-white/90 p-2 rounded-full shadow hover:scale-110 transition">
+        <button className="absolute top-4 right-4 cursor-pointer rounded-full bg-white/90 p-2 shadow transition hover:scale-110">
           <FaHeart className="text-gray-600 hover:text-red-500" />
         </button>
 
@@ -100,7 +100,7 @@ ${trip.title}
         </p>
 
         {/* 🏷️ DATE BADGES */}
-        {trip.startDate && (
+        {serviceType === "general" && trip.startDate && (
           <div className="flex flex-wrap gap-2 mt-2">
             <span className="border border-orange-400 text-orange-600 text-xs px-3 py-1 rounded-full">
               {new Date(trip.startDate).toLocaleDateString("en-IN", {
@@ -117,7 +117,11 @@ ${trip.title}
             onClick={(e) => { e.stopPropagation(); handleDetails(); }}
             className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-full text-sm font-semibold transition cursor-pointer"
           >
-            View Details
+            {serviceType === "bike"
+              ? "Book a ride"
+              : serviceType === "guide"
+              ? "Book a guide"
+              : "View Details"}
           </button>
 
           <button

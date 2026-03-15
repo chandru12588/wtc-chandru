@@ -63,6 +63,15 @@ export default function AdminBookings() {
   const formatDate = (d) =>
     d ? new Date(d).toLocaleDateString("en-IN") : "-";
 
+  const serviceLabel = (booking) => {
+    const type = booking.serviceType || booking.packageId?.serviceType || "general";
+
+    if (type === "bike") return "PILLION";
+    if (type === "guide") return "GUIDE";
+    if (type === "driver") return "DRIVER";
+    return "PACKAGE";
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-[60vh] text-gray-600">
@@ -127,6 +136,7 @@ export default function AdminBookings() {
           <thead className="bg-gray-50 border-b">
             <tr className="text-left font-semibold">
               <th className="p-3">Package</th>
+              <th className="p-3">Service</th>
               <th className="p-3">Customer</th>
               <th className="p-3">Contact</th>
               <th className="p-3">People</th>
@@ -143,7 +153,7 @@ export default function AdminBookings() {
           <tbody>
             {filteredBookings.length === 0 ? (
               <tr>
-                <td colSpan="11" className="text-center py-8 text-gray-500">
+                <td colSpan="12" className="text-center py-8 text-gray-500">
                   No bookings found
                 </td>
               </tr>
@@ -156,6 +166,19 @@ export default function AdminBookings() {
                       <span className="ml-2 text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded">
                         HOST
                       </span>
+                    )}
+                  </td>
+
+                  <td className="p-3 text-xs font-semibold">
+                    <span className="rounded bg-amber-100 px-2 py-1 text-amber-800">
+                      {serviceLabel(b)}
+                    </span>
+                    {(b.serviceDestination || b.vehicleModel || b.preferredLanguage) && (
+                      <div className="mt-2 space-y-1 text-[11px] font-normal text-gray-600">
+                        {b.serviceDestination && <div>To: {b.serviceDestination}</div>}
+                        {b.preferredLanguage && <div>Lang: {b.preferredLanguage}</div>}
+                        {b.vehicleModel && <div>Vehicle: {b.vehicleModel}</div>}
+                      </div>
                     )}
                   </td>
 

@@ -4,6 +4,23 @@ import { api } from "../api.js";
 import BookingForm from "../components/BookingForm.jsx";
 import { inferServiceType } from "../utils/serviceType";
 
+function getDescriptionPoints(description) {
+  const text = String(description || "").trim();
+  if (!text) return [];
+
+  const linePoints = text
+    .split(/\r?\n+/)
+    .map((line) => line.replace(/^(\d+[\).\s-]*|[-*]\s*)/, "").trim())
+    .filter(Boolean);
+
+  if (linePoints.length > 1) return linePoints;
+
+  return text
+    .split(/(?<=[.!?])\s+/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+}
+
 export default function PackageDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -28,6 +45,7 @@ export default function PackageDetails() {
 
   const images = pkg.images?.length ? pkg.images : [pkg.image];
   const serviceType = inferServiceType(pkg);
+  const descriptionPoints = getDescriptionPoints(pkg.description);
 
   return (
     <div className="mx-auto max-w-6xl p-4 md:p-8">
@@ -116,40 +134,41 @@ export default function PackageDetails() {
         </div>
       )}
 
-      <div className="mt-10 grid grid-cols-1 gap-10 md:grid-cols-3">
-        <div className="md:col-span-2">
+      <div className="mt-10 grid grid-cols-1 gap-10 md:grid-cols-[minmax(0,1fr)_420px] md:items-stretch">
+        <div className="min-w-0 md:min-h-0">
           <h2 className="text-2xl font-semibold">About this trip</h2>
-          <p className="mt-3 whitespace-pre-line leading-relaxed text-gray-700">
-            {pkg.description}
-          </p>
+          {serviceType === "bike" ? (
+            <div className="mt-4 flex rounded-2xl border border-stone-200 bg-white p-6 shadow-sm md:h-[860px] md:min-h-0 md:flex-col">
+              <div className="space-y-4 md:min-h-0 md:flex-1 md:overflow-y-auto md:pr-3">
+                {descriptionPoints.map((point, index) => (
+                  <p
+                    key={`${index}-${point}`}
+                    className="border-b border-stone-100 pb-4 text-[15px] leading-8 text-stone-700 last:border-b-0 last:pb-0"
+                  >
+                    {point}
+                  </p>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <p className="mt-3 whitespace-pre-line leading-relaxed text-gray-700">
+              {pkg.description}
+            </p>
+          )}
 
           <div className="mt-4 text-3xl font-bold text-indigo-600">
             Rs. {pkg.price}
           </div>
         </div>
 
-        <div className="md:col-span-1">
-          <div className="sticky top-28 rounded-xl bg-white p-4 shadow-lg">
-            {serviceType === "bike" ? (
-              <div className="space-y-4">
-                <h2 className="font-semibold">Request Pillion Rider Service</h2>
-                <p className="text-sm text-gray-600">
-                  Choose your route, trip date, days, and preferred bike brand
-                  on the next page.
-                </p>
-                <button
-                  onClick={() => navigate(`/pillion-request/${pkg._id}`)}
-                  className="w-full rounded-xl bg-purple-600 py-3 font-semibold text-white"
-                >
-                  Continue to Rider Request
-                </button>
-              </div>
-            ) : (
-              <>
-                <h2 className="mb-3 font-semibold">Book This Package</h2>
-                <BookingForm pkg={pkg} />
-              </>
-            )}
+        <div className="min-w-0">
+          <div className="md:h-full">
+            <BookingForm
+              pkg={pkg}
+              containerClassName={
+                serviceType === "bike" ? "md:h-[860px]" : ""
+              }
+            />
           </div>
         </div>
       </div>

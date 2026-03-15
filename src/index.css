@@ -1,5 +1,30 @@
 @import "tailwindcss";
 
+button,
+a,
+[role="button"],
+summary,
+select,
+input[type="button"],
+input[type="submit"],
+input[type="reset"],
+.cursor-pointer {
+  cursor: pointer;
+}
+
+button:disabled,
+input:disabled,
+select:disabled,
+textarea:disabled {
+  cursor: not-allowed;
+}
+
+button svg,
+a svg,
+[role="button"] svg,
+.cursor-pointer svg {
+  cursor: inherit;
+}
 
 @keyframes pulse {
   0% { box-shadow: 0 0 0 0 rgba(37,211,102,0.7); }

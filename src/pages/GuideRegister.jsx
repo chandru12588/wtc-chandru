@@ -1,6 +1,21 @@
 import React, { useState } from "react";
 import { SERVICE_COUNTRIES } from "../constants/countries";
 
+const COUNTRY_CURRENCY_MAP = {
+  India: { code: "INR", symbol: "Rs." },
+  Australia: { code: "AUD", symbol: "A$" },
+  America: { code: "USD", symbol: "$" },
+  UK: { code: "GBP", symbol: "£" },
+  Germany: { code: "EUR", symbol: "€" },
+  Italy: { code: "EUR", symbol: "€" },
+  Portugal: { code: "EUR", symbol: "€" },
+  France: { code: "EUR", symbol: "€" },
+  Spain: { code: "EUR", symbol: "€" },
+  Denmark: { code: "DKK", symbol: "kr" },
+  Switzerland: { code: "CHF", symbol: "CHF" },
+  Dubai: { code: "AED", symbol: "AED" },
+};
+
 export default function GuideRegister() {
   const API = import.meta.env.VITE_API_URL;
   const [loading, setLoading] = useState(false);
@@ -15,6 +30,10 @@ export default function GuideRegister() {
     state: "",
     city: "",
     zipcode: "",
+    currencyCode: "INR",
+    currencySymbol: "Rs.",
+    privateDayCharge: "",
+    groupDayCharge: "",
     languages: "",
     experienceYears: "",
     specialties: "",
@@ -24,6 +43,16 @@ export default function GuideRegister() {
 
   const setField = (key, value) => {
     setForm((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const handleCountryChange = (value) => {
+    const currency = COUNTRY_CURRENCY_MAP[value] || { code: "USD", symbol: "$" };
+    setForm((prev) => ({
+      ...prev,
+      country: value,
+      currencyCode: currency.code,
+      currencySymbol: currency.symbol,
+    }));
   };
 
   const submit = async (e) => {
@@ -51,6 +80,10 @@ export default function GuideRegister() {
         state: "",
         city: "",
         zipcode: "",
+        currencyCode: "INR",
+        currencySymbol: "Rs.",
+        privateDayCharge: "",
+        groupDayCharge: "",
         languages: "",
         experienceYears: "",
         specialties: "",
@@ -90,7 +123,7 @@ export default function GuideRegister() {
           <input className="rounded-lg border p-3" type="email" placeholder="Email" value={form.email} onChange={(e) => setField("email", e.target.value)} required />
           <input className="rounded-lg border p-3" placeholder="Phone" value={form.phone} onChange={(e) => setField("phone", e.target.value)} required />
           <input className="rounded-lg border p-3" placeholder="WhatsApp Number" value={form.whatsappNumber} onChange={(e) => setField("whatsappNumber", e.target.value)} required />
-          <select className="rounded-lg border p-3" value={form.country} onChange={(e) => setField("country", e.target.value)} required>
+          <select className="rounded-lg border p-3 cursor-pointer" value={form.country} onChange={(e) => handleCountryChange(e.target.value)} required>
             <option value="">Select Country</option>
             {SERVICE_COUNTRIES.map((country) => (
               <option key={country} value={country}>
@@ -98,13 +131,52 @@ export default function GuideRegister() {
               </option>
             ))}
           </select>
-          <input className="rounded-lg border p-3" placeholder="State" value={form.state} onChange={(e) => setField("state", e.target.value)} required />
+          <input className="rounded-lg border p-3" placeholder={form.country === "India" ? "State" : "State / Province"} value={form.state} onChange={(e) => setField("state", e.target.value)} required />
         </div>
 
         <div className="grid gap-3 md:grid-cols-3">
           <input className="rounded-lg border p-3" placeholder="City / Base Location" value={form.city} onChange={(e) => setField("city", e.target.value)} required />
           <input className="rounded-lg border p-3" placeholder="Zipcode" value={form.zipcode} onChange={(e) => setField("zipcode", e.target.value)} required />
           <input className="rounded-lg border p-3" type="number" placeholder="Experience (years)" value={form.experienceYears} onChange={(e) => setField("experienceYears", e.target.value)} />
+        </div>
+
+        <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+          <p className="text-sm font-medium text-emerald-800">
+            Currency will be used automatically based on country: {form.currencyCode} ({form.currencySymbol})
+          </p>
+          <div className="mt-3 grid gap-3 md:grid-cols-2">
+            <div>
+              <label className="mb-2 block text-sm font-medium text-gray-700">Private Guide Charge / Day</label>
+              <div className="flex items-center rounded-lg border bg-white px-3">
+                <span className="text-sm font-semibold text-gray-600">{form.currencySymbol}</span>
+                <input
+                  className="w-full rounded-lg p-3 outline-none"
+                  type="number"
+                  min="0"
+                  placeholder="Private guide daily charge"
+                  value={form.privateDayCharge}
+                  onChange={(e) => setField("privateDayCharge", e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+            <div>
+              <label className="mb-2 block text-sm font-medium text-gray-700">Group Guide Charge / Day</label>
+              <div className="flex items-center rounded-lg border bg-white px-3">
+                <span className="text-sm font-semibold text-gray-600">{form.currencySymbol}</span>
+                <input
+                  className="w-full rounded-lg p-3 outline-none"
+                  type="number"
+                  min="0"
+                  placeholder="Group guide daily charge"
+                  value={form.groupDayCharge}
+                  onChange={(e) => setField("groupDayCharge", e.target.value)}
+                  required
+                />
+              </div>
+              <p className="mt-2 text-xs text-gray-500">Group guide requests can be used for up to 7 people.</p>
+            </div>
+          </div>
         </div>
 
         <div className="grid gap-3 md:grid-cols-2">

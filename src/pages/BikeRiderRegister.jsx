@@ -166,15 +166,15 @@ export default function BikeRiderRegister() {
         <div className="grid md:grid-cols-2 gap-3">
           <label className="border rounded-lg p-3 block">
             <span className="text-sm text-gray-600">Upload RC Photo</span>
-            <input type="file" className="mt-2 block w-full" accept="image/*" onChange={(e) => setDocs((p) => ({ ...p, rcImage: e.target.files?.[0] || null }))} required />
+            <input type="file" className="mt-2 block w-full" accept="image/*,.pdf" onChange={(e) => setDocs((p) => ({ ...p, rcImage: e.target.files?.[0] || null }))} required />
           </label>
           <label className="border rounded-lg p-3 block">
             <span className="text-sm text-gray-600">Upload License Photo</span>
-            <input type="file" className="mt-2 block w-full" accept="image/*" onChange={(e) => setDocs((p) => ({ ...p, licenseImage: e.target.files?.[0] || null }))} required />
+            <input type="file" className="mt-2 block w-full" accept="image/*,.pdf" onChange={(e) => setDocs((p) => ({ ...p, licenseImage: e.target.files?.[0] || null }))} required />
           </label>
           <label className="border rounded-lg p-3 block">
             <span className="text-sm text-gray-600">Upload ID Proof Photo</span>
-            <input type="file" className="mt-2 block w-full" accept="image/*" onChange={(e) => setDocs((p) => ({ ...p, idProofImage: e.target.files?.[0] || null }))} required />
+            <input type="file" className="mt-2 block w-full" accept="image/*,.pdf" onChange={(e) => setDocs((p) => ({ ...p, idProofImage: e.target.files?.[0] || null }))} required />
           </label>
           <label className="border rounded-lg p-3 block">
             <span className="text-sm text-gray-600">Upload Bike Photos (optional)</span>

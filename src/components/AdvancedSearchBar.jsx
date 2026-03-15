@@ -1,6 +1,7 @@
 // frontend/src/components/AdvancedSearchBar.jsx
 import React, { useEffect, useRef, useState } from "react";
 import { MapPin, Calendar, Users, Mic, X } from "lucide-react";
+import { inferServiceType } from "../utils/serviceType";
 
 export default function AdvancedSearchBar({ trips = [], onSearch }) {
 
@@ -18,9 +19,11 @@ export default function AdvancedSearchBar({ trips = [], onSearch }) {
           .join(" ")
       : "";
 
-  const stayTypes  = [...new Set(trips.map(t => format(t.stayType)).filter(Boolean))];
-  const categories = [...new Set(trips.map(t => format(t.category)).filter(Boolean))];
-  const locations  = [...new Set(trips.map(t => format(t.location)).filter(Boolean))];
+  const searchableTrips = trips.filter((trip) => inferServiceType(trip) === "general");
+
+  const stayTypes  = [...new Set(searchableTrips.map(t => format(t.stayType)).filter(Boolean))];
+  const categories = [...new Set(searchableTrips.map(t => format(t.category)).filter(Boolean))];
+  const locations  = [...new Set(searchableTrips.map(t => format(t.location)).filter(Boolean))];
 
   const trendingStays = stayTypes.slice(0,6);
   const trendingLocations = locations.slice(0,6);

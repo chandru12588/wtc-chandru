@@ -24,6 +24,7 @@ export default function Navbar() {
   const OWNER_EMAIL = "chandru.balasub12588@gmail.com";
 
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [mobileServicesOpen, setMobileServicesOpen] = useState(false);
   const [hostMenu, setHostMenu] = useState(false);
   const [servicesMenu, setServicesMenu] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -72,6 +73,11 @@ export default function Navbar() {
     setHostUser(null);
     setHostMenu(false);
     navigate("/");
+  };
+
+  const closeMobileMenu = () => {
+    setMobileOpen(false);
+    setMobileServicesOpen(false);
   };
 
   const isOwnerUser =
@@ -215,7 +221,13 @@ export default function Navbar() {
           </div>
 
           {/* ================= Mobile Menu Btn ================= */}
-          <button onClick={() => setMobileOpen(true)} className="ml-auto md:hidden">
+          <button
+            onClick={() => {
+              setMobileOpen(true);
+              setMobileServicesOpen(false);
+            }}
+            className="ml-auto md:hidden"
+          >
             <Menu size={28} />
           </button>
         </nav>
@@ -227,60 +239,109 @@ export default function Navbar() {
           <div className="absolute right-0 top-0 h-full w-[78%] bg-white">
             <div className="flex justify-between p-4 border-b">
               <span className="font-bold">{user ? `Hi ${user.name}` : "Menu"}</span>
-              <X onClick={() => setMobileOpen(false)} />
+              <X onClick={closeMobileMenu} />
             </div>
 
             <div className="flex flex-col gap-4 p-6 text-sm">
-              <NavLink to="/" onClick={() => setMobileOpen(false)}><Home size={18} /> Home</NavLink>
-              <NavLink to="/trips" onClick={() => setMobileOpen(false)}><Compass size={18} /> Trips</NavLink>
-              <NavLink to="/#services" onClick={() => setMobileOpen(false)}><Compass size={18} /> Services</NavLink>
+              <NavLink to="/" onClick={closeMobileMenu}><Home size={18} /> Home</NavLink>
+              <NavLink to="/trips" onClick={closeMobileMenu}><Compass size={18} /> Trips</NavLink>
+              <div className="rounded-lg border">
+                <button
+                  type="button"
+                  onClick={() => setMobileServicesOpen((prev) => !prev)}
+                  className="flex w-full items-center justify-between px-3 py-3 text-left"
+                >
+                  <span className="flex items-center gap-2">
+                    <Compass size={18} /> Services
+                  </span>
+                  <ChevronDown
+                    size={18}
+                    className={`transition-transform duration-200 ${
+                      mobileServicesOpen ? "rotate-180" : ""
+                    }`}
+                  />
+                </button>
+
+                {mobileServicesOpen && (
+                  <div className="border-t px-3 py-2">
+                    <NavLink
+                      to="/trips?service=bike"
+                      onClick={closeMobileMenu}
+                      className="block rounded px-2 py-2"
+                    >
+                      Pillion Rider Service
+                    </NavLink>
+                    <NavLink
+                      to="/trips?service=guide"
+                      onClick={closeMobileMenu}
+                      className="block rounded px-2 py-2"
+                    >
+                      Tour Guide Service
+                    </NavLink>
+                    <NavLink
+                      to="/trips?service=host"
+                      onClick={closeMobileMenu}
+                      className="block rounded px-2 py-2"
+                    >
+                      Hosted Stays
+                    </NavLink>
+                    <NavLink
+                      to="/trips?service=driver"
+                      onClick={closeMobileMenu}
+                      className="block rounded px-2 py-2"
+                    >
+                      Acting Driver Service
+                    </NavLink>
+                  </div>
+                )}
+              </div>
 
               {user && (
-                <NavLink to="/my-bookings" onClick={() => setMobileOpen(false)}>
+                <NavLink to="/my-bookings" onClick={closeMobileMenu}>
                   <User size={18} /> My Bookings
                 </NavLink>
               )}
 
               <hr />
 
-              <NavLink to="/host/login" onClick={() => setMobileOpen(false)}>
+              <NavLink to="/host/login" onClick={closeMobileMenu}>
                 <LogIn size={18} /> Host Login
               </NavLink>
 
-              <NavLink to={hostUser ? "/host/dashboard" : "/host/register"} onClick={() => setMobileOpen(false)}>
+              <NavLink to={hostUser ? "/host/dashboard" : "/host/register"} onClick={closeMobileMenu}>
                 <UserPlus size={18} /> {hostUser ? "Host Dashboard" : "Host Register"}
               </NavLink>
 
               {hostUser && (
-                <NavLink to="/host/add-listing" onClick={() => setMobileOpen(false)}>
+                <NavLink to="/host/add-listing" onClick={closeMobileMenu}>
                   <UserPlus size={18} /> Add Listing
                 </NavLink>
               )}
 
-              <NavLink to="/guide/register" onClick={() => setMobileOpen(false)}>
+              <NavLink to="/guide/register" onClick={closeMobileMenu}>
                 <UserPlus size={18} /> Guide Register
               </NavLink>
 
-              <NavLink to="/acting-driver/register" onClick={() => setMobileOpen(false)}>
+              <NavLink to="/acting-driver/register" onClick={closeMobileMenu}>
                 <UserPlus size={18} /> Acting Driver Register
               </NavLink>
 
-              <NavLink to="/bike-rider/register" onClick={() => setMobileOpen(false)}>
+              <NavLink to="/bike-rider/register" onClick={closeMobileMenu}>
                 <UserPlus size={18} /> Bike Rider Register
               </NavLink>
 
               {isOwnerUser && (
-                <NavLink to="/admin/login" onClick={() => setMobileOpen(false)}>
+                <NavLink to="/admin/login" onClick={closeMobileMenu}>
                   <ShieldCheck size={18} /> Admin
                 </NavLink>
               )}
 
               {!user ? (
                 <>
-                  <NavLink to="/login?mode=signup" onClick={() => setMobileOpen(false)}>
+                  <NavLink to="/login?mode=signup" onClick={closeMobileMenu}>
                     <UserPlus size={18} /> Signup
                   </NavLink>
-                  <NavLink to="/login" onClick={() => setMobileOpen(false)}>
+                  <NavLink to="/login" onClick={closeMobileMenu}>
                     <LogIn size={18} /> User Login
                   </NavLink>
                 </>
