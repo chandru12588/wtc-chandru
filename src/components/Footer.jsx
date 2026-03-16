@@ -125,7 +125,7 @@ export default function Footer() {
 
       {/* ================= BOTTOM BAR ================= */}
       <div className="border-t border-white/10 py-4 text-center text-xs text-gray-500">
-        © {new Date().getFullYear()} Wrong Turn Club · All rights reserved
+        © {new Date().getFullYear()} Trippolama · All rights reserved
       </div>
     </footer>
   );
