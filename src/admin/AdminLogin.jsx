@@ -65,7 +65,7 @@ export default function AdminLogin() {
           className="bg-white p-8 rounded-2xl shadow-xl border border-indigo-100"
         >
           <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 text-center">WrongTurn</h1>
+            <h1 className="text-3xl font-bold text-gray-900 text-center">Trippolama</h1>
             <h2 className="text-xl font-semibold text-indigo-700 text-center mt-2">Admin Portal</h2>
           </div>
 
@@ -88,7 +88,7 @@ export default function AdminLogin() {
             <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
             <input
               type="email"
-              placeholder="admin@wrongturn.com"
+              placeholder="admin@trippolama.com"
               className="w-full border-2 border-gray-200 focus:border-indigo-400 px-4 py-2.5 rounded-lg text-sm focus:outline-none transition-colors bg-gray-50 focus:bg-white"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
