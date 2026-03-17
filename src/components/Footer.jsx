@@ -21,7 +21,7 @@ export default function Footer() {
         {/* BRAND */}
         <div>
           <h3 className="text-xl font-semibold text-white mb-3">
-            Wrong Turn Club
+            Trippolama
           </h3>
           <p className="text-sm text-gray-400 leading-relaxed max-w-sm">
             Curated road trips, camping & bike-friendly stays for travellers
@@ -30,16 +30,16 @@ export default function Footer() {
 
           {/* Social Icons */}
           <div className="flex gap-4 mt-5">
-            <a href="https://www.instagram.com/wrongturnclub/?utm_source=qr&r=nametag" target="_blank" rel="noopener noreferrer" className="hover:text-pink-400 transition">
+            <a href="" target="_blank" rel="noopener noreferrer" className="hover:text-pink-400 transition">
               <Instagram size={18} />
             </a>
-            <a href="https://www.facebook.com/search/top?q=wrong%20turn%20club" target="_blank" rel="noopener noreferrer" className="hover:text-blue-400 transition">
+            <a href="" target="_blank" rel="noopener noreferrer" className="hover:text-blue-400 transition">
               <Facebook size={18} />
             </a>
-            <a href="https://www.youtube.com/watch?v=JC41sopCd3E" target="_blank" rel="noopener noreferrer" className="hover:text-red-400 transition">
+            <a href="" target="_blank" rel="noopener noreferrer" className="hover:text-red-400 transition">
               <Youtube size={18} />
             </a>
-            <a href="https://maps.app.goo.gl/7n3auWptfisBCiiDA" target="_blank" rel="noopener noreferrer" className="hover:text-emerald-400 transition">
+            <a href="" target="_blank" rel="noopener noreferrer" className="hover:text-emerald-400 transition">
               <MapPin size={18} />
             </a>
           </div>
@@ -77,8 +77,8 @@ export default function Footer() {
           </h4>
 
           <iframe
-            title="WTC Hilltop Adventure Stay – Google Reviews"
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d5367.504252046915!2d77.38348221180071!3d10.265937489811172!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3b076540dd6a942d%3A0xfbfd0b02fac9016f!2sWTC%20Hilltop%20Adventure%20stay%20Kodaikanal!5e1!3m2!1sen!2sin!4v1765739885698!5m2!1sen!2sin"
+            title=""
+            src=""
             className="w-full h-48 rounded-xl border border-white/10 shadow-lg"
             loading="lazy"
             referrerPolicy="no-referrer-when-downgrade"
@@ -93,7 +93,7 @@ export default function Footer() {
             {instaImages.map((img, i) => (
               <a
                 key={i}
-                href="https://www.instagram.com/wrongturnclub/?utm_source=qr&r=nametag"
+                href=""
                 target="_blank"
                 rel="noopener noreferrer"
                 className="group relative block overflow-hidden rounded-lg"
@@ -113,7 +113,7 @@ export default function Footer() {
           </div>
 
           <a
-            href="https://www.instagram.com/wrongturnclub/?utm_source=qr&r=nametag"
+            href=""
             target="_blank"
             rel="noopener noreferrer"
             className="inline-block mt-4 text-sm text-emerald-400 hover:underline"
