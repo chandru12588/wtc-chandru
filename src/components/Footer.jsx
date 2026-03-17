@@ -2,15 +2,12 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { Instagram, Facebook, Youtube, MapPin, Star } from "lucide-react";
 
-import insta1 from "../assets/insta1.avif";
-import insta2 from "../assets/insta2.jpeg";
-import insta3 from "../assets/insta3.jpg";
-import insta4 from "../assets/insta4.avif";
-import insta5 from "../assets/insta5.jpg";
-import insta6 from "../assets/insta6.webp";
+
+
+
 
 export default function Footer() {
-  const instaImages = [insta1, insta2, insta3, insta4, insta5, insta6];
+  const instaImages = [ ];
 
   return (
     <footer className="bg-[#0f172a] text-gray-300">
@@ -100,7 +97,7 @@ export default function Footer() {
               >
                 <img
                   src={img}
-                  alt="Wrong Turn Club Instagram"
+                  alt="Trippolama Instagram"
                   loading="lazy"
                   className="aspect-square w-full object-cover transition-transform duration-300 group-hover:scale-110"
                 />

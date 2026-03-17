@@ -97,7 +97,7 @@ export default function Navbar() {
 
           {/* Logo */}
           <Link to="/" className="flex items-center">
-            <img src={logo3} alt="" className={`${scrolled ? "h-12" : "h-12"}`} />
+            <img src={logo3} alt="Trippolama" className={`${scrolled ? "h-20" : "h-20"}`} />
           </Link>
 
           {/* ================= Desktop Menu ================= */}
