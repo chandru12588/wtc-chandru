@@ -25,7 +25,7 @@ export default function Footer() {
           </h3>
           <p className="text-sm text-gray-400 leading-relaxed max-w-sm">
             Curated road trips, camping & bike-friendly stays for travellers
-            who believe the best memories are found on the wrong turn.
+            who believe the best memories are found on the Trippolama.
           </p>
 
           {/* Social Icons */}
