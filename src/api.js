@@ -7,7 +7,7 @@ export const api = axios.create({
 
 // AUTO SEND ADMIN TOKEN
 api.interceptors.request.use((config) => {
-  const adminToken = localStorage.getItem("wtc_admin_token");
+  const adminToken = localStorage.getItem("adminToken"); // ✅ FIXED
 
   if (adminToken) {
     config.headers.Authorization = `Bearer ${adminToken}`;
