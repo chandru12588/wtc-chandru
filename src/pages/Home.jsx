@@ -27,14 +27,27 @@ export default function Home() {
   useEffect(() => {
     (async () => {
       try {
-        const pkg = await axios.get(`${API}/api/packages`);
-        const host = await axios.get(`${API}/api/host/listings`);
-        const merged = [...pkg.data, ...host.data];
+        // ✅ ALWAYS load packages
+        const pkgRes = await axios.get(`${API}/api/packages`);
+
+        let hostData = [];
+
+        // ✅ Try host listings safely
+        try {
+          const hostRes = await axios.get(`${API}/api/host/listings/all`);
+          hostData = hostRes.data;
+        } catch (err) {
+          console.warn("⚠️ Host listings failed, continuing with packages");
+        }
+
+        const merged = [...pkgRes.data, ...hostData];
+
+        console.log("🔥 FINAL TRIPS:", merged);
 
         setAllTrips(merged);
         setFilteredTrips(merged);
       } catch (e) {
-        console.log("Error Loading Trips", e);
+        console.log("❌ Error Loading Packages", e);
       } finally {
         setLoading(false);
       }
@@ -48,10 +61,8 @@ export default function Home() {
     const result = allTrips.filter(
       (p) =>
         inferServiceType(p) === "general" &&
-        (
-        p.location?.toLowerCase().includes(q) ||
-        p.stayType?.toLowerCase().includes(q)
-        )
+        (p.location?.toLowerCase().includes(q) ||
+          p.stayType?.toLowerCase().includes(q))
     );
 
     setFilteredTrips(result);
@@ -162,25 +173,9 @@ export default function Home() {
         <div className="absolute inset-0 bg-black/30" />
 
         <div className="absolute inset-0 flex flex-col items-center justify-center px-4 text-center text-white">
-          <h1 className="text-4xl font-bold drop-shadow-md md:text-6xl">
+          <h1 className="text-4xl font-bold md:text-6xl">
             Camping in India
           </h1>
-          <h2 className="mt-2 text-2xl font-semibold drop-shadow-md md:text-4xl">
-            Made Easy & Safe
-          </h2>
-
-          <div className="mt-5">
-            <RotatingBadge />
-          </div>
-          <div className="absolute right-10 top-10 hidden md:block">
-            <RotatingReviewBadge />
-          </div>
-        </div>
-
-        <div className="absolute bottom-5 w-full px-4 md:bottom-14 md:px-6">
-          <div className="mx-auto mt-8 max-w-4xl">
-            <AdvancedSearchBar trips={allTrips} onSearch={handleSearch} />
-          </div>
         </div>
       </section>
 
@@ -196,14 +191,14 @@ export default function Home() {
 
         {loading ? (
           <p>Loading...</p>
-        ) : (
+        ) : filteredTrips.length ? (
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {filteredTrips.length ? (
-              filteredTrips.map((t) => <TripCard key={t._id} trip={t} />)
-            ) : (
-              <p>No results found</p>
-            )}
+            {filteredTrips.map((t) => (
+              <TripCard key={t._id} trip={t} />
+            ))}
           </div>
+        ) : (
+          <p>No results found</p>
         )}
 
         <ExploreMoreButton />
