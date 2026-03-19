@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
-import bg1 from "../assets/bg1.jpg"
+import bg1 from "../assets/bg1.jpg";
 
 const API = import.meta.env.VITE_API_URL;
 
@@ -20,21 +20,24 @@ export default function AdminLogin() {
     setMessage("");
 
     try {
-      const res = await fetch(`${API}/api/admin/login`, {
+      // ✅ FIXED API URL
+      const res = await fetch(`${API}/api/admin/auth/login`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify({ email, password }),
       });
 
       const data = await res.json();
 
       if (!res.ok) throw new Error(data.message);
 
-      localStorage.setItem("admin_token", data.token);
+      // ✅ FIXED TOKEN NAME
+      localStorage.setItem("adminToken", data.token);
+      localStorage.setItem("admin", JSON.stringify(data.admin));
 
-      navigate("/admin/dashboard");
+      navigate("/admin");
     } catch (err) {
       setMessage(err.message);
     } finally {
@@ -45,21 +48,18 @@ export default function AdminLogin() {
   return (
     <div className="min-h-screen flex items-center justify-center relative">
 
-      {/* Background Image */}
+      {/* Background */}
       <div
         className="fixed inset-0 -z-10 bg-cover bg-center"
         style={{
-          backgroundImage:
-            {bg1} ? `url(${bg1})` : "url('/bg33.jpg')",
+          backgroundImage: `url(${bg1})`,
         }}
       ></div>
 
-      {/* Dark overlay */}
       <div className="fixed inset-0 bg-black/40 -z-10"></div>
 
-      {/* Login Card */}
+      {/* Card */}
       <div className="w-full max-w-md px-6">
-
         <div className="bg-white/95 backdrop-blur-lg shadow-2xl rounded-2xl p-8">
 
           <h2 className="text-2xl font-bold text-center mb-6">
