@@ -27,12 +27,12 @@ export default function Home() {
   useEffect(() => {
     (async () => {
       try {
-        // ✅ ALWAYS load packages
+        // ✅ LOAD PACKAGES
         const pkgRes = await axios.get(`${API}/api/packages`);
 
         let hostData = [];
 
-        // ✅ Try host listings safely
+        // ✅ LOAD HOST LISTINGS SAFELY
         try {
           const hostRes = await axios.get(`${API}/api/host/listings/all`);
           hostData = hostRes.data;
@@ -40,14 +40,25 @@ export default function Home() {
           console.warn("⚠️ Host listings failed, continuing with packages");
         }
 
-        const merged = [...pkgRes.data, ...hostData];
+        // 🔥 FIX: TAG DATA PROPERLY
+        const formattedPackages = pkgRes.data.map((p) => ({
+          ...p,
+          isHostListing: false,
+        }));
+
+        const formattedHost = hostData.map((h) => ({
+          ...h,
+          isHostListing: true,
+        }));
+
+        const merged = [...formattedPackages, ...formattedHost];
 
         console.log("🔥 FINAL TRIPS:", merged);
 
         setAllTrips(merged);
         setFilteredTrips(merged);
       } catch (e) {
-        console.log("❌ Error Loading Packages", e);
+        console.log("❌ Error Loading Trips", e);
       } finally {
         setLoading(false);
       }
