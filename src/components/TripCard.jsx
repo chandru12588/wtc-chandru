@@ -1,4 +1,3 @@
-// frontend/src/components/TripCard.jsx
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { FaWhatsapp, FaHeart, FaStar, FaMapMarkerAlt } from "react-icons/fa";
@@ -9,28 +8,42 @@ import { inferServiceType } from "../utils/serviceType";
 import "swiper/css";
 import "swiper/css/pagination";
 
-const WHATSAPP_NUMBER = import.meta.env.VITE_WHATSAPP_NUMBER || "918248579662";
+const WHATSAPP_NUMBER =
+  import.meta.env.VITE_WHATSAPP_NUMBER || "918248579662";
 
 export default function TripCard({ trip }) {
   const navigate = useNavigate();
+
+  /* =========================
+     DETECT SERVICE TYPE
+  ========================= */
   const serviceType = inferServiceType(trip);
 
+  /* =========================
+     HANDLE NAVIGATION (FIXED 🔥)
+  ========================= */
   const handleDetails = () => {
-    navigate(
-      trip.isHostListing
-        ? `/host-listing/${trip._id}`
-        : serviceType === "bike"
-          ? `/pillion-request/${trip._id}`
-          : `/packages/${trip._id}`
-    );
+    if (serviceType === "host") {
+      navigate(`/host-listing/${trip._id}`);
+    } else if (serviceType === "bike") {
+      navigate(`/pillion-request/${trip._id}`);
+    } else if (serviceType === "guide") {
+      navigate(`/guide/${trip._id}`);
+    } else {
+      navigate(`/packages/${trip._id}`);
+    }
   };
 
+  /* =========================
+     WHATSAPP
+  ========================= */
   const handleWhatsApp = () => {
     const msg = `Hello 👋
 I want to book:
 ${trip.title}
 📍 ${trip.location}
 💰 ₹${trip.price || "Contact"}`;
+
     window.open(
       `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`,
       "_blank"
@@ -40,8 +53,10 @@ ${trip.title}
   const images = trip.images?.length ? trip.images : ["/no-image.jpg"];
 
   return (
-    <div className="bg-white rounded-3xl shadow-md hover:shadow-xl transition overflow-hidden group cursor-pointer" onClick={handleDetails}>
-
+    <div
+      className="bg-white rounded-3xl shadow-md hover:shadow-xl transition overflow-hidden group cursor-pointer"
+      onClick={handleDetails}
+    >
       {/* ================= IMAGE SLIDER ================= */}
       <div className="relative h-[300px] overflow-hidden">
         <Swiper
@@ -61,11 +76,14 @@ ${trip.title}
         </Swiper>
 
         {/* ❤️ Wishlist */}
-        <button className="absolute top-4 right-4 cursor-pointer rounded-full bg-white/90 p-2 shadow transition hover:scale-110">
+        <button
+          onClick={(e) => e.stopPropagation()}
+          className="absolute top-4 right-4 rounded-full bg-white/90 p-2 shadow hover:scale-110"
+        >
           <FaHeart className="text-gray-600 hover:text-red-500" />
         </button>
 
-        {/* ⚡ Featured / Instant */}
+        {/* ⚡ Instant */}
         {trip.instantBooking && (
           <span className="absolute top-4 left-4 bg-yellow-400 text-xs font-bold px-3 py-1 rounded-full shadow">
             ⚡ Instant
@@ -80,7 +98,7 @@ ${trip.title}
           </div>
         )}
 
-        {/* 💰 Price Pill */}
+        {/* 💰 Price */}
         <div className="absolute bottom-4 left-4 bg-white/95 backdrop-blur px-4 py-1.5 rounded-full text-sm font-semibold shadow">
           From ₹{trip.price || "Contact"}
         </div>
@@ -88,7 +106,6 @@ ${trip.title}
 
       {/* ================= CONTENT ================= */}
       <div className="p-5 space-y-2">
-
         <h3 className="text-base font-semibold line-clamp-2">
           {trip.title}
         </h3>
@@ -99,9 +116,9 @@ ${trip.title}
           {trip.location}
         </p>
 
-        {/* 🏷️ DATE BADGES */}
+        {/* 🏷️ DATE */}
         {serviceType === "general" && trip.startDate && (
-          <div className="flex flex-wrap gap-2 mt-2">
+          <div className="flex gap-2 mt-2">
             <span className="border border-orange-400 text-orange-600 text-xs px-3 py-1 rounded-full">
               {new Date(trip.startDate).toLocaleDateString("en-IN", {
                 day: "numeric",
@@ -114,19 +131,27 @@ ${trip.title}
         {/* ================= CTA ================= */}
         <div className="flex gap-3 pt-3">
           <button
-            onClick={(e) => { e.stopPropagation(); handleDetails(); }}
-            className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-full text-sm font-semibold transition cursor-pointer"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleDetails();
+            }}
+            className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-full text-sm font-semibold"
           >
             {serviceType === "bike"
               ? "Book a ride"
               : serviceType === "guide"
               ? "Book a guide"
+              : serviceType === "host"
+              ? "View Stay"
               : "View Details"}
           </button>
 
           <button
-            onClick={(e) => { e.stopPropagation(); handleWhatsApp(); }}
-            className="flex-1 bg-green-500 hover:bg-green-600 text-white py-2.5 rounded-full flex items-center justify-center gap-2 text-sm font-semibold transition cursor-pointer"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleWhatsApp();
+            }}
+            className="flex-1 bg-green-500 hover:bg-green-600 text-white py-2.5 rounded-full flex items-center justify-center gap-2 text-sm font-semibold"
           >
             <FaWhatsapp size={18} />
             WhatsApp
