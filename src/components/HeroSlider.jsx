@@ -1,10 +1,14 @@
 import React, { useEffect, useState } from "react";
 import bg1 from "../assets/bg1.jpg";
-import bg2 from "../assets/bg2.jpg";
+import bg9 from "../assets/bg9.jpg";
 import bg3 from "../assets/bg3.jpg";
 import bg5 from "../assets/bg5.jpg";
+import munnar from "../assets/munnar.jpeg";
+import bg22 from "../assets/bg22.jpg";
 
-const images = [bg1, bg2, bg3, bg5];
+
+
+const images = [bg1, bg9, bg3, bg5, munnar, bg22];
 
 export default function HeroSlider() {
   const [index, setIndex] = useState(0);
