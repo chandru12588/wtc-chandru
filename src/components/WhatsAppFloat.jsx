@@ -23,7 +23,7 @@ export default function WhatsAppFloat() {
 
       {/* WhatsApp Button */}
       <a
-        href="https://wa.me/918248579662?text=Hi%20WrongTurnClub%20Team"
+        href="https://wa.me/918248579662?text=Hi%20Trippolama%20Team"
         target="_blank"
         rel="noopener noreferrer"
         className="
