@@ -8,7 +8,7 @@ import bgImage from "../assets/bg1.jpg";
 export default function AdminLogin() {
   const navigate = useNavigate();
 
-  const [email, setEmail] = useState("admin@wrongturn.com");
+  const [email, setEmail] = useState("admin@trippolama.com");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);

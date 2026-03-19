@@ -275,7 +275,7 @@ style={{ backgroundImage: `url(${bgImage})` }}
 <div className="w-full max-w-lg">
 <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl p-6 md:p-8">
 <h1 className="text-5xl font-black text-center tracking-tight text-slate-900">
-WrongTurn
+Trippolama
 </h1>
 <p className="text-center text-slate-500 mt-1 mb-6 text-lg">
 Your Adventure Hub

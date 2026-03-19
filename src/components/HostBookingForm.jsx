@@ -110,7 +110,7 @@ export default function HostBookingForm({ listing }) {
         key: import.meta.env.VITE_RAZORPAY_KEY,
         amount: order.amount,
         currency: "INR",
-        name: "WrongTurn Club",
+        name: "Trippolama",
         description: listing.title,
         order_id: order.id,
 
