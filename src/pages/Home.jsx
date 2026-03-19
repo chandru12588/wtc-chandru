@@ -14,6 +14,7 @@ import RotatingReviewBadge from "../components/ReviewBadge";
 import RotatingBadge from "../components/RotatingBadge";
 import FilterDrawer from "../components/FilterDrawer";
 import ServicesHighlight from "../components/ServicesHighlight";
+
 import { inferServiceType } from "../utils/serviceType";
 
 const API = import.meta.env.VITE_API_URL;
@@ -27,48 +28,27 @@ export default function Home() {
   useEffect(() => {
     (async () => {
       try {
-        // ✅ LOAD PACKAGES
-        const pkgRes = await axios.get(`${API}/api/packages`);
+        const pkg = await axios.get(`${API}/api/packages`);
+        const host = await axios.get(`${API}/api/host/listings/all`);
 
-        let hostData = [];
-
-        // ✅ LOAD HOST LISTINGS SAFELY
-        try {
-          const hostRes = await axios.get(`${API}/api/host/listings/all`);
-          hostData = hostRes.data;
-        } catch (err) {
-          console.warn("⚠️ Host listings failed, continuing with packages");
-        }
-
-        // 🔥 FIX: TAG DATA PROPERLY
-        const formattedPackages = pkgRes.data.map((p) => ({
-          ...p,
-          isHostListing: false,
-        }));
-
-        const formattedHost = hostData.map((h) => ({
-          ...h,
-          isHostListing: true,
-        }));
-
-        const merged = [...formattedPackages, ...formattedHost];
-
-        console.log("🔥 FINAL TRIPS:", merged);
+        const merged = [...pkg.data, ...host.data];
 
         setAllTrips(merged);
         setFilteredTrips(merged);
       } catch (e) {
-        console.log("❌ Error Loading Trips", e);
+        console.log("Error Loading Trips", e);
       } finally {
         setLoading(false);
       }
     })();
   }, []);
 
+  // 🔍 SEARCH
   const handleSearch = ({ location }) => {
     if (!location) return setFilteredTrips(allTrips);
 
     const q = location.toLowerCase();
+
     const result = allTrips.filter(
       (p) =>
         inferServiceType(p) === "general" &&
@@ -77,13 +57,18 @@ export default function Home() {
     );
 
     setFilteredTrips(result);
+
     if (!result.length) alert("No results found");
   };
 
+  // 🎯 CATEGORY FILTER
   const handleCategoryFilter = (filter) => {
     let result = [...allTrips];
 
-    if (filter.type === "stayMenu") return setIsFilterOpen(true);
+    if (filter.type === "stayMenu") {
+      setIsFilterOpen(true);
+      return;
+    }
 
     if (filter.type === "category") {
       result = result.filter(
@@ -99,7 +84,9 @@ export default function Home() {
 
     if (filter.type === "tags") {
       result = result.filter((p) =>
-        p.tags?.some((t) => t.toLowerCase() === filter.value.toLowerCase())
+        p.tags?.some(
+          (t) => t.toLowerCase() === filter.value.toLowerCase()
+        )
       );
     }
 
@@ -110,13 +97,16 @@ export default function Home() {
     }
 
     setFilteredTrips(result);
+
     if (!result.length) alert("No stays found for this category");
   };
 
+  // 📅 TRIP TABS
   const handleTripTab = (type) => {
     if (type === "all") return setFilteredTrips(allTrips);
 
     const today = new Date();
+
     const result = allTrips.filter((trip) => {
       if (!trip.startDate) return false;
 
@@ -131,9 +121,11 @@ export default function Home() {
     });
 
     setFilteredTrips(result);
+
     if (!result.length) alert("No upcoming trips found");
   };
 
+  // 🎛 FILTER DRAWER
   const handleDrawerApply = (filters) => {
     let result = [...allTrips];
 
@@ -157,7 +149,9 @@ export default function Home() {
 
     if (filters.activity) {
       result = result.filter((p) =>
-        p.tags?.some((t) => t.toLowerCase() === filters.activity.toLowerCase())
+        p.tags?.some(
+          (t) => t.toLowerCase() === filters.activity.toLowerCase()
+        )
       );
     }
 
@@ -179,37 +173,62 @@ export default function Home() {
 
   return (
     <div className="w-full overflow-x-hidden">
+      {/* HERO */}
       <section className="relative w-full h-[78vh] md:h-[85vh] overflow-hidden">
         <HeroSlider />
+
         <div className="absolute inset-0 bg-black/30" />
 
         <div className="absolute inset-0 flex flex-col items-center justify-center px-4 text-center text-white">
-          <h1 className="text-4xl font-bold md:text-6xl">
+          <h1 className="text-4xl font-bold md:text-6xl drop-shadow-md">
             Camping in India
           </h1>
+
+          <h2 className="mt-2 text-2xl font-semibold md:text-4xl drop-shadow-md">
+            Made Easy & Safe
+          </h2>
+
+          <div className="mt-5">
+            <RotatingBadge />
+          </div>
+
+          <div className="absolute right-10 top-10 hidden md:block">
+            <RotatingReviewBadge />
+          </div>
+        </div>
+
+        <div className="absolute bottom-5 w-full px-4 md:bottom-14 md:px-6">
+          <div className="mx-auto mt-8 max-w-4xl">
+            <AdvancedSearchBar trips={allTrips} onSearch={handleSearch} />
+          </div>
         </div>
       </section>
 
+      {/* CATEGORY */}
       <CategoriesBar
         onCategorySelect={handleCategoryFilter}
         onOpenFilter={() => setIsFilterOpen(true)}
       />
 
+      {/* TABS */}
       <TripTabs onTabSelect={handleTripTab} />
 
+      {/* TRIPS */}
       <section className="mx-auto max-w-7xl px-5 py-12">
         <h2 className="mb-6 text-2xl font-semibold">Featured Trips</h2>
 
         {loading ? (
           <p>Loading...</p>
-        ) : filteredTrips.length ? (
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {filteredTrips.map((t) => (
-              <TripCard key={t._id} trip={t} />
-            ))}
-          </div>
         ) : (
-          <p>No results found</p>
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            {filteredTrips.length ? (
+              filteredTrips.map((t) => (
+                <TripCard key={t._id} trip={t} />
+              ))
+            ) : (
+              <p>No results found</p>
+            )}
+          </div>
         )}
 
         <ExploreMoreButton />
