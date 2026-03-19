@@ -3,6 +3,7 @@ import { api } from "../api.js";
 
 export default function AdminPackages() {
   const [packagesList, setPackagesList] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   /* ------------------------------
        LOAD ALL PACKAGES
@@ -11,9 +12,19 @@ export default function AdminPackages() {
     const loadPackages = async () => {
       try {
         const res = await api.get("/api/admin/packages");
-        setPackagesList(res.data);
+
+        console.log("📦 ADMIN PACKAGES:", res.data); // 🔥 DEBUG
+
+        // ✅ FIX: handle both formats
+        const data = Array.isArray(res.data)
+          ? res.data
+          : res.data.packages || [];
+
+        setPackagesList(data);
       } catch (err) {
-        console.error("LOAD ERROR:", err);
+        console.error("❌ LOAD ERROR:", err);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -30,7 +41,7 @@ export default function AdminPackages() {
       await api.delete(`/api/admin/packages/${id}`);
       setPackagesList((prev) => prev.filter((p) => p._id !== id));
     } catch (err) {
-      console.error("Delete failed:", err);
+      console.error("❌ Delete failed:", err);
       alert("Failed to delete package");
     }
   };
@@ -48,16 +59,19 @@ export default function AdminPackages() {
         </a>
       </div>
 
-      <div className="space-y-4">
-        {packagesList.length === 0 ? (
-          <p className="text-gray-500 text-sm">No packages found.</p>
-        ) : (
-          packagesList.map((pkg) => (
+      {/* 🔄 LOADING STATE */}
+      {loading ? (
+        <p className="text-gray-500 text-sm">Loading packages...</p>
+      ) : packagesList.length === 0 ? (
+        <p className="text-gray-500 text-sm">No packages found.</p>
+      ) : (
+        <div className="space-y-4">
+          {packagesList.map((pkg) => (
             <div
               key={pkg._id}
               className="flex items-center bg-white border rounded-xl p-4 shadow-sm"
             >
-              {/* IMAGE FALLBACK */}
+              {/* IMAGE */}
               <img
                 src={pkg.images?.[0] || "/no-image.png"}
                 alt={pkg.title}
@@ -104,9 +118,9 @@ export default function AdminPackages() {
                 </button>
               </div>
             </div>
-          ))
-        )}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
