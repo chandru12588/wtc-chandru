@@ -28,7 +28,7 @@ export default function Home() {
     (async () => {
       try {
         const pkg = await axios.get(`${API}/api/packages`);
-        const host = await axios.get(`${API}/api/host/listings/all`);
+        const host = await axios.get(`${API}/api/host/listings`);
         const merged = [...pkg.data, ...host.data];
 
         setAllTrips(merged);
