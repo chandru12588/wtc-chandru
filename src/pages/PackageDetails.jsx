@@ -24,7 +24,11 @@ function getDescriptionPoints(description) {
 export default function PackageDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
+
   const [pkg, setPkg] = useState(null);
+  const [loading, setLoading] = useState(true);   // ✅ added
+  const [error, setError] = useState(false);      // ✅ added
+
   const [showSlider, setShowSlider] = useState(false);
   const [slideIndex, setSlideIndex] = useState(0);
 
@@ -34,14 +38,40 @@ export default function PackageDetails() {
         const res = await api.get(`/api/packages/${id}`);
         setPkg(res.data);
       } catch (err) {
-        console.log(err);
+        console.log("PACKAGE ERROR:", err);
+
+        // 🔥 IMPORTANT FIX
+        setError(true);
+      } finally {
+        setLoading(false); // 🔥 stop infinite loading
       }
     };
 
     load();
   }, [id]);
 
-  if (!pkg) return <div className="p-6">Loading...</div>;
+  // ✅ Loading UI
+  if (loading) {
+    return <div className="p-6">Loading...</div>;
+  }
+
+  // ✅ Error UI (NO MORE STUCK SCREEN 🔥)
+  if (error || !pkg) {
+    return (
+      <div className="p-6 text-center">
+        <h2 className="text-xl font-semibold text-red-500">
+          Package not found or removed ❌
+        </h2>
+
+        <button
+          onClick={() => navigate("/trips")}
+          className="mt-4 bg-indigo-600 text-white px-4 py-2 rounded-lg"
+        >
+          Go Back
+        </button>
+      </div>
+    );
+  }
 
   const images = pkg.images?.length ? pkg.images : [pkg.image];
   const serviceType = inferServiceType(pkg);
@@ -51,7 +81,7 @@ export default function PackageDetails() {
     <div className="mx-auto max-w-6xl p-4 md:p-8">
       <button
         onClick={() => navigate("/trips")}
-        className="mb-4 flex items-center gap-2 font-semibold text-indigo-600 transition hover:scale-105 hover:text-indigo-800"
+        className="mb-4 flex items-center gap-2 font-semibold text-indigo-600"
       >
         Back to Trips
       </button>
@@ -89,87 +119,21 @@ export default function PackageDetails() {
         ))}
       </div>
 
-      {images.length > 5 && (
-        <button
-          onClick={() => {
-            setSlideIndex(0);
-            setShowSlider(true);
-          }}
-          className="mt-3 text-gray-700 underline"
-        >
-          View all photos ({images.length})
-        </button>
-      )}
-
-      {showSlider && (
-        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/90">
-          <button
-            className="absolute right-4 top-4 text-3xl text-white"
-            onClick={() => setShowSlider(false)}
-          >
-            X
-          </button>
-
-          <img
-            src={images[slideIndex]}
-            alt={`${pkg.title} ${slideIndex + 1}`}
-            className="max-h-[80vh] rounded-xl"
-          />
-
-          <button
-            className="absolute left-6 text-4xl text-white"
-            onClick={() =>
-              setSlideIndex((slideIndex - 1 + images.length) % images.length)
-            }
-          >
-            {"<"}
-          </button>
-
-          <button
-            className="absolute right-6 text-4xl text-white"
-            onClick={() => setSlideIndex((slideIndex + 1) % images.length)}
-          >
-            {">"}
-          </button>
-        </div>
-      )}
-
-      <div className="mt-10 grid grid-cols-1 gap-10 md:grid-cols-[minmax(0,1fr)_420px] md:items-stretch">
-        <div className="min-w-0 md:min-h-0">
+      <div className="mt-10 grid grid-cols-1 gap-10 md:grid-cols-[minmax(0,1fr)_420px]">
+        <div>
           <h2 className="text-2xl font-semibold">About this trip</h2>
-          {serviceType === "bike" ? (
-            <div className="mt-4 flex rounded-2xl border border-stone-200 bg-white p-6 shadow-sm md:h-[860px] md:min-h-0 md:flex-col">
-              <div className="space-y-4 md:min-h-0 md:flex-1 md:overflow-y-auto md:pr-3">
-                {descriptionPoints.map((point, index) => (
-                  <p
-                    key={`${index}-${point}`}
-                    className="border-b border-stone-100 pb-4 text-[15px] leading-8 text-stone-700 last:border-b-0 last:pb-0"
-                  >
-                    {point}
-                  </p>
-                ))}
-              </div>
-            </div>
-          ) : (
-            <p className="mt-3 whitespace-pre-line leading-relaxed text-gray-700">
-              {pkg.description}
-            </p>
-          )}
+
+          <p className="mt-3 whitespace-pre-line text-gray-700">
+            {pkg.description}
+          </p>
 
           <div className="mt-4 text-3xl font-bold text-indigo-600">
             Rs. {pkg.price}
           </div>
         </div>
 
-        <div className="min-w-0">
-          <div className="md:h-full">
-            <BookingForm
-              pkg={pkg}
-              containerClassName={
-                serviceType === "bike" ? "md:h-[860px]" : ""
-              }
-            />
-          </div>
+        <div>
+          <BookingForm pkg={pkg} />
         </div>
       </div>
     </div>
