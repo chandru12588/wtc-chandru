@@ -16,7 +16,9 @@ const API = import.meta.env.VITE_API_URL;
 
 export default function Trips() {
   const [searchParams] = useSearchParams();
-  const service = searchParams.get("service") || "all";
+
+  // ✅ FIX 1: Make service reactive
+  const [service, setService] = useState("all");
 
   const [trips, setTrips] = useState([]);
   const [filtered, setFiltered] = useState([]);
@@ -24,6 +26,16 @@ export default function Trips() {
   const [activeFilter, setActiveFilter] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+
+  /* ============================================
+        GET SERVICE FROM URL (🔥 FIXED)
+  ============================================ */
+  useEffect(() => {
+    const param = (searchParams.get("service") || "all").toLowerCase();
+    setService(param);
+
+    console.log("SERVICE PARAM:", param); // 🔥 debug
+  }, [searchParams]);
 
   /* ============================================
         LOAD DATA
@@ -52,7 +64,6 @@ export default function Trips() {
 
         setActiveFilter(null);
         setActiveCategory("all");
-
       } catch (err) {
         console.error("Trips load error:", err);
       } finally {
@@ -64,7 +75,7 @@ export default function Trips() {
   }, []);
 
   /* ============================================
-      SERVICE FILTER (🔥 FIXED)
+      SERVICE FILTER (🔥 FINAL FIX)
   ============================================ */
   const matchesService = (trip) => {
     const category = String(trip.category || "").toLowerCase();
@@ -74,15 +85,29 @@ export default function Trips() {
     if (service === "host") return trip.isHostListing;
 
     if (service === "bike") {
-      return type === "bike" || category.includes("bike") || title.includes("bike");
+      return (
+        type === "bike" ||
+        category.includes("bike") ||
+        title.includes("bike")
+      );
     }
 
     if (service === "guide") {
-      return type === "guide" || category.includes("guide") || title.includes("guide");
+      return (
+        type === "guide" ||
+        category.includes("guide") ||
+        title.includes("guide") ||
+        category.includes("tour") ||   // 🔥 important
+        title.includes("tour")
+      );
     }
 
     if (service === "driver") {
-      return type === "driver" || category.includes("driver") || title.includes("driver");
+      return (
+        type === "driver" ||
+        category.includes("driver") ||
+        title.includes("driver")
+      );
     }
 
     return true;
