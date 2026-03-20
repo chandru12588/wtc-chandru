@@ -39,7 +39,6 @@ export default function Trips() {
           isHostListing: false,
         }));
 
-        // ✅ FIXED HOST API
         const hostRes = await axios.get(`${API}/api/host/listings/all`);
         const hostTrips = hostRes.data.map((l) => ({
           ...l,
@@ -51,7 +50,6 @@ export default function Trips() {
         setTrips(finalTrips);
         setFiltered(finalTrips);
 
-        // ✅ RESET FILTERS
         setActiveFilter(null);
         setActiveCategory("all");
 
@@ -66,18 +64,35 @@ export default function Trips() {
   }, []);
 
   /* ============================================
+      SERVICE FILTER (🔥 FIXED)
+  ============================================ */
+  const matchesService = (trip) => {
+    const category = String(trip.category || "").toLowerCase();
+    const title = String(trip.title || "").toLowerCase();
+    const type = inferServiceType(trip);
+
+    if (service === "host") return trip.isHostListing;
+
+    if (service === "bike") {
+      return type === "bike" || category.includes("bike") || title.includes("bike");
+    }
+
+    if (service === "guide") {
+      return type === "guide" || category.includes("guide") || title.includes("guide");
+    }
+
+    if (service === "driver") {
+      return type === "driver" || category.includes("driver") || title.includes("driver");
+    }
+
+    return true;
+  };
+
+  /* ============================================
       APPLY FILTERS
   ============================================ */
   useEffect(() => {
     if (!trips.length) return;
-
-    const matchesService = (trip) => {
-      if (service === "host") return trip.isHostListing;
-      if (service === "bike") return inferServiceType(trip) === "bike";
-      if (service === "guide") return inferServiceType(trip) === "guide";
-      if (service === "driver") return inferServiceType(trip) === "driver";
-      return true;
-    };
 
     let list = trips.filter(matchesService);
 
@@ -155,38 +170,30 @@ export default function Trips() {
   return (
     <div className="max-w-7xl mx-auto pt-24 px-4 pb-16">
 
-      {/* CATEGORY BAR */}
       <CategoriesBar
         onCategorySelect={handleCategoryClick}
         onOpenFilter={() => setIsFilterOpen(true)}
       />
 
-      {/* 🔥 PREMIUM HEADER */}
       <div className="backdrop-blur-md bg-white/60 p-4 rounded-xl shadow-sm mt-6 mb-6">
-        <h1 className="text-3xl font-bold">
-          {activeCategory === "all"
-            ? serviceTitle
-            : `${String(activeCategory).toUpperCase()} Camps`}
-        </h1>
+        <h1 className="text-3xl font-bold">{serviceTitle}</h1>
       </div>
 
-      {/* 🔥 PREMIUM GRID */}
       {loading ? (
         <SkeletonGrid />
       ) : filtered.length === 0 ? (
         <EmptyState />
       ) : (
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
           className="grid sm:grid-cols-2 md:grid-cols-3 gap-6"
         >
           {filtered.map((trip, i) => (
             <motion.div
               key={trip._id}
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.05 }}
             >
               <TripCard trip={trip} />
@@ -195,10 +202,8 @@ export default function Trips() {
         </motion.div>
       )}
 
-      {/* MOBILE FILTER */}
       <StickyFilterBar onOpenFilter={() => setIsFilterOpen(true)} />
 
-      {/* FILTER DRAWER */}
       <FilterDrawer
         isOpen={isFilterOpen}
         onClose={() => setIsFilterOpen(false)}
