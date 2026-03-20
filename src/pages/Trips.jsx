@@ -1,11 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import axios from "axios";
+import { motion } from "framer-motion";
 
 import TripCard from "../components/TripCard";
 import CategoriesBar from "../components/CategoriesBar";
 import StickyFilterBar from "../components/StickyFilterBar";
 import FilterDrawer from "../components/FilterDrawer";
+import SkeletonGrid from "../components/SkeletonGrid";
+import EmptyState from "../components/EmptyState";
+
 import { inferServiceType } from "../utils/serviceType";
 
 const API = import.meta.env.VITE_API_URL;
@@ -22,21 +26,20 @@ export default function Trips() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   /* ============================================
-        LOAD ADMIN PACKAGES + HOST LISTINGS
+        LOAD DATA
   ============================================ */
   useEffect(() => {
     const loadTrips = async () => {
       try {
         setLoading(true);
 
-        // ✅ ADMIN PACKAGES
         const pkgRes = await axios.get(`${API}/api/packages`);
         const adminTrips = pkgRes.data.map((p) => ({
           ...p,
           isHostListing: false,
         }));
 
-        // ✅ FIXED API (IMPORTANT 🔥)
+        // ✅ FIXED HOST API
         const hostRes = await axios.get(`${API}/api/host/listings/all`);
         const hostTrips = hostRes.data.map((l) => ({
           ...l,
@@ -45,11 +48,10 @@ export default function Trips() {
 
         const finalTrips = [...adminTrips, ...hostTrips];
 
-        // ✅ SET STATE
         setTrips(finalTrips);
         setFiltered(finalTrips);
 
-        // ✅ RESET FILTERS (VERY IMPORTANT)
+        // ✅ RESET FILTERS
         setActiveFilter(null);
         setActiveCategory("all");
 
@@ -64,10 +66,10 @@ export default function Trips() {
   }, []);
 
   /* ============================================
-      APPLY FILTERS SAFELY
+      APPLY FILTERS
   ============================================ */
   useEffect(() => {
-    if (!trips.length) return; // ✅ prevents empty bug
+    if (!trips.length) return;
 
     const matchesService = (trip) => {
       if (service === "host") return trip.isHostListing;
@@ -79,7 +81,6 @@ export default function Trips() {
 
     let list = trips.filter(matchesService);
 
-    // ✅ CATEGORY
     if (activeFilter?.type === "category") {
       list = list.filter(
         (t) =>
@@ -88,7 +89,6 @@ export default function Trips() {
       );
     }
 
-    // ✅ REGION (IMPROVED)
     if (activeFilter?.type === "region") {
       list = list.filter((t) => {
         const region = String(t.region || "").toLowerCase();
@@ -100,7 +100,6 @@ export default function Trips() {
       });
     }
 
-    // ✅ TAGS
     if (activeFilter?.type === "tags") {
       list = list.filter(
         (t) =>
@@ -113,7 +112,6 @@ export default function Trips() {
       );
     }
 
-    // ✅ STAY TYPE
     if (activeFilter?.type === "stayType") {
       list = list.filter(
         (t) =>
@@ -132,7 +130,7 @@ export default function Trips() {
     if (!selection || !selection.type) {
       setActiveCategory("all");
       setActiveFilter(null);
-      setFiltered(trips); // ✅ RESET RESULTS
+      setFiltered(trips);
       return;
     }
 
@@ -156,36 +154,48 @@ export default function Trips() {
 
   return (
     <div className="max-w-7xl mx-auto pt-24 px-4 pb-16">
-      
+
       {/* CATEGORY BAR */}
       <CategoriesBar
         onCategorySelect={handleCategoryClick}
         onOpenFilter={() => setIsFilterOpen(true)}
       />
 
-      {/* HEADER */}
-      <h1 className="text-3xl font-bold mt-6 mb-6">
-        {activeCategory === "all"
-          ? serviceTitle
-          : `${String(activeCategory).toUpperCase()} Camps`}
-      </h1>
+      {/* 🔥 PREMIUM HEADER */}
+      <div className="backdrop-blur-md bg-white/60 p-4 rounded-xl shadow-sm mt-6 mb-6">
+        <h1 className="text-3xl font-bold">
+          {activeCategory === "all"
+            ? serviceTitle
+            : `${String(activeCategory).toUpperCase()} Camps`}
+        </h1>
+      </div>
 
-      {/* TRIPS GRID */}
+      {/* 🔥 PREMIUM GRID */}
       {loading ? (
-        <p className="text-center text-gray-500">Loading trips...</p>
+        <SkeletonGrid />
       ) : filtered.length === 0 ? (
-        <p className="text-center text-gray-500">
-          No trips found.
-        </p>
+        <EmptyState />
       ) : (
-        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
-          {filtered.map((trip) => (
-            <TripCard key={trip._id} trip={trip} />
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="grid sm:grid-cols-2 md:grid-cols-3 gap-6"
+        >
+          {filtered.map((trip, i) => (
+            <motion.div
+              key={trip._id}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: i * 0.05 }}
+            >
+              <TripCard trip={trip} />
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       )}
 
-      {/* MOBILE FILTER BAR */}
+      {/* MOBILE FILTER */}
       <StickyFilterBar onOpenFilter={() => setIsFilterOpen(true)} />
 
       {/* FILTER DRAWER */}
