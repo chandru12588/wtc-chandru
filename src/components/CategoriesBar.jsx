@@ -1,8 +1,17 @@
 import React, { useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Mountain, Trees, CloudSun, Backpack, Building2, Umbrella, Castle, Bike,
   Users, UsersRound, Timer, Home, Tent, Warehouse, TreePine, SlidersHorizontal
 } from "lucide-react";
+
+// 🔥 SERVICE BUTTONS (FIX)
+const services = [
+  { name: "Guide", value: "guide", icon: Users },
+  { name: "Bike", value: "bike", icon: Bike },
+  { name: "Driver", value: "driver", icon: UsersRound },
+  { name: "Stays", value: "host", icon: Home },
+];
 
 // --- MAIN CATEGORY BUTTONS ---
 const categories = [
@@ -14,12 +23,8 @@ const categories = [
   { name: "Beach", icon: Umbrella, filterType:"category", value:"Beach" },
   { name: "Desert", icon: CloudSun, filterType:"category", value:"Desert" },
   { name: "New Year Trip", icon: Timer, filterType:"category", value:"New Year Trip" },
-
-  // Region names now match DB properly
   { name: "Chennai", icon: Castle, filterType:"region", value:"TAMILNADU" },
   { name: "Bangalore", icon: Building2, filterType:"region", value:"KARNATAKA" },
-
-  // Tags
   { name: "Family", icon: Users, filterType:"tags", value:"Family" },
   { name: "Friends", icon: UsersRound, filterType:"tags", value:"Friends" },
 ];
@@ -38,7 +43,9 @@ const stayTypes = [
 
 export default function CategoriesBar({ onCategorySelect, onOpenFilter }) {
 
+  const navigate = useNavigate(); // 🔥 IMPORTANT
   const scrollRef = useRef(null);
+
   const scrollLeft  = () => scrollRef.current.scrollBy({ left:-300, behavior:"smooth" });
   const scrollRight = () => scrollRef.current.scrollBy({ left:300, behavior:"smooth" });
 
@@ -55,6 +62,21 @@ export default function CategoriesBar({ onCategorySelect, onOpenFilter }) {
       {/* Scrollable */}
       <div ref={scrollRef} className="flex gap-4 overflow-x-auto flex-1 scrollbar-hide">
 
+        {/* 🔥 SERVICE BUTTONS (MAIN FIX) */}
+        {services.map((s,i)=>{
+          const Icon = s.icon;
+          return (
+            <div key={"service-"+i}
+              onClick={() => navigate(`/trips?service=${s.value}`)} // 🔥 FIX
+              className="min-w-[110px] h-[90px] bg-indigo-50 rounded-xl shadow 
+              flex flex-col justify-center items-center cursor-pointer
+              hover:bg-indigo-100 hover:scale-105 transition text-center">
+              <Icon className="text-indigo-600" size={22}/>
+              <p className="text-xs font-semibold mt-1">{s.name}</p>
+            </div>
+          );
+        })}
+
         {/* CATEGORY BUTTONS */}
         {categories.map((c,i)=> {
           const Icon = c.icon;
@@ -62,7 +84,7 @@ export default function CategoriesBar({ onCategorySelect, onOpenFilter }) {
             <div key={i}
               onClick={()=>onCategorySelect({
                 type: c.filterType,
-                value: c.value.toLowerCase()   // ensure lowercase
+                value: c.value.toLowerCase()
               })}
               className="min-w-[110px] h-[90px] bg-white rounded-xl shadow 
               flex flex-col justify-center items-center cursor-pointer
@@ -80,7 +102,7 @@ export default function CategoriesBar({ onCategorySelect, onOpenFilter }) {
             <div key={i}
               onClick={()=>onCategorySelect({
                 type:"stayType",
-                value:s.name.toLowerCase()     // lowercase match DB
+                value:s.name.toLowerCase()
               })}
               className="min-w-[110px] h-[90px] bg-orange-50 rounded-xl shadow 
               flex flex-col justify-center items-center cursor-pointer
