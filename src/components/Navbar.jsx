@@ -69,6 +69,7 @@ export default function Navbar() {
 
   const handleLogout = () => {
     localStorage.removeItem("wtc_user");
+    localStorage.removeItem("wtc_token");
     setUser(null);
     navigate("/");
   };

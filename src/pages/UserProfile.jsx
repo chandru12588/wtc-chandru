@@ -19,6 +19,9 @@ export default function UserProfile() {
       try {
         setLoading(true);
         const res = await api.get("/api/auth/me");
+        if (res.data?.token) {
+          localStorage.setItem("wtc_token", res.data.token);
+        }
         const user = res.data?.user || {};
         setForm({
           name: user.name || "",
@@ -53,6 +56,9 @@ export default function UserProfile() {
         dob: form.dob || null,
       });
 
+      if (res.data?.token) {
+        localStorage.setItem("wtc_token", res.data.token);
+      }
       const user = res.data?.user || {};
       localStorage.setItem("wtc_user", JSON.stringify(user));
       setMessage("Profile updated successfully");
