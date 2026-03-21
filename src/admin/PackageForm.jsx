@@ -429,7 +429,7 @@ export default function PackageForm() {
                     </p>
                   ) : null}
                   <div className="mt-3 flex flex-wrap gap-2">
-                    <label className="cursor-pointer rounded bg-indigo-50 px-3 py-2 text-sm font-medium text-indigo-700">
+                    <label className="cursor-pointer rounded bg-emerald-600 px-3 py-2 text-sm font-medium text-white hover:bg-emerald-700">
                       Change Picture
                       <input
                         type="file"

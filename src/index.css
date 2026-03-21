@@ -44,6 +44,62 @@ a svg,
   background: #f97316;
 }
 
+input[type="file"]::file-selector-button {
+  background: #16a34a;
+  color: #ffffff;
+  border: 0;
+  border-radius: 0.5rem;
+  padding: 0.45rem 0.85rem;
+  margin-right: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+input[type="file"]::file-selector-button:hover {
+  background: #15803d;
+}
+
+input[type="file"]::-webkit-file-upload-button {
+  background: #16a34a;
+  color: #ffffff;
+  border: 0;
+  border-radius: 0.5rem;
+  padding: 0.45rem 0.85rem;
+  margin-right: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+input[type="file"]::-webkit-file-upload-button:hover {
+  background: #15803d;
+}
+
+@keyframes brandWave {
+  0% {
+    background-position: 0% 50%;
+    text-shadow: 0 0 8px rgba(52, 211, 153, 0.35), 0 4px 10px rgba(15, 23, 42, 0.25);
+    transform: translateY(0);
+  }
+  50% {
+    background-position: 100% 50%;
+    text-shadow: 0 0 16px rgba(56, 189, 248, 0.5), 0 5px 12px rgba(15, 23, 42, 0.28);
+    transform: translateY(-1px);
+  }
+  100% {
+    background-position: 0% 50%;
+    text-shadow: 0 0 8px rgba(52, 211, 153, 0.35), 0 4px 10px rgba(15, 23, 42, 0.25);
+    transform: translateY(0);
+  }
+}
+
+.brand-wave-text {
+  background: linear-gradient(90deg, #10b981, #22c55e, #14b8a6, #06b6d4, #10b981);
+  background-size: 240% 240%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: brandWave 3.6s ease-in-out infinite;
+}
 
 
 
