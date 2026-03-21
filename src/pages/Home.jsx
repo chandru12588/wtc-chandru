@@ -43,17 +43,16 @@ export default function Home() {
     })();
   }, []);
 
-  // 🔍 SEARCH
   const handleSearch = ({ location }) => {
     if (!location) return setFilteredTrips(allTrips);
 
     const q = location.toLowerCase();
 
     const result = allTrips.filter(
-      (p) =>
-        inferServiceType(p) === "general" &&
-        (p.location?.toLowerCase().includes(q) ||
-          p.stayType?.toLowerCase().includes(q))
+      (trip) =>
+        inferServiceType(trip) === "general" &&
+        (trip.location?.toLowerCase().includes(q) ||
+          trip.stayType?.toLowerCase().includes(q))
     );
 
     setFilteredTrips(result);
@@ -61,7 +60,6 @@ export default function Home() {
     if (!result.length) alert("No results found");
   };
 
-  // 🎯 CATEGORY FILTER
   const handleCategoryFilter = (filter) => {
     let result = [...allTrips];
 
@@ -72,27 +70,25 @@ export default function Home() {
 
     if (filter.type === "category") {
       result = result.filter(
-        (p) => p.category?.toLowerCase() === filter.value.toLowerCase()
+        (trip) => trip.category?.toLowerCase() === filter.value.toLowerCase()
       );
     }
 
     if (filter.type === "region") {
       result = result.filter(
-        (p) => p.location?.toLowerCase() === filter.value.toLowerCase()
+        (trip) => trip.location?.toLowerCase() === filter.value.toLowerCase()
       );
     }
 
     if (filter.type === "tags") {
-      result = result.filter((p) =>
-        p.tags?.some(
-          (t) => t.toLowerCase() === filter.value.toLowerCase()
-        )
+      result = result.filter((trip) =>
+        trip.tags?.some((tag) => tag.toLowerCase() === filter.value.toLowerCase())
       );
     }
 
     if (filter.type === "stayType") {
       result = result.filter(
-        (p) => p.stayType?.toLowerCase() === filter.value.toLowerCase()
+        (trip) => trip.stayType?.toLowerCase() === filter.value.toLowerCase()
       );
     }
 
@@ -101,23 +97,48 @@ export default function Home() {
     if (!result.length) alert("No stays found for this category");
   };
 
-  // 📅 TRIP TABS
   const handleTripTab = (type) => {
-    if (type === "all") return setFilteredTrips(allTrips);
+    if (type === "all") {
+      setFilteredTrips(allTrips);
+      return;
+    }
 
-    const today = new Date();
+    const toDateOnly = (value) => {
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return null;
+      return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    };
+
+    const today = toDateOnly(new Date());
+    if (!today) return setFilteredTrips([]);
+
+    const weekStart = new Date(today);
+    weekStart.setDate(today.getDate() - today.getDay());
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekStart.getDate() + 6);
+
+    const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+    const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0);
 
     const result = allTrips.filter((trip) => {
-      if (!trip.startDate) return false;
+      const sourceDate =
+        trip.startDate ||
+        (Array.isArray(trip.availableDates) ? trip.availableDates[0] : null) ||
+        trip.availableFrom ||
+        null;
 
-      const diff = Math.ceil(
-        (new Date(trip.startDate) - today) / (1000 * 60 * 60 * 24)
-      );
+      const tripDate = toDateOnly(sourceDate);
+      if (!tripDate) return false;
 
-      return (
-        (type === "week" && diff >= 0 && diff <= 7) ||
-        (type === "month" && diff >= 0 && diff <= 30)
-      );
+      if (type === "week") {
+        return tripDate >= weekStart && tripDate <= weekEnd;
+      }
+
+      if (type === "month") {
+        return tripDate >= monthStart && tripDate <= monthEnd;
+      }
+
+      return false;
     });
 
     setFilteredTrips(result);
@@ -125,44 +146,43 @@ export default function Home() {
     if (!result.length) alert("No upcoming trips found");
   };
 
-  // 🎛 FILTER DRAWER
   const handleDrawerApply = (filters) => {
     let result = [...allTrips];
 
     if (filters.state) {
       result = result.filter(
-        (p) => p.location?.toLowerCase() === filters.state.toLowerCase()
+        (trip) => trip.location?.toLowerCase() === filters.state.toLowerCase()
       );
     }
 
     if (filters.stayType) {
       result = result.filter(
-        (p) => p.stayType?.toLowerCase() === filters.stayType.toLowerCase()
+        (trip) => trip.stayType?.toLowerCase() === filters.stayType.toLowerCase()
       );
     }
 
     if (filters.theme) {
       result = result.filter(
-        (p) => p.category?.toLowerCase() === filters.theme.toLowerCase()
+        (trip) => trip.category?.toLowerCase() === filters.theme.toLowerCase()
       );
     }
 
     if (filters.activity) {
-      result = result.filter((p) =>
-        p.tags?.some(
-          (t) => t.toLowerCase() === filters.activity.toLowerCase()
+      result = result.filter((trip) =>
+        trip.tags?.some(
+          (tag) => tag.toLowerCase() === filters.activity.toLowerCase()
         )
       );
     }
 
     if (filters.date) {
       result = result.filter(
-        (p) => new Date(p.startDate) >= new Date(filters.date)
+        (trip) => new Date(trip.startDate) >= new Date(filters.date)
       );
     }
 
     if (filters.instant) {
-      result = result.filter((p) => p.instantBooking);
+      result = result.filter((trip) => trip.instantBooking);
     }
 
     setFilteredTrips(result);
@@ -173,7 +193,6 @@ export default function Home() {
 
   return (
     <div className="w-full overflow-x-hidden">
-      {/* HERO */}
       <section className="relative w-full h-[78vh] md:h-[85vh] overflow-hidden">
         <HeroSlider />
 
@@ -204,16 +223,13 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CATEGORY */}
       <CategoriesBar
         onCategorySelect={handleCategoryFilter}
         onOpenFilter={() => setIsFilterOpen(true)}
       />
 
-      {/* TABS */}
       <TripTabs onTabSelect={handleTripTab} />
 
-      {/* TRIPS */}
       <section className="mx-auto max-w-7xl px-5 py-12">
         <h2 className="mb-6 text-2xl font-semibold">Featured Trips</h2>
 
@@ -222,9 +238,7 @@ export default function Home() {
         ) : (
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
             {filteredTrips.length ? (
-              filteredTrips.map((t) => (
-                <TripCard key={t._id} trip={t} />
-              ))
+              filteredTrips.map((trip) => <TripCard key={trip._id} trip={trip} />)
             ) : (
               <p>No results found</p>
             )}

@@ -18,25 +18,25 @@ export default function UserBookings() {
     try {
       setLoading(true);
 
-      const [pkgRes, hostRes, pillionRes] = await Promise.all([
+      const [pkgRes, hostRes, pillionRes] = await Promise.allSettled([
         axios.get(`${API}/api/bookings/user/${userId}`),
         axios.get(`${API}/api/host/bookings/user/${userId}`),
         axios.get(`${API}/api/pillion-requests/user/${userId}`),
       ]);
 
-      const packages = pkgRes.data.map((b) => ({
+      const packages = (pkgRes.status === "fulfilled" ? pkgRes.value.data : []).map((b) => ({
         ...b,
         source: "package",
         finalStatus: b.status,
       }));
 
-      const hosts = hostRes.data.map((b) => ({
+      const hosts = (hostRes.status === "fulfilled" ? hostRes.value.data : []).map((b) => ({
         ...b,
         source: "host",
         finalStatus: b.bookingStatus,
       }));
 
-      const pillionRequests = pillionRes.data.map((b) => ({
+      const pillionRequests = (pillionRes.status === "fulfilled" ? pillionRes.value.data : []).map((b) => ({
         ...b,
         source: "pillion",
         finalStatus: b.status,
