@@ -29,6 +29,13 @@ const [message, setMessage] = useState("");
 const [messageType, setMessageType] = useState("error");
 const [loading, setLoading] = useState(false);
 
+const setUserSession = (token, user) => {
+localStorage.removeItem("adminToken");
+localStorage.removeItem("admin");
+localStorage.setItem("wtc_token", token);
+localStorage.setItem("wtc_user", JSON.stringify(user));
+};
+
   useEffect(() => {
 const params = new URLSearchParams(window.location.search);
   const token = params.get("token");
@@ -38,7 +45,9 @@ const params = new URLSearchParams(window.location.search);
   setMode("signup");
   }
 
-  if (token) {
+if (token) {
+localStorage.removeItem("adminToken");
+localStorage.removeItem("admin");
 localStorage.setItem("wtc_token", token);
 
 fetch(`${API}/api/auth/me`, {
@@ -127,8 +136,7 @@ body: JSON.stringify({ email: form.email, otp })
 const data = await res.json();
 if (!res.ok) throw new Error(data.message);
 
-localStorage.setItem("wtc_token", data.token);
-localStorage.setItem("wtc_user", JSON.stringify(data.user));
+setUserSession(data.token, data.user);
 navigate("/");
 } catch (err) {
 showFeedback(err.message);
@@ -153,8 +161,7 @@ body: JSON.stringify({ email: form.email, password: form.password })
 const data = await res.json();
 if (!res.ok) throw new Error(data.message);
 
-localStorage.setItem("wtc_token", data.token);
-localStorage.setItem("wtc_user", JSON.stringify(data.user));
+setUserSession(data.token, data.user);
 navigate("/");
 } catch (err) {
 showFeedback(err.message);
@@ -185,8 +192,7 @@ password: form.password
 const data = await res.json();
 if (!res.ok) throw new Error(data.message);
 
-localStorage.setItem("wtc_token", data.token);
-localStorage.setItem("wtc_user", JSON.stringify(data.user));
+setUserSession(data.token, data.user);
 navigate("/");
 } catch (err) {
 showFeedback(err.message);

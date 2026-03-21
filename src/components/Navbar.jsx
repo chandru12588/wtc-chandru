@@ -21,7 +21,6 @@ export default function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
   const isAdminPage = location.pathname.startsWith("/admin");
-  const OWNER_EMAIL = "chandru.balasub12588@gmail.com";
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileServicesOpen, setMobileServicesOpen] = useState(false);
@@ -31,6 +30,7 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [user, setUser] = useState(null);
   const [hostUser, setHostUser] = useState(null);
+  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
 
   const hostRef = useRef(null);
   const servicesRef = useRef(null);
@@ -41,6 +41,7 @@ export default function Navbar() {
     const saved = localStorage.getItem("wtc_user");
     setUser(saved ? JSON.parse(saved) : null);
     setHostUser(getHostUser());
+    setIsAdminLoggedIn(Boolean(localStorage.getItem("adminToken")));
   }, [location.pathname]);
 
   /** Scroll shrink effect */
@@ -85,10 +86,6 @@ export default function Navbar() {
     setMobileOpen(false);
     setMobileServicesOpen(false);
   };
-
-  const isOwnerUser =
-    !!user?.email &&
-    String(user.email).trim().toLowerCase() === OWNER_EMAIL.toLowerCase();
 
   if (isAdminPage) return null;
 
@@ -207,9 +204,15 @@ export default function Navbar() {
               </>
             )}
 
-            {isOwnerUser && (
+            {!user && (
               <Link to="/admin/login" className="bg-gray-800 text-white px-4 py-1.5 rounded-full text-xs">
                 Admin
+              </Link>
+            )}
+
+            {isAdminLoggedIn && (
+              <Link to="/admin" className="bg-gray-800 text-white px-4 py-1.5 rounded-full text-xs">
+                Admin Panel
               </Link>
             )}
 
@@ -387,7 +390,7 @@ export default function Navbar() {
                 <UserPlus size={18} /> Bike Rider Register
               </NavLink>
 
-              {isOwnerUser && (
+              {!user && (
                 <NavLink to="/admin/login" onClick={closeMobileMenu}>
                   <ShieldCheck size={18} /> Admin
                 </NavLink>
