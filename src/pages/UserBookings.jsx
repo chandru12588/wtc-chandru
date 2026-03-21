@@ -155,7 +155,7 @@ export default function UserBookings() {
   }, [bookings, activeFilter]);
 
   const goToFavorite = (fav) => {
-    if (fav.itemType === "listing") navigate(`/host-listing/${fav.itemId}`);
+    if (fav.itemType === "listing" || fav.serviceType === "host") navigate(`/host-listing/${fav.itemId}`);
     else navigate(`/packages/${fav.itemId}`);
   };
 

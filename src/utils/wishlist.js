@@ -32,7 +32,7 @@ export const toggleFavorite = async (trip) => {
     location: trip?.location || "",
     image: Array.isArray(trip?.images) ? trip.images[0] || "" : "",
     price: Number(trip?.price || 0),
-    serviceType: trip?.serviceType || "general",
+    serviceType: trip?.isHostListing ? "host" : trip?.serviceType || "general",
   };
 
   if (!item.itemId) return { favorite: false, favorites: [] };

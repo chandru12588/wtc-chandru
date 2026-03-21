@@ -28,9 +28,8 @@ export default function PackageDetails() {
   const navigate = useNavigate();
 
   const [pkg, setPkg] = useState(null);
-  const [loading, setLoading] = useState(true);   // ✅ added
-  const [error, setError] = useState(false);      // ✅ added
-
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [showSlider, setShowSlider] = useState(false);
   const [slideIndex, setSlideIndex] = useState(0);
   const [isFavorite, setIsFavorite] = useState(false);
@@ -41,44 +40,25 @@ export default function PackageDetails() {
         const res = await api.get(`/api/packages/${id}`);
         setPkg(res.data);
       } catch (err) {
-        console.log("PACKAGE ERROR:", err);
+        try {
+          const listingRes = await api.get(`/api/host/listings/${id}`);
+          if (listingRes?.data?._id) {
+            navigate(`/host-listing/${id}`, { replace: true });
+            return;
+          }
+        } catch {
+          // no-op fallback
+        }
 
-        // 🔥 IMPORTANT FIX
+        console.log("PACKAGE ERROR:", err);
         setError(true);
       } finally {
-        setLoading(false); // 🔥 stop infinite loading
+        setLoading(false);
       }
     };
 
     load();
-  }, [id]);
-
-  // ✅ Loading UI
-  if (loading) {
-    return <div className="p-6">Loading...</div>;
-  }
-
-  // ✅ Error UI (NO MORE STUCK SCREEN 🔥)
-  if (error || !pkg) {
-    return (
-      <div className="p-6 text-center">
-        <h2 className="text-xl font-semibold text-red-500">
-          Package not found or removed ❌
-        </h2>
-
-        <button
-          onClick={() => navigate("/trips")}
-          className="mt-4 bg-indigo-600 text-white px-4 py-2 rounded-lg"
-        >
-          Go Back
-        </button>
-      </div>
-    );
-  }
-
-  const images = pkg.images?.length ? pkg.images : [pkg.image];
-  const serviceType = inferServiceType(pkg);
-  const descriptionPoints = getDescriptionPoints(pkg.description);
+  }, [id, navigate]);
 
   useEffect(() => {
     let mounted = true;
@@ -109,6 +89,26 @@ export default function PackageDetails() {
     }
   };
 
+  if (loading) return <div className="p-6">Loading...</div>;
+
+  if (error || !pkg) {
+    return (
+      <div className="p-6 text-center">
+        <h2 className="text-xl font-semibold text-red-500">Package not found or removed</h2>
+        <button
+          onClick={() => navigate("/trips")}
+          className="mt-4 rounded-lg bg-indigo-600 px-4 py-2 text-white"
+        >
+          Go Back
+        </button>
+      </div>
+    );
+  }
+
+  const images = pkg.images?.length ? pkg.images : [pkg.image];
+  const serviceType = inferServiceType(pkg);
+  const descriptionPoints = getDescriptionPoints(pkg.description);
+
   return (
     <div className="mx-auto max-w-6xl p-4 md:p-8">
       <button
@@ -119,9 +119,7 @@ export default function PackageDetails() {
       </button>
 
       <h1 className="text-4xl font-bold">{pkg.title}</h1>
-      <p className="mt-2 text-gray-600">
-        {pkg.region || "Beautiful Destination"}
-      </p>
+      <p className="mt-2 text-gray-600">{pkg.region || "Beautiful Destination"}</p>
 
       <div className="mt-6 grid grid-cols-1 gap-3 md:grid-cols-4">
         <div className="relative row-span-2 md:col-span-2">
@@ -162,14 +160,8 @@ export default function PackageDetails() {
       <div className="mt-10 grid grid-cols-1 gap-10 md:grid-cols-[minmax(0,1fr)_420px]">
         <div>
           <h2 className="text-2xl font-semibold">About this trip</h2>
-
-          <p className="mt-3 whitespace-pre-line text-gray-700">
-            {pkg.description}
-          </p>
-
-          <div className="mt-4 text-3xl font-bold text-indigo-600">
-            Rs. {pkg.price}
-          </div>
+          <p className="mt-3 whitespace-pre-line text-gray-700">{pkg.description}</p>
+          <div className="mt-4 text-3xl font-bold text-indigo-600">Rs. {pkg.price}</div>
         </div>
 
         <div>
