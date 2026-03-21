@@ -16,10 +16,7 @@ const API = import.meta.env.VITE_API_URL;
 
 export default function Trips() {
   const [searchParams] = useSearchParams();
-
-  // ✅ FIX 1: Make service reactive
   const [service, setService] = useState("all");
-
   const [trips, setTrips] = useState([]);
   const [filtered, setFiltered] = useState([]);
   const [activeCategory, setActiveCategory] = useState("all");
@@ -27,41 +24,31 @@ export default function Trips() {
   const [loading, setLoading] = useState(true);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
-  /* ============================================
-        GET SERVICE FROM URL (🔥 FIXED)
-  ============================================ */
   useEffect(() => {
     const param = (searchParams.get("service") || "all").toLowerCase();
     setService(param);
-
-    console.log("SERVICE PARAM:", param); // 🔥 debug
   }, [searchParams]);
 
-  /* ============================================
-        LOAD DATA
-  ============================================ */
   useEffect(() => {
     const loadTrips = async () => {
       try {
         setLoading(true);
 
         const pkgRes = await axios.get(`${API}/api/packages`);
-        const adminTrips = pkgRes.data.map((p) => ({
-          ...p,
+        const adminTrips = pkgRes.data.map((pkg) => ({
+          ...pkg,
           isHostListing: false,
         }));
 
         const hostRes = await axios.get(`${API}/api/host/listings/all`);
-        const hostTrips = hostRes.data.map((l) => ({
-          ...l,
+        const hostTrips = hostRes.data.map((listing) => ({
+          ...listing,
           isHostListing: true,
         }));
 
         const finalTrips = [...adminTrips, ...hostTrips];
-
         setTrips(finalTrips);
         setFiltered(finalTrips);
-
         setActiveFilter(null);
         setActiveCategory("all");
       } catch (err) {
@@ -74,12 +61,12 @@ export default function Trips() {
     loadTrips();
   }, []);
 
-  /* ============================================
-      SERVICE FILTER (🔥 FINAL FIX)
-  ============================================ */
   const matchesService = (trip) => {
     const category = String(trip.category || "").toLowerCase();
     const title = String(trip.title || "").toLowerCase();
+    const tags = Array.isArray(trip.tags)
+      ? trip.tags.map((tag) => String(tag || "").toLowerCase())
+      : [];
     const type = inferServiceType(trip);
 
     if (service === "host") return trip.isHostListing;
@@ -88,17 +75,19 @@ export default function Trips() {
       return (
         type === "bike" ||
         category.includes("bike") ||
-        title.includes("bike")
+        title.includes("bike") ||
+        tags.includes("bike")
       );
     }
 
     if (service === "guide") {
       return (
         type === "guide" ||
-        category.includes("guide") ||
-        title.includes("guide") ||
-        category.includes("tour") ||   // 🔥 important
-        title.includes("tour")
+        (type === "general" &&
+          (category.includes("guide") ||
+            title.includes("guide") ||
+            title.includes("tour guide") ||
+            tags.includes("guide")))
       );
     }
 
@@ -106,16 +95,14 @@ export default function Trips() {
       return (
         type === "driver" ||
         category.includes("driver") ||
-        title.includes("driver")
+        title.includes("driver") ||
+        tags.includes("driver")
       );
     }
 
     return true;
   };
 
-  /* ============================================
-      APPLY FILTERS
-  ============================================ */
   useEffect(() => {
     if (!trips.length) return;
 
@@ -123,16 +110,16 @@ export default function Trips() {
 
     if (activeFilter?.type === "category") {
       list = list.filter(
-        (t) =>
-          String(t.category || "").toLowerCase() ===
+        (trip) =>
+          String(trip.category || "").toLowerCase() ===
           activeFilter.value.toLowerCase()
       );
     }
 
     if (activeFilter?.type === "region") {
-      list = list.filter((t) => {
-        const region = String(t.region || "").toLowerCase();
-        const location = String(t.location || "").toLowerCase();
+      list = list.filter((trip) => {
+        const region = String(trip.region || "").toLowerCase();
+        const location = String(trip.location || "").toLowerCase();
         return (
           region.includes(activeFilter.value.toLowerCase()) ||
           location.includes(activeFilter.value.toLowerCase())
@@ -142,20 +129,18 @@ export default function Trips() {
 
     if (activeFilter?.type === "tags") {
       list = list.filter(
-        (t) =>
-          Array.isArray(t.tags) &&
-          t.tags.some(
-            (tag) =>
-              String(tag).toLowerCase() ===
-              activeFilter.value.toLowerCase()
+        (trip) =>
+          Array.isArray(trip.tags) &&
+          trip.tags.some(
+            (tag) => String(tag).toLowerCase() === activeFilter.value.toLowerCase()
           )
       );
     }
 
     if (activeFilter?.type === "stayType") {
       list = list.filter(
-        (t) =>
-          String(t.stayType || "").toLowerCase() ===
+        (trip) =>
+          String(trip.stayType || "").toLowerCase() ===
           activeFilter.value.toLowerCase()
       );
     }
@@ -163,9 +148,6 @@ export default function Trips() {
     setFiltered(list);
   }, [trips, activeFilter, service]);
 
-  /* ============================================
-      CATEGORY CLICK
-  ============================================ */
   const handleCategoryClick = (selection) => {
     if (!selection || !selection.type) {
       setActiveCategory("all");
@@ -178,9 +160,6 @@ export default function Trips() {
     setActiveFilter(selection);
   };
 
-  /* ============================================
-      TITLE
-  ============================================ */
   const serviceTitle =
     service === "bike"
       ? "Pillion Rider Service"
@@ -194,7 +173,6 @@ export default function Trips() {
 
   return (
     <div className="max-w-7xl mx-auto pt-24 px-4 pb-16">
-
       <CategoriesBar
         onCategorySelect={handleCategoryClick}
         onOpenFilter={() => setIsFilterOpen(true)}
@@ -214,12 +192,12 @@ export default function Trips() {
           animate={{ opacity: 1 }}
           className="grid sm:grid-cols-2 md:grid-cols-3 gap-6"
         >
-          {filtered.map((trip, i) => (
+          {filtered.map((trip, index) => (
             <motion.div
               key={trip._id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.05 }}
+              transition={{ delay: index * 0.05 }}
             >
               <TripCard trip={trip} />
             </motion.div>

@@ -1,53 +1,59 @@
 export function inferServiceType(item) {
   const normalize = (value) => String(value || "").trim().toLowerCase();
+  const hasAny = (value, keywords) =>
+    keywords.some((keyword) => value.includes(keyword));
 
-  // 🔥 1. Direct serviceType (highest priority)
+  const BIKE_KEYWORDS = ["bike", "biker", "pillion", "rider", "ride"];
+  const GUIDE_KEYWORDS = ["guide", "tour guide", "local guide", "guided"];
+  const DRIVER_KEYWORDS = ["driver", "acting driver", "chauffeur"];
+  const HOST_KEYWORDS = ["host", "stay", "listing", "cabin", "camp"];
+  const GENERAL_KEYWORDS = ["general", "package", "trip", "camping", "camp"];
+
   const explicit = normalize(item?.serviceType);
-  if (explicit) return explicit;
+  if (explicit) {
+    if (hasAny(explicit, BIKE_KEYWORDS)) return "bike";
+    if (hasAny(explicit, GUIDE_KEYWORDS)) return "guide";
+    if (hasAny(explicit, DRIVER_KEYWORDS)) return "driver";
+    if (hasAny(explicit, HOST_KEYWORDS)) return "host";
+    if (hasAny(explicit, GENERAL_KEYWORDS)) return "general";
+  }
 
   const category = normalize(item?.category);
   const stayType = normalize(item?.stayType);
   const title = normalize(item?.title);
-
   const tags = Array.isArray(item?.tags)
-    ? item.tags.map((t) => normalize(t))
+    ? item.tags.map((tag) => normalize(tag))
     : [];
+  const tagsText = tags.join(" ");
 
-  // 🏠 HOST
   if (item?.isHostListing) {
     return "host";
   }
 
-  // 🏍 BIKE
   if (
-    category.includes("bike") ||
-    stayType.includes("bike") ||
-    title.includes("bike") ||
-    tags.includes("bike")
+    hasAny(category, BIKE_KEYWORDS) ||
+    hasAny(stayType, BIKE_KEYWORDS) ||
+    hasAny(title, BIKE_KEYWORDS) ||
+    hasAny(tagsText, BIKE_KEYWORDS)
   ) {
     return "bike";
   }
 
-  // 🧑‍🏫 GUIDE (🔥 YOUR MAIN FIX)
   if (
-    category.includes("guide") ||
-    title.includes("guide") ||
-    category.includes("tour") ||   // 🔥 IMPORTANT
-    title.includes("tour") ||      // 🔥 IMPORTANT
-    tags.includes("guide")
+    hasAny(category, GUIDE_KEYWORDS) ||
+    hasAny(title, GUIDE_KEYWORDS) ||
+    hasAny(tagsText, GUIDE_KEYWORDS)
   ) {
     return "guide";
   }
 
-  // 🚗 DRIVER
   if (
-    category.includes("driver") ||
-    title.includes("driver") ||
-    tags.includes("driver")
+    hasAny(category, DRIVER_KEYWORDS) ||
+    hasAny(title, DRIVER_KEYWORDS) ||
+    hasAny(tagsText, DRIVER_KEYWORDS)
   ) {
     return "driver";
   }
 
-  // 🧭 DEFAULT
   return "general";
 }

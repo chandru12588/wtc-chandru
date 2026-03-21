@@ -1,117 +1,93 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { FaEye, FaEyeSlash } from "react-icons/fa";
-import bg1 from "../assets/bg1.jpg";
+import React, { useEffect, useMemo, useState } from "react";
+import { api } from "../api.js";
 
-const API = import.meta.env.VITE_API_URL;
+export default function AdminUsers() {
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [query, setQuery] = useState("");
 
-export default function AdminLogin() {
-  const navigate = useNavigate();
+  useEffect(() => {
+    const loadUsers = async () => {
+      try {
+        setLoading(true);
+        setError("");
+        const res = await api.get("/api/admin/users");
+        setUsers(Array.isArray(res.data) ? res.data : []);
+      } catch (err) {
+        setError(err?.response?.data?.message || "Failed to load users");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
+    loadUsers();
+  }, []);
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setMessage("");
+  const filteredUsers = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return users;
 
-    try {
-      // ✅ FIXED API URL
-      const res = await fetch(`${API}/api/admin/auth/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) throw new Error(data.message);
-
-      // ✅ FIXED TOKEN NAME
-      localStorage.setItem("adminToken", data.token);
-      localStorage.setItem("admin", JSON.stringify(data.admin));
-
-      navigate("/admin");
-    } catch (err) {
-      setMessage(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+    return users.filter((user) => {
+      const name = String(user?.name || "").toLowerCase();
+      const email = String(user?.email || "").toLowerCase();
+      const phone = String(user?.phone || "").toLowerCase();
+      return name.includes(q) || email.includes(q) || phone.includes(q);
+    });
+  }, [users, query]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center relative">
-
-      {/* Background */}
-      <div
-        className="fixed inset-0 -z-10 bg-cover bg-center"
-        style={{
-          backgroundImage: `url(${bg1})`,
-        }}
-      ></div>
-
-      <div className="fixed inset-0 bg-black/40 -z-10"></div>
-
-      {/* Card */}
-      <div className="w-full max-w-md px-6">
-        <div className="bg-white/95 backdrop-blur-lg shadow-2xl rounded-2xl p-8">
-
-          <h2 className="text-2xl font-bold text-center mb-6">
-            Admin Login
-          </h2>
-
-          {message && (
-            <div className="bg-red-100 text-red-700 p-3 mb-4 rounded text-sm">
-              {message}
-            </div>
-          )}
-
-          <form onSubmit={handleLogin} className="space-y-4">
-
-            <input
-              type="email"
-              placeholder="Admin Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full border px-4 py-3 rounded-lg"
-              required
-            />
-
-            <div className="relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full border px-4 py-3 rounded-lg pr-10"
-                required
-              />
-
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
-              >
-                {showPassword ? <FaEyeSlash /> : <FaEye />}
-              </button>
-            </div>
-
-            <button
-              disabled={loading}
-              className="w-full bg-red-500 hover:bg-red-600 text-white py-3 rounded-lg font-semibold"
-            >
-              {loading ? "Logging in..." : "Login"}
-            </button>
-
-          </form>
-        </div>
+    <div className="space-y-5">
+      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <h1 className="text-xl font-bold">Users</h1>
+        <input
+          type="text"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search by name, email, phone"
+          className="w-full rounded-lg border px-3 py-2 text-sm md:w-80"
+        />
       </div>
+
+      {loading ? <p className="text-gray-600">Loading users...</p> : null}
+      {error ? <p className="text-red-600">{error}</p> : null}
+
+      {!loading && !error ? (
+        <div className="overflow-x-auto rounded-xl bg-white shadow">
+          <table className="w-full text-left text-sm">
+            <thead className="bg-gray-100 text-gray-700">
+              <tr>
+                <th className="px-4 py-3">Name</th>
+                <th className="px-4 py-3">Email</th>
+                <th className="px-4 py-3">Phone</th>
+                <th className="px-4 py-3">Joined</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredUsers.length ? (
+                filteredUsers.map((user) => (
+                  <tr key={user._id} className="border-t">
+                    <td className="px-4 py-3">{user.name || "-"}</td>
+                    <td className="px-4 py-3">{user.email || "-"}</td>
+                    <td className="px-4 py-3">{user.phone || "-"}</td>
+                    <td className="px-4 py-3">
+                      {user.createdAt
+                        ? new Date(user.createdAt).toLocaleDateString("en-IN")
+                        : "-"}
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td className="px-4 py-8 text-center text-gray-500" colSpan="4">
+                    No users found.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      ) : null}
     </div>
   );
 }

@@ -5,8 +5,8 @@ export default function AdminLayout() {
   const navigate = useNavigate();
 
   const logout = () => {
-    localStorage.removeItem("wtc_admin_token");
-    localStorage.removeItem("wtc_admin");
+    localStorage.removeItem("adminToken");
+    localStorage.removeItem("admin");
     navigate("/admin/login");
   };
 

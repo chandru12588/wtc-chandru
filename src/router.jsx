@@ -58,6 +58,7 @@ export default function AppRouter() {
       <Route path="/" element={<Home />} />
       <Route path="/packages" element={<PackagesList />} />
       <Route path="/packages/:id" element={<PackageDetails />} />
+      <Route path="/guide/:id" element={<PackageDetails />} />
       <Route path="/booking/:id" element={<BookingPage />} />
       <Route path="/trips" element={<Trips />} />
       <Route path="/trips/:id" element={<TripDetails />} />

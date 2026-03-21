@@ -28,7 +28,7 @@ export default function TripCard({ trip }) {
     } else if (serviceType === "bike") {
       navigate(`/pillion-request/${trip._id}`);
     } else if (serviceType === "guide") {
-      navigate(`/guide/${trip._id}`);
+      navigate(`/packages/${trip._id}`);
     } else {
       navigate(`/packages/${trip._id}`);
     }
