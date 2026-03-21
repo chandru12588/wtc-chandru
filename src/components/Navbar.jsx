@@ -301,14 +301,14 @@ export default function Navbar() {
 
       {/* ================= Mobile Drawer ================= */}
       {mobileOpen && (
-        <div className="fixed inset-0 z-[999] bg-black/40 md:hidden">
-          <div className="absolute right-0 top-0 h-full w-[78%] bg-white">
-            <div className="flex justify-between p-4 border-b">
+        <div className="fixed inset-0 z-[10001] bg-black/40 md:hidden">
+          <div className="absolute right-0 top-0 flex h-full w-[82%] flex-col bg-white">
+            <div className="flex justify-between p-4 border-b shrink-0">
               <span className="font-bold">{user ? `Hi ${user.name}` : "Menu"}</span>
               <X onClick={closeMobileMenu} />
             </div>
 
-            <div className="flex flex-col gap-4 p-6 text-sm">
+            <div className="flex flex-1 flex-col gap-4 overflow-y-auto p-6 pb-28 text-sm">
               <NavLink to="/" onClick={closeMobileMenu}><Home size={18} /> Home</NavLink>
               <NavLink to="/trips" onClick={closeMobileMenu}><Compass size={18} /> Trips</NavLink>
               <NavLink to="/reviews" onClick={closeMobileMenu}><Compass size={18} /> Reviews</NavLink>

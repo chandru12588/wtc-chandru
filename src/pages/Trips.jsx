@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import axios from "axios";
 import { motion } from "framer-motion";
+import { Building2, Compass, MapPin, Mountain, SlidersHorizontal, Trees } from "lucide-react";
 
 import TripCard from "../components/TripCard";
 import CategoriesBar from "../components/CategoriesBar";
@@ -13,6 +14,13 @@ import EmptyState from "../components/EmptyState";
 import { inferServiceType } from "../utils/serviceType";
 
 const API = import.meta.env.VITE_API_URL;
+const MOBILE_QUICK_FILTERS = [
+  { name: "Locations", selection: { type: "openFilter" }, icon: MapPin },
+  { name: "Forest", selection: { type: "category", value: "forest" }, icon: Trees },
+  { name: "Glamping", selection: { type: "category", value: "glamping" }, icon: Compass },
+  { name: "Mountain", selection: { type: "category", value: "mountain" }, icon: Mountain },
+  { name: "Bangalore", selection: { type: "region", value: "karnataka" }, icon: Building2 },
+];
 
 export default function Trips() {
   const [searchParams] = useSearchParams();
@@ -160,6 +168,69 @@ export default function Trips() {
     setActiveFilter(selection);
   };
 
+  const handleMobileQuickFilter = (selection) => {
+    if (selection?.type === "openFilter") {
+      setIsFilterOpen(true);
+      return;
+    }
+    handleCategoryClick(selection);
+  };
+
+  const handleDrawerApply = (filters) => {
+    let list = trips.filter(matchesService);
+
+    if (filters?.state) {
+      list = list.filter((trip) => {
+        const region = String(trip.region || "").toLowerCase();
+        const location = String(trip.location || "").toLowerCase();
+        const needle = String(filters.state || "").toLowerCase();
+        return region.includes(needle) || location.includes(needle);
+      });
+    }
+
+    if (filters?.stayType) {
+      list = list.filter(
+        (trip) =>
+          String(trip.stayType || "").toLowerCase() ===
+          String(filters.stayType || "").toLowerCase()
+      );
+    }
+
+    if (filters?.theme) {
+      list = list.filter(
+        (trip) =>
+          String(trip.category || "").toLowerCase() ===
+          String(filters.theme || "").toLowerCase()
+      );
+    }
+
+    if (filters?.activity) {
+      list = list.filter((trip) =>
+        Array.isArray(trip.tags)
+          ? trip.tags.some(
+              (tag) =>
+                String(tag || "").toLowerCase() ===
+                String(filters.activity || "").toLowerCase()
+            )
+          : false
+      );
+    }
+
+    if (filters?.date) {
+      list = list.filter(
+        (trip) =>
+          trip.startDate && new Date(trip.startDate) >= new Date(filters.date)
+      );
+    }
+
+    if (filters?.instant) {
+      list = list.filter((trip) => Boolean(trip.instantBooking));
+    }
+
+    setFiltered(list);
+    setIsFilterOpen(false);
+  };
+
   const serviceTitle =
     service === "bike"
       ? "Pillion Rider Service"
@@ -172,14 +243,45 @@ export default function Trips() {
       : "All Camping Packages";
 
   return (
-    <div className="max-w-7xl mx-auto pt-24 px-4 pb-16">
-      <CategoriesBar
-        onCategorySelect={handleCategoryClick}
-        onOpenFilter={() => setIsFilterOpen(true)}
-      />
+    <div className="mx-auto max-w-7xl px-3 pb-20 pt-24 md:px-4 md:pb-16">
+      <div className="md:hidden">
+        <div className="rounded-[28px] border border-slate-200 bg-white/90 px-3 py-3 shadow-sm">
+          <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide">
+            {MOBILE_QUICK_FILTERS.map((item) => {
+              const Icon = item.icon;
+              return (
+                <button
+                  key={item.name}
+                  type="button"
+                  onClick={() => handleMobileQuickFilter(item.selection)}
+                  className="min-w-[118px] rounded-3xl border border-slate-200 bg-slate-50 px-3 py-3 text-center"
+                >
+                  <Icon size={18} className="mx-auto text-orange-500" />
+                  <p className="mt-1 text-sm font-semibold text-slate-700">{item.name}</p>
+                </button>
+              );
+            })}
+            <button
+              type="button"
+              onClick={() => setIsFilterOpen(true)}
+              className="min-w-[118px] rounded-3xl bg-slate-200 px-3 py-3 text-center text-slate-700"
+            >
+              <SlidersHorizontal size={18} className="mx-auto" />
+              <p className="mt-1 text-sm font-semibold">Filter</p>
+            </button>
+          </div>
+        </div>
+      </div>
 
-      <div className="backdrop-blur-md bg-white/60 p-4 rounded-xl shadow-sm mt-6 mb-6">
-        <h1 className="text-3xl font-bold">{serviceTitle}</h1>
+      <div className="hidden md:block">
+        <CategoriesBar
+          onCategorySelect={handleCategoryClick}
+          onOpenFilter={() => setIsFilterOpen(true)}
+        />
+      </div>
+
+      <div className="mb-5 mt-4 rounded-xl bg-white/70 p-3 shadow-sm backdrop-blur-md md:mt-6 md:mb-6 md:p-4">
+        <h1 className="text-2xl font-bold leading-tight md:text-3xl">{serviceTitle}</h1>
       </div>
 
       {loading ? (
@@ -190,7 +292,7 @@ export default function Trips() {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="grid sm:grid-cols-2 md:grid-cols-3 gap-6"
+          className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 md:gap-6"
         >
           {filtered.map((trip, index) => (
             <motion.div
@@ -211,6 +313,7 @@ export default function Trips() {
         isOpen={isFilterOpen}
         onClose={() => setIsFilterOpen(false)}
         allTrips={trips}
+        onApply={handleDrawerApply}
       />
     </div>
   );
