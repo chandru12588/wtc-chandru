@@ -87,11 +87,11 @@ ${trip.title}
 
   return (
     <div
-      className="bg-white rounded-3xl shadow-md hover:shadow-xl transition overflow-hidden group cursor-pointer"
+      className="group cursor-pointer overflow-hidden rounded-3xl bg-white shadow-md transition hover:shadow-xl"
       onClick={handleDetails}
     >
       {/* ================= IMAGE SLIDER ================= */}
-      <div className="relative h-[300px] overflow-hidden">
+      <div className="relative h-[200px] overflow-hidden sm:h-[240px] lg:h-[300px]">
         <Swiper
           modules={[Pagination]}
           pagination={{ clickable: true }}
@@ -138,8 +138,8 @@ ${trip.title}
       </div>
 
       {/* ================= CONTENT ================= */}
-      <div className="p-5 space-y-2">
-        <h3 className="text-base font-semibold line-clamp-2">
+      <div className="space-y-2 p-4 md:p-5">
+        <h3 className="line-clamp-2 text-base font-semibold">
           {trip.title}
         </h3>
 
@@ -162,13 +162,13 @@ ${trip.title}
         )}
 
         {/* ================= CTA ================= */}
-        <div className="flex gap-3 pt-3">
+        <div className="flex gap-2 pt-2 md:gap-3 md:pt-3">
           <button
             onClick={(e) => {
               e.stopPropagation();
               handleDetails();
             }}
-            className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-full text-sm font-semibold"
+            className="flex-1 rounded-full bg-indigo-600 py-2 text-xs font-semibold text-white hover:bg-indigo-700 md:py-2.5 md:text-sm"
           >
             {serviceType === "bike"
               ? "Book a ride"
@@ -184,7 +184,7 @@ ${trip.title}
               e.stopPropagation();
               handleWhatsApp();
             }}
-            className="flex-1 bg-green-500 hover:bg-green-600 text-white py-2.5 rounded-full flex items-center justify-center gap-2 text-sm font-semibold"
+            className="flex flex-1 items-center justify-center gap-1 rounded-full bg-green-500 py-2 text-xs font-semibold text-white hover:bg-green-600 md:gap-2 md:py-2.5 md:text-sm"
           >
             <FaWhatsapp size={18} />
             WhatsApp

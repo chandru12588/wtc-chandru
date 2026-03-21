@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { Link, useNavigate } from "react-router-dom";
+import { Backpack, Building2, Compass, Headset, MapPin, Menu, Mountain, Trees, UserRound } from "lucide-react";
 
 import AdvancedSearchBar from "../components/AdvancedSearchBar";
 import CategoriesBar from "../components/CategoriesBar";
@@ -29,6 +31,16 @@ const CATEGORY_ORDER = [
   "new year trip",
 ];
 
+const MOBILE_QUICK_FILTERS = [
+  { name: "Nearby", icon: MapPin, filter: { type: "openFilter" } },
+  { name: "Forest", icon: Trees, filter: { type: "category", value: "forest" } },
+  { name: "Glamping", icon: Compass, filter: { type: "category", value: "glamping" } },
+  { name: "Mountain", icon: Mountain, filter: { type: "category", value: "mountain" } },
+  { name: "Backpacking", icon: Backpack, filter: { type: "category", value: "backpacker" } },
+  { name: "Bangalore", icon: Building2, filter: { type: "region", value: "karnataka" } },
+  { name: "Chennai", icon: Building2, filter: { type: "region", value: "tamilnadu" } },
+];
+
 function sortTripsForHome(list = []) {
   return [...list].sort((a, b) => {
     const aCategory = String(a?.category || "").toLowerCase();
@@ -48,10 +60,12 @@ function sortTripsForHome(list = []) {
 }
 
 export default function Home() {
+  const navigate = useNavigate();
   const [allTrips, setAllTrips] = useState([]);
   const [filteredTrips, setFilteredTrips] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [mobileSearch, setMobileSearch] = useState("");
 
   useEffect(() => {
     (async () => {
@@ -220,9 +234,62 @@ export default function Home() {
     if (!result.length) alert("No matching stays found");
   };
 
+  const handleMobileSearch = (e) => {
+    e.preventDefault();
+    handleSearch({ location: mobileSearch });
+  };
+
+  const handleMobileQuickFilter = (filter) => {
+    if (filter.type === "openFilter") {
+      setIsFilterOpen(true);
+      return;
+    }
+
+    handleCategoryFilter(filter);
+  };
+
   return (
-    <div className="w-full overflow-x-hidden">
-      <section className="relative w-full h-[78vh] md:h-[85vh] overflow-hidden">
+    <div className="w-full overflow-x-hidden pb-20 md:pb-0">
+      <section className="md:hidden px-3 pt-3">
+        <div className="rounded-[26px] border border-slate-200 bg-white px-3 py-3 shadow-[0_8px_24px_rgba(15,23,42,0.08)]">
+          <form onSubmit={handleMobileSearch} className="flex items-center rounded-full border border-slate-300 bg-slate-50 px-3 py-2.5">
+            <MapPin size={17} className="shrink-0 text-slate-500" />
+            <input
+              type="text"
+              value={mobileSearch}
+              onChange={(e) => setMobileSearch(e.target.value)}
+              placeholder="Search your destination"
+              className="ml-2 w-full bg-transparent text-sm font-medium text-slate-700 outline-none placeholder:text-slate-500"
+            />
+          </form>
+
+          <div className="mt-4 flex gap-3 overflow-x-auto pb-1 scrollbar-hide">
+            {MOBILE_QUICK_FILTERS.map((item) => {
+              const Icon = item.icon;
+              return (
+                <button
+                  key={item.name}
+                  type="button"
+                  onClick={() => handleMobileQuickFilter(item.filter)}
+                  className="min-w-[84px] rounded-2xl border border-slate-200 bg-white px-2 py-2 text-center shadow-sm"
+                >
+                  <Icon size={18} className="mx-auto text-slate-700" />
+                  <p className="mt-1 text-xs font-semibold text-slate-700">{item.name}</p>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="mt-4 flex items-center justify-between px-1">
+          <h2 className="text-3xl font-semibold text-slate-900">Trending Community Trips</h2>
+          <Link to="/trips" className="text-sm font-semibold text-orange-500">
+            View All
+          </Link>
+        </div>
+      </section>
+
+      <section className="relative hidden w-full overflow-hidden md:block md:h-[85vh]">
         <HeroSlider />
 
         <div className="absolute inset-0 bg-black/30" />
@@ -252,22 +319,30 @@ export default function Home() {
         </div>
       </section>
 
-      <CategoriesBar
-        onCategorySelect={handleCategoryFilter}
-        onOpenFilter={() => setIsFilterOpen(true)}
-      />
+      <div className="hidden md:block">
+        <CategoriesBar
+          onCategorySelect={handleCategoryFilter}
+          onOpenFilter={() => setIsFilterOpen(true)}
+        />
+      </div>
 
-      <TripTabs onTabSelect={handleTripTab} />
+      <div className="hidden md:block">
+        <TripTabs onTabSelect={handleTripTab} />
+      </div>
 
-      <section className="mx-auto max-w-7xl px-5 py-12">
-        <h2 className="mb-6 text-2xl font-semibold">Featured Trips</h2>
+      <section className="mx-auto max-w-7xl px-3 py-6 md:px-5 md:py-12">
+        <h2 className="mb-6 hidden text-2xl font-semibold md:block">Featured Trips</h2>
 
         {loading ? (
           <p>Loading...</p>
         ) : (
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+          <div className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 md:grid md:gap-8 md:overflow-visible md:pb-0 md:snap-none md:grid-cols-2 lg:grid-cols-3">
             {filteredTrips.length ? (
-              filteredTrips.map((trip) => <TripCard key={trip._id} trip={trip} />)
+              filteredTrips.map((trip) => (
+                <div key={trip._id} className="min-w-[82%] snap-start md:min-w-0">
+                  <TripCard trip={trip} />
+                </div>
+              ))
             ) : (
               <p>No results found</p>
             )}
@@ -288,6 +363,27 @@ export default function Home() {
         allTrips={allTrips}
         onApply={handleDrawerApply}
       />
+
+      <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-slate-200 bg-white/95 px-2 py-2 backdrop-blur md:hidden">
+        <div className="grid grid-cols-4 gap-1">
+          <button onClick={() => navigate("/")} className="flex flex-col items-center gap-1 text-orange-500">
+            <Compass size={18} />
+            <span className="text-xs font-semibold">Explore</span>
+          </button>
+          <button onClick={() => navigate("/safety")} className="flex flex-col items-center gap-1 text-slate-700">
+            <Headset size={18} />
+            <span className="text-xs font-medium">Support</span>
+          </button>
+          <button onClick={() => navigate("/profile")} className="flex flex-col items-center gap-1 text-slate-700">
+            <UserRound size={18} />
+            <span className="text-xs font-medium">Profile</span>
+          </button>
+          <button onClick={() => navigate("/trips")} className="flex flex-col items-center gap-1 text-slate-700">
+            <Menu size={18} />
+            <span className="text-xs font-medium">Other</span>
+          </button>
+        </div>
+      </nav>
     </div>
   );
 }

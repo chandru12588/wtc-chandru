@@ -114,11 +114,11 @@ export default function Navbar() {
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 md:gap-3">
             <img src={logo3} alt="Trippolama" className={`${scrolled ? "h-20" : "h-20"}`} />
-            <span className="hidden sm:flex flex-col leading-none">
-              <span className="brand-wave-text text-lg md:text-2xl font-extrabold tracking-wide">
+            <span className="flex flex-col leading-none">
+              <span className="brand-wave-text text-sm sm:text-lg md:text-2xl font-extrabold tracking-wide">
                 Trippolama
               </span>
-              <span className="text-[10px] md:text-xs font-medium uppercase tracking-[0.22em] text-emerald-700">
+              <span className="text-[8px] sm:text-[10px] md:text-xs font-medium uppercase tracking-[0.18em] sm:tracking-[0.22em] text-emerald-700">
                 Explore. Smile. Repeat.
               </span>
             </span>
