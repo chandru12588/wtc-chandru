@@ -111,9 +111,9 @@ ${trip.title}
         {/* ❤️ Wishlist */}
         <button
           onClick={handleFavorite}
-          className="absolute top-4 right-4 rounded-full border border-white/70 bg-black/35 p-2.5 shadow-lg backdrop-blur-sm hover:scale-110"
+          className="absolute right-3 top-3 z-30 flex h-10 w-10 items-center justify-center rounded-full bg-white/95 shadow-xl ring-1 ring-black/10 transition hover:scale-110"
         >
-          <FaHeart className={isFavorite ? "text-red-500" : "text-white"} />
+          <FaHeart className={isFavorite ? "text-red-500" : "text-gray-500"} />
         </button>
 
         {/* ⚡ Instant */}

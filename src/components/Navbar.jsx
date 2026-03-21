@@ -218,8 +218,17 @@ export default function Navbar() {
               <div className="flex items-center gap-4">
                 <span className="flex items-center gap-2 text-sm font-medium text-gray-700">
                   Hi {user.name || "Explorer"}
-                  <span className="penguin-greeter" role="img" aria-label="Welcoming penguin">
-                    ??
+                  <span className="penguin-greeter" aria-hidden="true">
+                    <span className="penguin-head">
+                      <span className="penguin-eye left" />
+                      <span className="penguin-eye right" />
+                      <span className="penguin-beak" />
+                    </span>
+                    <span className="penguin-body">
+                      <span className="penguin-belly" />
+                      <span className="penguin-wing left" />
+                      <span className="penguin-wing right" />
+                    </span>
                   </span>
                 </span>
                 

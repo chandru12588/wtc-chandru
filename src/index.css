@@ -111,13 +111,100 @@ input[type="file"]::-webkit-file-upload-button:hover {
 }
 
 .penguin-greeter {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.05rem;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.18));
-  transform-origin: 50% 85%;
+  position: relative;
+  display: inline-block;
+  width: 20px;
+  height: 22px;
   animation: penguinWiggle 1.6s ease-in-out infinite;
+  transform-origin: 50% 85%;
+}
+
+.penguin-head {
+  position: absolute;
+  top: 0;
+  left: 5px;
+  width: 10px;
+  height: 9px;
+  background: #0f172a;
+  border-radius: 999px;
+}
+
+.penguin-eye {
+  position: absolute;
+  top: 3px;
+  width: 2px;
+  height: 2px;
+  border-radius: 999px;
+  background: #ffffff;
+}
+
+.penguin-eye.left {
+  left: 2px;
+}
+
+.penguin-eye.right {
+  right: 2px;
+}
+
+.penguin-beak {
+  position: absolute;
+  left: 4px;
+  bottom: -2px;
+  width: 0;
+  height: 0;
+  border-left: 2px solid transparent;
+  border-right: 2px solid transparent;
+  border-top: 3px solid #f59e0b;
+}
+
+.penguin-body {
+  position: absolute;
+  left: 3px;
+  bottom: 0;
+  width: 14px;
+  height: 14px;
+  background: #111827;
+  border-radius: 999px 999px 7px 7px;
+}
+
+.penguin-belly {
+  position: absolute;
+  left: 3px;
+  top: 4px;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #f8fafc;
+}
+
+.penguin-wing {
+  position: absolute;
+  top: 5px;
+  width: 3px;
+  height: 7px;
+  border-radius: 999px;
+  background: #1f2937;
+}
+
+.penguin-wing.left {
+  left: -2px;
+  transform-origin: right top;
+  animation: penguinWing 0.8s ease-in-out infinite alternate;
+}
+
+.penguin-wing.right {
+  right: -2px;
+  transform-origin: left top;
+  animation: penguinWing 0.8s ease-in-out infinite alternate-reverse;
+}
+
+@keyframes penguinWing {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(18deg); }
+}
+
+.penguin-greeter {
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.18));
 }
 
 
