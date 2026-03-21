@@ -17,6 +17,7 @@ const [signupMethod, setSignupMethod] = useState("otp");
 const [form, setForm] = useState({
 name: "",
 dob: "",
+phone: "",
 email: "",
 password: ""
 });
@@ -79,8 +80,8 @@ showFeedback("Email required");
 return;
 }
 
-if (targetMode === "signup" && (!form.name || !form.dob)) {
-showFeedback("Name, DOB and email required");
+if (targetMode === "signup" && (!form.name || !form.dob || !form.phone)) {
+showFeedback("Name, DOB, mobile number and email required");
 return;
 }
 
@@ -90,6 +91,7 @@ const payload = { email: form.email };
 if (targetMode === "signup") {
 payload.name = form.name;
 payload.dob = form.dob;
+payload.phone = form.phone;
 }
 
 const res = await fetch(`${API}/api/auth/send-otp`, {
@@ -162,8 +164,8 @@ setLoading(false);
 };
 
 const signupPassword = async () => {
-if (!form.name || !form.dob || !form.email || !form.password) {
-showFeedback("Name, DOB, email and password required");
+if (!form.name || !form.dob || !form.phone || !form.email || !form.password) {
+showFeedback("Name, DOB, mobile number, email and password required");
 return;
 }
 
@@ -176,6 +178,7 @@ body: JSON.stringify({
 name: form.name,
 dob: form.dob,
 email: form.email,
+phone: form.phone,
 password: form.password
 })
 });
@@ -367,6 +370,14 @@ type="text"
 name="name"
 placeholder="Full Name"
 value={form.name}
+onChange={handleChange}
+className="w-full border border-slate-300 focus:border-slate-500 focus:outline-none rounded-xl px-4 py-3"
+/>
+<input
+type="tel"
+name="phone"
+placeholder="Mobile Number"
+value={form.phone}
 onChange={handleChange}
 className="w-full border border-slate-300 focus:border-slate-500 focus:outline-none rounded-xl px-4 py-3"
 />

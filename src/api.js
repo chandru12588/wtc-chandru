@@ -5,12 +5,14 @@ export const api = axios.create({
   withCredentials: true,
 });
 
-// AUTO SEND ADMIN TOKEN
 api.interceptors.request.use((config) => {
-  const adminToken = localStorage.getItem("adminToken"); // ✅ FIXED
+  const adminToken = localStorage.getItem("adminToken");
+  const userToken = localStorage.getItem("wtc_token");
 
   if (adminToken) {
     config.headers.Authorization = `Bearer ${adminToken}`;
+  } else if (userToken) {
+    config.headers.Authorization = `Bearer ${userToken}`;
   }
 
   return config;

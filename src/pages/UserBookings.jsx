@@ -1,19 +1,41 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { api } from "../api";
+import { loadFavorites } from "../utils/wishlist";
+
+const FILTERS = ["ALL", "UPCOMING", "COMPLETED", "CANCELLED", "BOOKING REQUESTS"];
 
 export default function UserBookings() {
   const API = import.meta.env.VITE_API_URL;
+  const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("wtc_user"));
   const userId = user?._id || user?.id;
 
+  const [activeTab, setActiveTab] = useState("bookings");
+  const [activeFilter, setActiveFilter] = useState("ALL");
   const [bookings, setBookings] = useState([]);
+  const [favorites, setFavorites] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [deletingAccount, setDeletingAccount] = useState(false);
 
   useEffect(() => {
-    if (userId) loadBookings();
+    if (userId) {
+      loadBookings();
+      loadUserFavorites();
+    }
   }, [userId]);
 
-  /* ================= LOAD BOOKINGS ================= */
+  const loadUserFavorites = async () => {
+    try {
+      const list = await loadFavorites();
+      setFavorites(Array.isArray(list) ? list : []);
+    } catch (err) {
+      console.error("FAVORITES LOAD ERROR:", err);
+      setFavorites([]);
+    }
+  };
+
   const loadBookings = async () => {
     try {
       setLoading(true);
@@ -24,35 +46,33 @@ export default function UserBookings() {
         axios.get(`${API}/api/pillion-requests/user/${userId}`),
       ]);
 
-      const packages = (pkgRes.status === "fulfilled" ? pkgRes.value.data : []).map((b) => ({
-        ...b,
+      const packages = (pkgRes.status === "fulfilled" ? pkgRes.value.data : []).map((item) => ({
+        ...item,
         source: "package",
-        finalStatus: b.status,
+        finalStatus: item.status,
       }));
 
-      const hosts = (hostRes.status === "fulfilled" ? hostRes.value.data : []).map((b) => ({
-        ...b,
+      const hosts = (hostRes.status === "fulfilled" ? hostRes.value.data : []).map((item) => ({
+        ...item,
         source: "host",
-        finalStatus: b.bookingStatus,
+        finalStatus: item.bookingStatus,
       }));
 
-      const pillionRequests = (pillionRes.status === "fulfilled" ? pillionRes.value.data : []).map((b) => ({
-        ...b,
+      const pillionRequests = (
+        pillionRes.status === "fulfilled" ? pillionRes.value.data : []
+      ).map((item) => ({
+        ...item,
         source: "pillion",
-        finalStatus: b.status,
-        checkIn: b.startDate,
-        checkOut: b.startDate,
+        finalStatus: item.status,
+        checkIn: item.startDate,
+        checkOut: item.startDate,
         people: 1,
         amount: 0,
       }));
 
-      const merged = [...packages, ...hosts, ...pillionRequests]
-        .filter((b) => b.finalStatus !== "rejected")
-        .sort(
-          (a, b) =>
-            new Date(b.createdAt || b.checkIn) -
-            new Date(a.createdAt || a.checkIn)
-        );
+      const merged = [...packages, ...hosts, ...pillionRequests].sort(
+        (a, b) => new Date(b.createdAt || b.checkIn) - new Date(a.createdAt || a.checkIn)
+      );
 
       setBookings(merged);
     } catch (err) {
@@ -62,221 +82,279 @@ export default function UserBookings() {
     }
   };
 
-  /* ================= CANCEL ================= */
-  const cancelBooking = async (b) => {
-    if (!confirm("Are you sure you want to cancel this booking?")) return;
+  const canCancel = (booking) => {
+    if (booking.source === "pillion") return false;
+    if (!["pending", "accepted"].includes(booking.finalStatus)) return false;
+    return new Date() < new Date(booking.checkIn);
+  };
+
+  const cancelBooking = async (booking) => {
+    if (!confirm("Cancel this booking?")) return;
 
     try {
       const url =
-        b.source === "host"
-          ? `${API}/api/host/bookings/${b._id}/cancel`
-          : `${API}/api/bookings/${b._id}/cancel`;
-
+        booking.source === "host"
+          ? `${API}/api/host/bookings/${booking._id}/cancel`
+          : `${API}/api/bookings/${booking._id}/cancel`;
       await axios.put(url);
-      alert("Booking cancelled successfully");
       loadBookings();
     } catch (err) {
-      alert(err.response?.data?.message || "Cancel failed");
+      alert(err.response?.data?.message || err.response?.data?.msg || "Cancel failed");
     }
   };
 
-  const canCancel = (b) => {
-    if (b.source === "pillion") return false;
-    if (!["pending", "accepted"].includes(b.finalStatus)) return false;
-    return new Date() < new Date(b.checkIn);
+  const deleteBooking = async (booking) => {
+    if (!confirm("Delete this booking/request from your list?")) return;
+
+    try {
+      const url =
+        booking.source === "host"
+          ? `${API}/api/host/bookings/${booking._id}/user-delete?userId=${userId}`
+          : booking.source === "pillion"
+          ? `${API}/api/pillion-requests/${booking._id}/user-delete?userId=${userId}`
+          : `${API}/api/bookings/${booking._id}/user-delete?userId=${userId}`;
+
+      await axios.delete(url);
+      loadBookings();
+    } catch (err) {
+      alert(err.response?.data?.message || err.response?.data?.msg || "Delete failed");
+    }
   };
 
-  /* ================= UI ================= */
-  if (!user)
-    return (
-      <div className="text-center py-20 text-gray-600">
-        Please login to view bookings.
-      </div>
-    );
+  const deleteAccount = async () => {
+    if (!confirm("Delete your account permanently? This cannot be undone.")) return;
 
-  if (loading)
-    return (
-      <div className="text-center py-20 text-gray-500">
-        Loading your bookings...
-      </div>
-    );
+    try {
+      setDeletingAccount(true);
+      await api.delete("/api/auth/account");
+      localStorage.removeItem("wtc_user");
+      localStorage.removeItem("wtc_token");
+      localStorage.removeItem("wishlist");
+      navigate("/");
+    } catch (err) {
+      alert(err.response?.data?.message || "Failed to delete account");
+    } finally {
+      setDeletingAccount(false);
+    }
+  };
+
+  const filteredBookings = useMemo(() => {
+    const today = new Date();
+
+    return bookings.filter((booking) => {
+      const status = String(booking.finalStatus || "").toLowerCase();
+      const endDate = booking.checkOut ? new Date(booking.checkOut) : null;
+
+      if (activeFilter === "ALL") return true;
+      if (activeFilter === "CANCELLED") return status === "cancelled" || status === "rejected";
+      if (activeFilter === "BOOKING REQUESTS") return status === "pending";
+      if (activeFilter === "UPCOMING") return status === "accepted" && endDate && endDate >= today;
+      if (activeFilter === "COMPLETED") return status === "accepted" && endDate && endDate < today;
+      return true;
+    });
+  }, [bookings, activeFilter]);
+
+  const goToFavorite = (fav) => {
+    if (fav.itemType === "listing") navigate(`/host-listing/${fav.itemId}`);
+    else navigate(`/packages/${fav.itemId}`);
+  };
+
+  if (!user) {
+    return <div className="py-20 text-center text-gray-600">Please login to view your dashboard.</div>;
+  }
 
   return (
-    <div className="max-w-6xl mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">My Bookings</h1>
+    <div className="mx-auto max-w-7xl px-4 pb-14 pt-24">
+      <div className="grid gap-6 lg:grid-cols-[320px_minmax(0,1fr)]">
+        <aside className="rounded-3xl bg-white p-5 shadow">
+          <div className="flex items-center gap-3">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-amber-100 text-xl font-bold text-amber-700">
+              {String(user?.name || "U").charAt(0).toUpperCase()}
+            </div>
+            <div>
+              <p className="text-2xl font-bold">{user?.name || "Explorer"}</p>
+              <p className="text-sm text-gray-600">{user?.phone || "No mobile number"}</p>
+              <p className="text-sm text-gray-500">{user?.email}</p>
+            </div>
+          </div>
 
-      {bookings.length === 0 ? (
-        <div className="text-center py-10 text-gray-500">
-          No bookings found.
-        </div>
-      ) : (
-        <>
-          {/* ================= DESKTOP TABLE ================= */}
-          <div className="hidden md:block bg-white rounded-xl shadow overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="border-b bg-gray-50">
-                <tr className="text-left font-semibold">
-                  <th className="p-3">Trip</th>
-                  <th className="p-3">Dates</th>
-                  <th className="p-3">People</th>
-                  <th className="p-3">Amount</th>
-                  <th className="p-3">Status</th>
-                  <th className="p-3">Actions</th>
-                </tr>
-              </thead>
+          <div className="mt-6 grid grid-cols-2 gap-3 text-center">
+            <div className="rounded-xl border py-3">
+              <p className="text-lg font-bold text-orange-600">{bookings.length}</p>
+              <p className="text-xs text-gray-600">Bookings</p>
+            </div>
+            <div className="rounded-xl border py-3">
+              <p className="text-lg font-bold text-orange-600">{favorites.length}</p>
+              <p className="text-xs text-gray-600">Favorites</p>
+            </div>
+          </div>
 
-              <tbody>
-                {bookings.map((b) => (
-                  <tr key={b._id} className="border-b hover:bg-gray-50">
-                    <td className="p-3 font-medium">
-                      {b.packageId?.title || b.listingId?.title || "—"}
-                      {b.source === "host" && (
-                        <span className="ml-2 text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">
-                          HOST
-                        </span>
-                      )}
-                      {b.source === "pillion" && (
-                        <span className="ml-2 text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded">
-                          PILLION
-                        </span>
-                      )}
-                    </td>
+          <button
+            onClick={deleteAccount}
+            disabled={deletingAccount}
+            className="mt-6 w-full rounded-xl border border-red-300 py-2 text-sm font-semibold text-red-600 hover:bg-red-50 disabled:opacity-60"
+          >
+            {deletingAccount ? "Deleting..." : "Delete Account"}
+          </button>
+        </aside>
 
-                    <td className="p-3 text-xs">
-                      {b.source === "pillion" ? (
-                        <>
-                          {new Date(b.startDate).toLocaleDateString()}
-                          <div>{b.numberOfDays} day(s)</div>
-                        </>
-                      ) : (
-                        <>
-                          {new Date(b.checkIn).toLocaleDateString()} →{" "}
-                          {new Date(b.checkOut).toLocaleDateString()}
-                        </>
-                      )}
-                    </td>
+        <section className="rounded-3xl bg-white p-5 shadow">
+          <div className="flex flex-wrap items-center gap-5 border-b pb-4">
+            <button
+              onClick={() => setActiveTab("bookings")}
+              className={`pb-2 text-2xl font-semibold ${
+                activeTab === "bookings" ? "border-b-2 border-orange-500 text-orange-500" : "text-gray-700"
+              }`}
+            >
+              My Bookings
+            </button>
+            <button
+              onClick={() => setActiveTab("favorites")}
+              className={`pb-2 text-2xl font-semibold ${
+                activeTab === "favorites" ? "border-b-2 border-orange-500 text-orange-500" : "text-gray-700"
+              }`}
+            >
+              Favorites
+            </button>
+            <button
+              onClick={() => setActiveTab("settings")}
+              className={`pb-2 text-2xl font-semibold ${
+                activeTab === "settings" ? "border-b-2 border-orange-500 text-orange-500" : "text-gray-700"
+              }`}
+            >
+              Settings
+            </button>
+          </div>
 
-                    <td className="p-3">
-                      {b.source === "pillion"
-                        ? `${b.startPoint} → ${b.destination}`
-                        : b.people || b.guests || 1}
-                    </td>
-
-                    <td className="p-3 font-semibold">
-                      {b.source === "pillion" ? b.bikeBrand : `₹${b.amount}`}
-                    </td>
-
-                    <td
-                      className={`p-3 font-semibold capitalize ${
-                        b.finalStatus === "accepted"
-                          ? "text-green-600"
-                          : b.finalStatus === "cancelled"
-                          ? "text-gray-600"
-                          : "text-yellow-600"
-                      }`}
-                    >
-                      {b.finalStatus}
-                    </td>
-
-                    <td className="p-3 space-y-1">
-                      {b.finalStatus === "accepted" && (
-                        <a
-                          href={`${API}/api/invoice/${b._id}`}
-                          target="_blank"
-                          className="block text-indigo-600 underline text-xs"
-                        >
-                          Download Invoice
-                        </a>
-                      )}
-
-                      {canCancel(b) && (
-                        <button
-                          onClick={() => cancelBooking(b)}
-                          className="text-red-600 text-xs underline"
-                        >
-                          Cancel Booking
-                        </button>
-                      )}
-                    </td>
-                  </tr>
+          {activeTab === "bookings" && (
+            <>
+              <div className="mt-4 flex flex-wrap gap-2">
+                {FILTERS.map((filter) => (
+                  <button
+                    key={filter}
+                    onClick={() => setActiveFilter(filter)}
+                    className={`rounded-full border px-4 py-2 text-sm font-semibold ${
+                      activeFilter === filter
+                        ? "border-orange-500 bg-orange-50 text-orange-600"
+                        : "border-gray-200 text-gray-700"
+                    }`}
+                  >
+                    {filter}
+                  </button>
                 ))}
-              </tbody>
-            </table>
-          </div>
-
-          {/* ================= MOBILE CARDS ================= */}
-          <div className="md:hidden space-y-4">
-            {bookings.map((b) => (
-              <div
-                key={b._id}
-                className="bg-white rounded-xl shadow p-4 space-y-2"
-              >
-                <div className="font-semibold text-lg">
-                  {b.packageId?.title || b.listingId?.title}
-                  {b.source === "host" && (
-                    <span className="ml-2 text-xs bg-blue-100 text-blue-700 px-2 rounded">
-                      HOST
-                    </span>
-                  )}
-                  {b.source === "pillion" && (
-                    <span className="ml-2 text-xs bg-amber-100 text-amber-700 px-2 rounded">
-                      PILLION
-                    </span>
-                  )}
-                </div>
-
-                <div className="text-sm text-gray-600">
-                  {b.source === "pillion"
-                    ? `📅 ${new Date(b.startDate).toLocaleDateString()} • ${b.numberOfDays} day(s)`
-                    : `📅 ${new Date(b.checkIn).toLocaleDateString()} → ${new Date(b.checkOut).toLocaleDateString()}`}
-                </div>
-
-                <div className="text-sm">
-                  {b.source === "pillion"
-                    ? `🏍 ${b.startPoint} → ${b.destination}`
-                    : `👥 ${b.people || b.guests || 1}`}
-                </div>
-                <div className="font-semibold">
-                  {b.source === "pillion" ? b.bikeBrand : `₹${b.amount}`}
-                </div>
-
-                <div
-                  className={`font-semibold capitalize ${
-                    b.finalStatus === "accepted"
-                      ? "text-green-600"
-                      : b.finalStatus === "cancelled"
-                      ? "text-gray-600"
-                      : "text-yellow-600"
-                  }`}
-                >
-                  {b.finalStatus}
-                </div>
-
-                <div className="flex gap-4 pt-2">
-                  {b.finalStatus === "accepted" && (
-                    <a
-                      href={`${API}/api/invoice/${b._id}`}
-                      target="_blank"
-                      className="text-indigo-600 underline text-sm"
-                    >
-                      Invoice
-                    </a>
-                  )}
-
-                  {canCancel(b) && (
-                    <button
-                      onClick={() => cancelBooking(b)}
-                      className="text-red-600 underline text-sm"
-                    >
-                      Cancel
-                    </button>
-                  )}
-                </div>
               </div>
-            ))}
-          </div>
-        </>
-      )}
+
+              {loading ? (
+                <div className="py-10 text-center text-gray-500">Loading your bookings...</div>
+              ) : filteredBookings.length === 0 ? (
+                <div className="py-10 text-center text-gray-500">No bookings in this filter.</div>
+              ) : (
+                <div className="mt-4 space-y-3">
+                  {filteredBookings.map((booking) => (
+                    <div key={booking._id} className="rounded-2xl border p-4">
+                      <div className="grid items-center gap-3 md:grid-cols-[1.7fr_1fr_0.9fr_auto]">
+                        <div>
+                          <p className="text-xl font-semibold">
+                            {booking.packageId?.title || booking.listingId?.title || "Request"}
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            {booking.source === "pillion"
+                              ? `${booking.startPoint} -> ${booking.destination}`
+                              : booking.packageId?.location || booking.listingId?.location || "Location"}
+                          </p>
+                          <p className="mt-1 text-xs text-gray-500">
+                            {booking.source === "pillion"
+                              ? `${new Date(booking.startDate).toLocaleDateString()} • ${booking.numberOfDays} day(s)`
+                              : `${new Date(booking.checkIn).toLocaleDateString()} - ${new Date(
+                                  booking.checkOut
+                                ).toLocaleDateString()}`}
+                          </p>
+                        </div>
+
+                        <div className="font-semibold">
+                          {booking.source === "pillion" ? booking.bikeBrand : `Rs. ${booking.amount || 0}`}
+                        </div>
+
+                        <div
+                          className={`text-sm font-bold uppercase ${
+                            booking.finalStatus === "accepted"
+                              ? "text-green-600"
+                              : booking.finalStatus === "cancelled" || booking.finalStatus === "rejected"
+                              ? "text-gray-600"
+                              : "text-amber-600"
+                          }`}
+                        >
+                          {booking.finalStatus}
+                        </div>
+
+                        <div className="flex gap-2">
+                          {canCancel(booking) && (
+                            <button
+                              onClick={() => cancelBooking(booking)}
+                              className="rounded-lg border border-amber-400 px-3 py-1 text-xs font-semibold text-amber-600"
+                            >
+                              Cancel
+                            </button>
+                          )}
+                          <button
+                            onClick={() => deleteBooking(booking)}
+                            className="rounded-lg border border-red-300 px-3 py-1 text-xs font-semibold text-red-600"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+
+          {activeTab === "favorites" && (
+            <div className="mt-4">
+              {favorites.length === 0 ? (
+                <p className="py-10 text-center text-gray-500">No favorites yet. Tap heart on any trip.</p>
+              ) : (
+                <div className="space-y-3">
+                  {favorites.map((fav) => (
+                    <button
+                      key={`${fav.itemType}-${fav.itemId}`}
+                      onClick={() => goToFavorite(fav)}
+                      className="grid w-full grid-cols-[64px_1fr_auto] items-center gap-3 rounded-2xl border p-3 text-left hover:bg-gray-50"
+                    >
+                      <img
+                        src={fav.image || "/no-image.jpg"}
+                        alt={fav.title || "Favorite"}
+                        className="h-16 w-16 rounded-xl object-cover"
+                      />
+                      <div>
+                        <p className="font-semibold">{fav.title || "Saved Trip"}</p>
+                        <p className="text-sm text-gray-600">{fav.location || "-"}</p>
+                      </div>
+                      <div className="font-semibold text-orange-600">Rs. {fav.price || 0}</div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeTab === "settings" && (
+            <div className="mt-6 max-w-md space-y-3 rounded-2xl border p-4">
+              <p className="text-lg font-semibold">Account Settings</p>
+              <p className="text-sm text-gray-600">You can permanently delete your account and all booking data.</p>
+              <button
+                onClick={deleteAccount}
+                disabled={deletingAccount}
+                className="rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-60"
+              >
+                {deletingAccount ? "Deleting..." : "Delete My Account"}
+              </button>
+            </div>
+          )}
+        </section>
+      </div>
     </div>
   );
 }

@@ -48,10 +48,10 @@ export default function PillionRideRequestPage() {
           This package is not configured as a pillion rider service.
         </p>
         <button
-          onClick={() => navigate(`/packages/${id}`)}
+          onClick={() => navigate("/trips")}
           className="mt-4 rounded-lg bg-indigo-600 px-4 py-2 text-white"
         >
-          Back to package
+          Back to Trips
         </button>
       </div>
     );
@@ -62,10 +62,10 @@ export default function PillionRideRequestPage() {
   return (
     <div className="mx-auto max-w-5xl px-4 py-10 pt-28">
       <button
-        onClick={() => navigate(`/packages/${id}`)}
+        onClick={() => navigate("/trips")}
         className="mb-5 text-indigo-600 hover:text-indigo-800"
       >
-        Back to package
+        Back to Trips
       </button>
 
       <div className="grid gap-8 md:grid-cols-[minmax(0,1fr)_420px] md:items-stretch">

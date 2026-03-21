@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaWhatsapp, FaHeart, FaStar, FaMapMarkerAlt } from "react-icons/fa";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination } from "swiper/modules";
 import { inferServiceType } from "../utils/serviceType";
+import { loadFavorites, toggleFavorite } from "../utils/wishlist";
 
 import "swiper/css";
 import "swiper/css/pagination";
@@ -13,11 +14,32 @@ const WHATSAPP_NUMBER =
 
 export default function TripCard({ trip }) {
   const navigate = useNavigate();
+  const [isFavorite, setIsFavorite] = useState(false);
 
   /* =========================
      DETECT SERVICE TYPE
   ========================= */
   const serviceType = inferServiceType(trip);
+
+  useEffect(() => {
+    let mounted = true;
+
+    const syncFavorite = async () => {
+      try {
+        const list = await loadFavorites();
+        if (!mounted) return;
+        setIsFavorite(list.some((fav) => String(fav.itemId) === String(trip?._id)));
+      } catch {
+        if (!mounted) return;
+        setIsFavorite(false);
+      }
+    };
+
+    syncFavorite();
+    return () => {
+      mounted = false;
+    };
+  }, [trip?._id]);
 
   /* =========================
      HANDLE NAVIGATION (FIXED 🔥)
@@ -52,6 +74,17 @@ ${trip.title}
 
   const images = trip.images?.length ? trip.images : ["/no-image.jpg"];
 
+  const handleFavorite = async (e) => {
+    e.stopPropagation();
+
+    try {
+      const result = await toggleFavorite(trip);
+      setIsFavorite(Boolean(result?.favorite));
+    } catch {
+      alert("Unable to update favorite right now");
+    }
+  };
+
   return (
     <div
       className="bg-white rounded-3xl shadow-md hover:shadow-xl transition overflow-hidden group cursor-pointer"
@@ -77,10 +110,10 @@ ${trip.title}
 
         {/* ❤️ Wishlist */}
         <button
-          onClick={(e) => e.stopPropagation()}
+          onClick={handleFavorite}
           className="absolute top-4 right-4 rounded-full bg-white/90 p-2 shadow hover:scale-110"
         >
-          <FaHeart className="text-gray-600 hover:text-red-500" />
+          <FaHeart className={isFavorite ? "text-red-500" : "text-gray-600 hover:text-red-500"} />
         </button>
 
         {/* ⚡ Instant */}
