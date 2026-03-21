@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { FaHeart } from "react-icons/fa";
 import { api } from "../api.js";
 import BookingForm from "../components/BookingForm.jsx";
 import { inferServiceType } from "../utils/serviceType";
+import { loadFavorites, toggleFavorite } from "../utils/wishlist";
 
 function getDescriptionPoints(description) {
   const text = String(description || "").trim();
@@ -31,6 +33,7 @@ export default function PackageDetails() {
 
   const [showSlider, setShowSlider] = useState(false);
   const [slideIndex, setSlideIndex] = useState(0);
+  const [isFavorite, setIsFavorite] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -77,6 +80,35 @@ export default function PackageDetails() {
   const serviceType = inferServiceType(pkg);
   const descriptionPoints = getDescriptionPoints(pkg.description);
 
+  useEffect(() => {
+    let mounted = true;
+
+    const syncFavorite = async () => {
+      try {
+        const list = await loadFavorites();
+        if (!mounted) return;
+        setIsFavorite(list.some((fav) => String(fav.itemId) === String(pkg?._id)));
+      } catch {
+        if (!mounted) return;
+        setIsFavorite(false);
+      }
+    };
+
+    if (pkg?._id) syncFavorite();
+    return () => {
+      mounted = false;
+    };
+  }, [pkg?._id]);
+
+  const handleFavorite = async () => {
+    try {
+      const result = await toggleFavorite(pkg);
+      setIsFavorite(Boolean(result?.favorite));
+    } catch {
+      alert("Unable to update favorite right now");
+    }
+  };
+
   return (
     <div className="mx-auto max-w-6xl p-4 md:p-8">
       <button
@@ -92,7 +124,15 @@ export default function PackageDetails() {
       </p>
 
       <div className="mt-6 grid grid-cols-1 gap-3 md:grid-cols-4">
-        <div className="row-span-2 md:col-span-2">
+        <div className="relative row-span-2 md:col-span-2">
+          <button
+            type="button"
+            onClick={handleFavorite}
+            className="absolute right-4 top-4 z-10 rounded-full border border-white/70 bg-black/35 p-3 shadow-lg backdrop-blur-sm"
+            aria-label="Toggle favorite"
+          >
+            <FaHeart className={isFavorite ? "text-red-500" : "text-white"} />
+          </button>
           <img
             src={images[0]}
             alt={pkg.title}

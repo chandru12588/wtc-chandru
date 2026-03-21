@@ -216,7 +216,12 @@ export default function Navbar() {
             {/* User Profile */}
             {user && (
               <div className="flex items-center gap-4">
-                <span className="text-sm font-medium text-gray-700">Hi {user.name || "Explorer"} 👋</span>
+                <span className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                  Hi {user.name || "Explorer"}
+                  <span className="penguin-greeter" role="img" aria-label="Welcoming penguin">
+                    ??
+                  </span>
+                </span>
                 
                 <button 
                   onClick={handleLogout} 
@@ -371,3 +376,4 @@ export default function Navbar() {
     </>
   );
 }
+

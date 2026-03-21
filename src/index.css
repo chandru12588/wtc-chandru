@@ -101,6 +101,25 @@ input[type="file"]::-webkit-file-upload-button:hover {
   animation: brandWave 3.6s ease-in-out infinite;
 }
 
+@keyframes penguinWiggle {
+  0% { transform: rotate(0deg) translateY(0); }
+  20% { transform: rotate(-10deg) translateY(-1px); }
+  40% { transform: rotate(8deg) translateY(0); }
+  60% { transform: rotate(-6deg) translateY(-1px); }
+  80% { transform: rotate(4deg) translateY(0); }
+  100% { transform: rotate(0deg) translateY(0); }
+}
+
+.penguin-greeter {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.05rem;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.18));
+  transform-origin: 50% 85%;
+  animation: penguinWiggle 1.6s ease-in-out infinite;
+}
+
 
 
 
