@@ -14,7 +14,9 @@ import ResetPassword from "./pages/ResetPassword.jsx";
 import FAQ from "./pages/FAQ.jsx";
 import Safety from "./pages/Safety.jsx";
 import Blog from "./pages/Blog.jsx";
+import Reviews from "./pages/Reviews.jsx";
 import UserBookings from "./pages/UserBookings.jsx";
+import UserProfile from "./pages/UserProfile.jsx";
 import SearchResults from "./pages/SearchResults.jsx";
 import BikeRiderRegister from "./pages/BikeRiderRegister.jsx";
 import GuideRegister from "./pages/GuideRegister.jsx";
@@ -66,9 +68,11 @@ export default function AppRouter() {
       <Route path="/reset-password/:token" element={<ResetPassword />} />
       <Route path="/search" element={<SearchResults />} />
       <Route path="/my-bookings" element={<UserBookings />} />
+      <Route path="/profile" element={<UserProfile />} />
       <Route path="/faq" element={<FAQ />} />
       <Route path="/safety" element={<Safety />} />
       <Route path="/blog" element={<Blog />} />
+      <Route path="/reviews" element={<Reviews />} />
       <Route path="/bike-rider/register" element={<BikeRiderRegister />} />
       <Route path="/guide/register" element={<GuideRegister />} />
       <Route path="/acting-driver/register" element={<ActingDriverRegister />} />
@@ -110,3 +114,4 @@ export default function AppRouter() {
     </Routes>
   );
 }
+

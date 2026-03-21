@@ -124,10 +124,10 @@ ${trip.title}
         )}
 
         {/* ⭐ Rating */}
-        {trip.rating && (
+        {Number(trip.averageRating || trip.rating || 0) > 0 && (
           <div className="absolute bottom-4 right-4 bg-black/80 text-white px-2 py-1 rounded-full text-xs flex items-center gap-1">
             <FaStar className="text-yellow-400" />
-            {trip.rating}
+            {(trip.averageRating || trip.rating || 0).toFixed(1)}
           </div>
         )}
 
@@ -194,3 +194,4 @@ ${trip.title}
     </div>
   );
 }
+

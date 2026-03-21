@@ -1,77 +1,80 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { ArrowRight } from "lucide-react";
-import blog1 from "../assets/blog1.jpg"
-import blog2 from "../assets/blog2.png"
-import blog3 from "../assets/blog3.webp"
+import { Link } from "react-router-dom";
+import { api } from "../api";
 
-const blogs = [
-  {
-    id: 1,
-    title: "Top 5 Hidden Camping Spots in Tamil Nadu",
-    desc: "Discover less-explored serene camping locations perfect for weekends.",
-    category: "Travel Guide",
-    image: blog1,
-  },
-  {
-    id: 2,
-    title: "Beginner’s Guide to First-Time Camping",
-    desc: "Everything you need to know before planning your first camping trip.",
-    category: "Camping Tips",
-    image: blog2,
-  },
-  {
-    id: 3,
-    title: "Why Road Trips Heal the Soul",
-    desc: "A deep dive into how nature + travel can change your mindset.",
-    category: "Lifestyle",
-    image: blog3,
-  },
-];
+function StoryCover({ story }) {
+  const media = Array.isArray(story.media) ? story.media[0] : null;
+  if (!media?.url) {
+    return <div className="h-40 w-full bg-gradient-to-br from-emerald-100 to-slate-100" />;
+  }
+
+  if (media.mediaType === "video") {
+    return (
+      <video className="h-40 w-full object-cover" muted playsInline>
+        <source src={media.url} />
+      </video>
+    );
+  }
+
+  return <img src={media.url} alt={story.title} className="h-40 w-full object-cover" />;
+}
 
 export default function BlogSection() {
+  const [stories, setStories] = useState([]);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await api.get("/api/stories?limit=3");
+        setStories(Array.isArray(res.data) ? res.data : []);
+      } catch {
+        setStories([]);
+      }
+    })();
+  }, []);
+
   return (
-    <div className="max-w-6xl mx-auto px-4 py-10">
-      <h2 className="text-lg font-semibold mb-6">Travel Stories & Blogs</h2>
+    <div className="mx-auto max-w-6xl px-4 py-10">
+      <div className="mb-6 flex items-center justify-between gap-3">
+        <h2 className="text-lg font-semibold">Travel Stories & Blogs</h2>
+        <Link to="/blog" className="text-sm font-medium text-emerald-700 hover:underline">
+          View All
+        </Link>
+      </div>
 
       <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3">
-        {blogs.map((b) => (
-          <div
-            key={b.id}
-            className="bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer"
-          >
-            {/* Image */}
-            <div className="h-40 overflow-hidden">
-              <img
-                src={b.image}
-                alt={b.title}
-                className="w-full h-full object-cover hover:scale-110 transition duration-500"
-              />
-            </div>
+        {stories.length ? (
+          stories.map((story) => (
+            <Link
+              to="/blog"
+              key={story._id}
+              className="cursor-pointer overflow-hidden rounded-2xl bg-white shadow-md transition-all duration-300 hover:shadow-xl"
+            >
+              <StoryCover story={story} />
 
-            {/* Content */}
-            <div className="p-4">
-              <span className="text-xs bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full">
-                {b.category}
-              </span>
+              <div className="p-4">
+                <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs text-emerald-700">
+                  Story by {story.userName || "Traveler"}
+                </span>
 
-              <h3 className="text-base font-semibold mt-3 line-clamp-2">
-                {b.title}
-              </h3>
+                <h3 className="mt-3 line-clamp-2 text-base font-semibold">{story.title}</h3>
 
-              <p className="text-sm text-gray-600 mt-2 line-clamp-2">
-                {b.desc}
-              </p>
+                <p className="mt-2 line-clamp-2 text-sm text-gray-600">{story.content || "Shared from Trippolama community"}</p>
 
-              <div className="mt-3 flex items-center text-sm text-emerald-600 group font-medium">
-                Read More
-                <ArrowRight
-                  size={16}
-                  className="ml-1 group-hover:translate-x-1 transition-transform"
-                />
+                <div className="group mt-3 flex items-center text-sm font-medium text-emerald-600">
+                  Read More
+                  <ArrowRight
+                    size={16}
+                    className="ml-1 transition-transform group-hover:translate-x-1"
+                  />
+                </div>
               </div>
-            </div>
-          </div>
-        ))}
+            </Link>
+          ))
+        ) : (
+          <p className="text-sm text-gray-600">No stories yet. Be the first traveler to share your journey.</p>
+        )}
       </div>
     </div>
   );

@@ -207,6 +207,17 @@ input[type="file"]::-webkit-file-upload-button:hover {
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.18));
 }
 
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
 
 
 

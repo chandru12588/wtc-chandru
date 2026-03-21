@@ -18,6 +18,34 @@ import ServicesHighlight from "../components/ServicesHighlight";
 import { inferServiceType } from "../utils/serviceType";
 
 const API = import.meta.env.VITE_API_URL;
+const CATEGORY_ORDER = [
+  "backpacker",
+  "forest",
+  "glamping",
+  "mountain",
+  "bike pillion tour",
+  "beach",
+  "desert",
+  "new year trip",
+];
+
+function sortTripsForHome(list = []) {
+  return [...list].sort((a, b) => {
+    const aCategory = String(a?.category || "").toLowerCase();
+    const bCategory = String(b?.category || "").toLowerCase();
+
+    const aIndex = CATEGORY_ORDER.indexOf(aCategory);
+    const bIndex = CATEGORY_ORDER.indexOf(bCategory);
+
+    const aRank = aIndex === -1 ? 999 : aIndex;
+    const bRank = bIndex === -1 ? 999 : bIndex;
+    if (aRank !== bRank) return aRank - bRank;
+
+    const aDate = a?.startDate ? new Date(a.startDate).getTime() : 0;
+    const bDate = b?.startDate ? new Date(b.startDate).getTime() : 0;
+    return bDate - aDate;
+  });
+}
 
 export default function Home() {
   const [allTrips, setAllTrips] = useState([]);
@@ -33,8 +61,9 @@ export default function Home() {
 
         const merged = [...pkg.data, ...host.data];
 
-        setAllTrips(merged);
-        setFilteredTrips(merged);
+        const ordered = sortTripsForHome(merged);
+        setAllTrips(ordered);
+        setFilteredTrips(ordered);
       } catch (e) {
         console.log("Error Loading Trips", e);
       } finally {
@@ -55,7 +84,7 @@ export default function Home() {
           trip.stayType?.toLowerCase().includes(q))
     );
 
-    setFilteredTrips(result);
+    setFilteredTrips(sortTripsForHome(result));
 
     if (!result.length) alert("No results found");
   };
@@ -92,7 +121,7 @@ export default function Home() {
       );
     }
 
-    setFilteredTrips(result);
+    setFilteredTrips(sortTripsForHome(result));
 
     if (!result.length) alert("No stays found for this category");
   };
@@ -141,7 +170,7 @@ export default function Home() {
       return false;
     });
 
-    setFilteredTrips(result);
+    setFilteredTrips(sortTripsForHome(result));
 
     if (!result.length) alert("No upcoming trips found");
   };
@@ -185,7 +214,7 @@ export default function Home() {
       result = result.filter((trip) => trip.instantBooking);
     }
 
-    setFilteredTrips(result);
+    setFilteredTrips(sortTripsForHome(result));
     setIsFilterOpen(false);
 
     if (!result.length) alert("No matching stays found");

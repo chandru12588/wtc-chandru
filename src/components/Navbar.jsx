@@ -27,12 +27,14 @@ export default function Navbar() {
   const [mobileServicesOpen, setMobileServicesOpen] = useState(false);
   const [hostMenu, setHostMenu] = useState(false);
   const [servicesMenu, setServicesMenu] = useState(false);
+  const [userMenu, setUserMenu] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [user, setUser] = useState(null);
   const [hostUser, setHostUser] = useState(null);
 
   const hostRef = useRef(null);
   const servicesRef = useRef(null);
+  const userRef = useRef(null);
 
   /** Sync user state */
   useEffect(() => {
@@ -56,6 +58,9 @@ export default function Navbar() {
       }
       if (servicesRef.current && !servicesRef.current.contains(e.target)) {
         setServicesMenu(false);
+      }
+      if (userRef.current && !userRef.current.contains(e.target)) {
+        setUserMenu(false);
       }
     };
     document.addEventListener("click", handler);
@@ -115,13 +120,7 @@ export default function Navbar() {
             <CampfireAnimated size={26} />
 
             <NavLink to="/trips">Trips</NavLink>
-
-            {/* Bookings */}
-            {user && (
-              <NavLink to="/my-bookings" className="text-emerald-700 font-semibold">
-                My Bookings
-              </NavLink>
-            )}
+            <NavLink to="/reviews">Reviews</NavLink>
 
             <div ref={servicesRef} className="relative">
               <button
@@ -215,9 +214,12 @@ export default function Navbar() {
 
             {/* User Profile */}
             {user && (
-              <div className="flex items-center gap-4">
-                <span className="flex items-center gap-2 text-sm font-medium text-gray-700">
-                  Hi {user.name || "Explorer"}
+              <div ref={userRef} className="relative">
+                <button
+                  onClick={() => setUserMenu((prev) => !prev)}
+                  className="flex items-center gap-2 rounded-full border border-slate-300 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-slate-50"
+                >
+                  <span>Hi {user.name || "Explorer"}</span>
                   <span className="penguin-greeter" aria-hidden="true">
                     <span className="penguin-head">
                       <span className="penguin-eye left" />
@@ -230,14 +232,39 @@ export default function Navbar() {
                       <span className="penguin-wing right" />
                     </span>
                   </span>
-                </span>
-                
-                <button 
-                  onClick={handleLogout} 
-                  className="text-red-500 hover:text-red-700 hover:bg-red-50 px-3 py-1.5 rounded-full font-medium text-sm flex items-center gap-1 transition"
-                >
-                  <LogOut size={16} /> Logout
                 </button>
+
+                {userMenu && (
+                  <div className="absolute right-0 top-full mt-2 w-52 overflow-hidden rounded-xl border bg-white shadow-lg">
+                    <button
+                      onClick={() => {
+                        setUserMenu(false);
+                        navigate("/my-bookings");
+                      }}
+                      className="block w-full px-4 py-3 text-left text-sm hover:bg-gray-50"
+                    >
+                      My Bookings
+                    </button>
+                    <button
+                      onClick={() => {
+                        setUserMenu(false);
+                        navigate("/profile");
+                      }}
+                      className="block w-full px-4 py-3 text-left text-sm hover:bg-gray-50"
+                    >
+                      Edit Profile
+                    </button>
+                    <button
+                      onClick={() => {
+                        setUserMenu(false);
+                        handleLogout();
+                      }}
+                      className="block w-full px-4 py-3 text-left text-sm text-red-600 hover:bg-red-50"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -267,6 +294,7 @@ export default function Navbar() {
             <div className="flex flex-col gap-4 p-6 text-sm">
               <NavLink to="/" onClick={closeMobileMenu}><Home size={18} /> Home</NavLink>
               <NavLink to="/trips" onClick={closeMobileMenu}><Compass size={18} /> Trips</NavLink>
+              <NavLink to="/reviews" onClick={closeMobileMenu}><Compass size={18} /> Reviews</NavLink>
               <div className="rounded-lg border">
                 <button
                   type="button"
@@ -321,6 +349,12 @@ export default function Navbar() {
               {user && (
                 <NavLink to="/my-bookings" onClick={closeMobileMenu}>
                   <User size={18} /> My Bookings
+                </NavLink>
+              )}
+
+              {user && (
+                <NavLink to="/profile" onClick={closeMobileMenu}>
+                  <User size={18} /> Edit Profile
                 </NavLink>
               )}
 
@@ -385,4 +419,6 @@ export default function Navbar() {
     </>
   );
 }
+
+
 
