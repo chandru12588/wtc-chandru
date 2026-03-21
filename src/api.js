@@ -5,11 +5,19 @@ export const api = axios.create({
   withCredentials: true,
 });
 
+const isAdminApiRequest = (path = "") => {
+  const requestPath = String(path || "");
+  return (
+    requestPath.startsWith("/api/admin") ||
+    requestPath.startsWith("/api/bookings/admin/") ||
+    /^\/api\/bookings\/[^/]+\/status$/.test(requestPath)
+  );
+};
+
 api.interceptors.request.use((config) => {
   const adminToken = localStorage.getItem("adminToken");
   const userToken = localStorage.getItem("wtc_token");
-  const requestPath = String(config.url || "");
-  const isAdminRequest = requestPath.startsWith("/api/admin");
+  const isAdminRequest = isAdminApiRequest(config.url);
 
   if (isAdminRequest && adminToken) {
     config.headers.Authorization = `Bearer ${adminToken}`;
@@ -25,8 +33,7 @@ api.interceptors.response.use(
   (error) => {
     const status = error?.response?.status;
     const message = String(error?.response?.data?.message || "");
-    const requestPath = String(error?.config?.url || "");
-    const isAdminRequest = requestPath.startsWith("/api/admin");
+    const isAdminRequest = isAdminApiRequest(error?.config?.url);
 
     if (
       status === 401 &&
