@@ -31,6 +31,13 @@ export default function Navbar() {
   const [user, setUser] = useState(null);
   const [hostUser, setHostUser] = useState(null);
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
+  const adminEmailList = (
+    import.meta.env.VITE_ADMIN_EMAILS ||
+    "admin@trippolama.com,chandru.balasub12588@gmail.com"
+  )
+    .split(",")
+    .map((email) => email.trim().toLowerCase())
+    .filter(Boolean);
 
   const hostRef = useRef(null);
   const servicesRef = useRef(null);
@@ -41,7 +48,11 @@ export default function Navbar() {
     const saved = localStorage.getItem("wtc_user");
     setUser(saved ? JSON.parse(saved) : null);
     setHostUser(getHostUser());
-    setIsAdminLoggedIn(Boolean(localStorage.getItem("adminToken")));
+    const adminToken = localStorage.getItem("adminToken");
+    const adminRaw = localStorage.getItem("admin");
+    const admin = adminRaw ? JSON.parse(adminRaw) : null;
+    const isAllowedAdmin = adminEmailList.includes(admin?.email?.toLowerCase() || "");
+    setIsAdminLoggedIn(Boolean(adminToken && isAllowedAdmin));
   }, [location.pathname]);
 
   /** Scroll shrink effect */
@@ -86,6 +97,8 @@ export default function Navbar() {
     setMobileOpen(false);
     setMobileServicesOpen(false);
   };
+
+  const isAdminUser = adminEmailList.includes(user?.email?.toLowerCase() || "");
 
   if (isAdminPage) return null;
 
@@ -204,13 +217,13 @@ export default function Navbar() {
               </>
             )}
 
-            {!user && (
+            {isAdminUser && !isAdminLoggedIn && (
               <Link to="/admin/login" className="bg-gray-800 text-white px-4 py-1.5 rounded-full text-xs">
                 Admin
               </Link>
             )}
 
-            {isAdminLoggedIn && (
+            {isAdminUser && isAdminLoggedIn && (
               <Link to="/admin" className="bg-gray-800 text-white px-4 py-1.5 rounded-full text-xs">
                 Admin Panel
               </Link>
@@ -390,9 +403,15 @@ export default function Navbar() {
                 <UserPlus size={18} /> Bike Rider Register
               </NavLink>
 
-              {!user && (
+              {isAdminUser && !isAdminLoggedIn && (
                 <NavLink to="/admin/login" onClick={closeMobileMenu}>
                   <ShieldCheck size={18} /> Admin
+                </NavLink>
+              )}
+
+              {isAdminUser && isAdminLoggedIn && (
+                <NavLink to="/admin" onClick={closeMobileMenu}>
+                  <ShieldCheck size={18} /> Admin Panel
                 </NavLink>
               )}
 
