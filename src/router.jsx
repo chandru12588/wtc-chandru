@@ -15,6 +15,7 @@ import FAQ from "./pages/FAQ.jsx";
 import Safety from "./pages/Safety.jsx";
 import Blog from "./pages/Blog.jsx";
 import Reviews from "./pages/Reviews.jsx";
+import AboutUs from "./pages/AboutUs.jsx";
 import UserBookings from "./pages/UserBookings.jsx";
 import UserProfile from "./pages/UserProfile.jsx";
 import SearchResults from "./pages/SearchResults.jsx";
@@ -73,6 +74,7 @@ export default function AppRouter() {
       <Route path="/safety" element={<Safety />} />
       <Route path="/blog" element={<Blog />} />
       <Route path="/reviews" element={<Reviews />} />
+      <Route path="/about" element={<AboutUs />} />
       <Route path="/bike-rider/register" element={<BikeRiderRegister />} />
       <Route path="/guide/register" element={<GuideRegister />} />
       <Route path="/acting-driver/register" element={<ActingDriverRegister />} />

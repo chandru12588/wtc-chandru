@@ -7,8 +7,11 @@ import WhatsAppFloat from "./components/WhatsAppFloat";
 export default function App() {
   const location = useLocation();
 
-  // show footer only on home page, not on login pages
-  const showFooter = location.pathname === "/" && !location.pathname.includes("/login") && !location.pathname.includes("/admin");
+  // Show footer on Home and About pages, hide on admin/login pages.
+  const showFooter =
+    (location.pathname === "/" || location.pathname === "/about") &&
+    !location.pathname.includes("/login") &&
+    !location.pathname.includes("/admin");
 
   return (
     <div className="min-h-screen flex flex-col">

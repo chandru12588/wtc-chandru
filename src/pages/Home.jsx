@@ -289,21 +289,21 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="relative hidden w-full overflow-hidden md:block md:h-[85vh]">
+      <section className="relative h-[68vh] w-full overflow-hidden md:h-[85vh]">
         <HeroSlider />
 
         <div className="absolute inset-0 bg-black/30" />
 
         <div className="absolute inset-0 flex flex-col items-center justify-center px-4 text-center text-white">
-          <h1 className="text-4xl font-bold md:text-6xl drop-shadow-md">
+          <h1 className="text-3xl font-bold drop-shadow-md md:text-6xl">
             Camping in India
           </h1>
 
-          <h2 className="mt-2 text-2xl font-semibold md:text-4xl drop-shadow-md">
+          <h2 className="mt-2 text-xl font-semibold drop-shadow-md md:text-4xl">
             Made Easy & Safe
           </h2>
 
-          <div className="mt-5">
+          <div className="mt-5 md:block">
             <RotatingBadge />
           </div>
 
@@ -312,7 +312,7 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="absolute bottom-5 w-full px-4 md:bottom-14 md:px-6">
+        <div className="absolute bottom-5 hidden w-full px-4 md:bottom-14 md:block md:px-6">
           <div className="mx-auto mt-8 max-w-4xl">
             <AdvancedSearchBar trips={allTrips} onSearch={handleSearch} />
           </div>
