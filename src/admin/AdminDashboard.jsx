@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Bar, Line } from "react-chartjs-2";
+import { api } from "../api.js";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -21,8 +22,6 @@ ChartJS.register(
   Legend
 );
 
-// ✅ USE ENV VARIABLE (IMPORTANT)
-const API = import.meta.env.VITE_API_URL;
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({
@@ -36,24 +35,14 @@ export default function AdminDashboard() {
   });
 
   useEffect(() => {
-    if (!API) {
-      console.error("❌ VITE_API_URL is not defined");
-      return;
-    }
-
-    fetch(`${API}/api/admin/stats`)
+    api
+      .get("/api/admin/stats")
       .then((res) => {
-        if (!res.ok) {
-          throw new Error(`API Error: ${res.status}`);
-        }
-        return res.json();
-      })
-      .then((data) => {
-        console.log("✅ ADMIN STATS:", data);
-        setStats(data);
+        console.log("ADMIN STATS:", res.data);
+        setStats(res.data || {});
       })
       .catch((err) => {
-        console.error("❌ Failed to load admin stats:", err);
+        console.error("Failed to load admin stats:", err);
       });
   }, []);
 
