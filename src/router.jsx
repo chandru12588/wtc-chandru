@@ -40,6 +40,7 @@ import AdminProfile from "./admin/AdminProfile.jsx";
 import AdminBikeRiders from "./admin/AdminBikeRiders.jsx";
 import AdminGuides from "./admin/AdminGuides.jsx";
 import AdminPillionRequests from "./admin/AdminPillionRequests.jsx";
+import AdminStories from "./admin/AdminStories.jsx";
 
 // Layout/Auth protection
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
@@ -108,6 +109,7 @@ export default function AppRouter() {
         <Route path="bike-riders" element={<AdminBikeRiders />} />
         <Route path="guides" element={<AdminGuides />} />
         <Route path="pillion-requests" element={<AdminPillionRequests />} />
+        <Route path="stories" element={<AdminStories />} />
         <Route path="profile" element={<AdminProfile />} />
       </Route>
 

@@ -1,21 +1,54 @@
-import React, { useEffect, useMemo, useState } from "react";
+ï»¿import React, { useEffect, useState } from "react";
 import { api } from "../api";
+
+const MEDIA_ACCEPT =
+  "image/*,video/*,.jpg,.jpeg,.png,.webp,.avif,.gif,.bmp,.tiff,.tif,.svg,.heic,.heif,.raw,.mp4,.mov,.avi,.mkv,.webm,.m4v,.3gp,.mpeg,.mpg,.wmv";
 
 function MediaView({ item }) {
   if (!item?.url) return null;
 
   if (item.mediaType === "video") {
     return (
-      <video controls className="h-56 w-full rounded-xl object-cover">
-        <source src={item.url} />
-      </video>
+      <>
+        <video controls className="h-56 w-full rounded-xl object-cover">
+          <source src={item.url} />
+        </video>
+        <a
+          href={item.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-1 inline-block text-xs text-emerald-700 hover:underline"
+        >
+          Open video in new tab
+        </a>
+      </>
     );
   }
 
-  return <img src={item.url} alt="Story" className="h-56 w-full rounded-xl object-cover" />;
+  return (
+    <>
+      <img
+        src={item.url}
+        alt="Story"
+        className="h-56 w-full rounded-xl object-cover"
+        onError={(e) => {
+          e.currentTarget.style.display = "none";
+        }}
+      />
+      <a
+        href={item.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="mt-1 inline-block text-xs text-emerald-700 hover:underline"
+      >
+        Open image file
+      </a>
+    </>
+  );
 }
 
 export default function Blog() {
+  const MAX_VIDEO_SECONDS = 60;
   const [stories, setStories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [posting, setPosting] = useState(false);
@@ -24,8 +57,6 @@ export default function Blog() {
   const [content, setContent] = useState("");
   const [location, setLocation] = useState("");
   const [files, setFiles] = useState([]);
-
-  const isLoggedIn = useMemo(() => Boolean(localStorage.getItem("wtc_token")), []);
 
   const loadStories = async () => {
     try {
@@ -43,9 +74,42 @@ export default function Blog() {
     loadStories();
   }, []);
 
+  const getVideoDuration = (file) =>
+    new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(file);
+      const video = document.createElement("video");
+      video.preload = "metadata";
+      video.onloadedmetadata = () => {
+        const duration = Number(video.duration || 0);
+        URL.revokeObjectURL(url);
+        resolve(duration);
+      };
+      video.onerror = () => {
+        URL.revokeObjectURL(url);
+        reject(new Error("Invalid video"));
+      };
+      video.src = url;
+    });
+
+  const validateFiles = async (selectedFiles) => {
+    const valid = [];
+    for (const file of selectedFiles) {
+      if (file.type.startsWith("video/")) {
+        const duration = await getVideoDuration(file);
+        if (duration > MAX_VIDEO_SECONDS) {
+          alert(`Video "${file.name}" is longer than ${MAX_VIDEO_SECONDS} seconds`);
+          continue;
+        }
+      }
+      valid.push(file);
+    }
+    return valid;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const isLoggedIn = Boolean(localStorage.getItem("wtc_token"));
     if (!isLoggedIn) {
       alert("Please login first");
       return;
@@ -86,7 +150,7 @@ export default function Blog() {
     <div className="mx-auto max-w-6xl px-4 py-8">
       <h1 className="mb-2 text-2xl font-bold">Travel Stories & Blog</h1>
       <p className="mb-6 text-sm text-gray-600">
-        Real stories from your customers. Post your trip experience with text, photos, and videos.
+        Share your travel experience with text, photos, and videos.
       </p>
 
       <form onSubmit={handleSubmit} className="mb-8 rounded-2xl border bg-white p-4 md:p-5">
@@ -118,10 +182,15 @@ export default function Blog() {
         <input
           type="file"
           multiple
-          accept="image/*,video/*"
-          onChange={(e) => setFiles(Array.from(e.target.files || []))}
+          accept={MEDIA_ACCEPT}
+          onChange={async (e) => {
+            const selected = Array.from(e.target.files || []);
+            const checked = await validateFiles(selected);
+            setFiles(checked);
+          }}
           className="mt-3 block w-full text-sm"
         />
+        <p className="mt-1 text-xs text-gray-500">Video max duration: 60 seconds per file.</p>
 
         <button
           type="submit"
@@ -146,7 +215,7 @@ export default function Blog() {
                 <h3 className="text-lg font-semibold">{story.title}</h3>
                 <p className="text-xs text-gray-500">
                   by {story.userName || "Traveler"}
-                  {story.location ? ` • ${story.location}` : ""}
+                  {story.location ? ` - ${story.location}` : ""}
                 </p>
               </div>
               <p className="text-xs text-gray-500">

@@ -1,11 +1,26 @@
 import React, { useMemo, useState } from "react";
-import { ExternalLink, Rocket, Route, Users } from "lucide-react";
+import { ExternalLink, Mail, MessageCircle, Phone, Rocket, Route, Users } from "lucide-react";
 import bg22 from "../assets/bg22.jpg";
 import munnar from "../assets/munnar.jpeg";
-import bg3 from "../assets/bg3.jpg";
+import yercaud from "../assets/yercaud.jpg";
 
 export default function AboutUs() {
+  const founderCandidates = useMemo(
+    () => [
+      "founder-photo.png",
+      "founder-photo.jpg",
+      "founder-photo.jpeg",
+      "founder.png",
+      "founder.jpg",
+      "chandru-bike.png",
+      "chandru-bike.jpg",
+    ],
+    []
+  );
+  const [founderIndex, setFounderIndex] = useState(0);
   const [imageMissing, setImageMissing] = useState(false);
+  const founderSrc = `/${founderCandidates[founderIndex]}`;
+  const founderLoaded = !imageMissing && founderIndex < founderCandidates.length;
 
   const highlights = useMemo(
     () => [
@@ -86,20 +101,28 @@ export default function AboutUs() {
         </article>
 
         <article className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-          {imageMissing ? (
+          {founderLoaded ? (
+            <img
+              src={founderSrc}
+              alt="Founder of Trippolama"
+              className="h-full min-h-[360px] w-full object-contain bg-slate-100"
+              onError={() => {
+                const next = founderIndex + 1;
+                if (next < founderCandidates.length) {
+                  setFounderIndex(next);
+                } else {
+                  setImageMissing(true);
+                }
+              }}
+            />
+          ) : (
             <div className="flex min-h-[360px] flex-col items-center justify-center bg-gradient-to-br from-slate-200 to-slate-300 px-6 text-center">
               <p className="text-lg font-semibold text-slate-700">Add your founder photo</p>
               <p className="mt-2 text-sm text-slate-600">
-                Upload image as <code className="rounded bg-white/70 px-1 py-0.5">public/founder-photo.png</code>
+                Upload to <code className="rounded bg-white/70 px-1 py-0.5">frontend/public</code> as
+                <code className="ml-1 rounded bg-white/70 px-1 py-0.5">founder-photo.png</code>
               </p>
             </div>
-          ) : (
-            <img
-              src="/founder-photo.png"
-              alt="Founder of Trippolama"
-              className="h-full min-h-[360px] w-full object-cover"
-              onError={() => setImageMissing(true)}
-            />
           )}
         </article>
       </section>
@@ -124,21 +147,66 @@ export default function AboutUs() {
 
       <section className="mx-auto w-full max-w-7xl px-5 pb-16 md:px-8">
         <div className="grid gap-6 rounded-3xl bg-white p-4 shadow-sm md:grid-cols-2 md:p-6">
-          <img src={munnar} alt="Travel journey" className="h-64 w-full rounded-2xl object-cover md:h-full" />
+          <div className="grid gap-3 sm:grid-cols-2">
+            <img src={bg22} alt="Nature trail" className="h-56 w-full rounded-2xl object-cover sm:h-64" />
+            <img src={munnar} alt="Mountain valley" className="h-56 w-full rounded-2xl object-cover sm:h-64" />
+            <div className="sm:col-span-2">
+              {founderLoaded ? (
+                <img src={founderSrc} alt="Founder bike journey" className="h-64 w-full rounded-2xl object-contain bg-slate-100" />
+              ) : (
+                <img src={yercaud} alt="Travel hills" className="h-64 w-full rounded-2xl object-cover" />
+              )}
+            </div>
+          </div>
+
           <div className="rounded-2xl p-2 md:p-4">
             <h2 className="text-2xl font-semibold">What I am building next</h2>
             <p className="mt-3 leading-8 text-slate-700">
               I am currently shaping Trippolama as a user-friendly travel startup with better discovery, safer booking,
               and a strong travel community. This is only the beginning.
             </p>
-            <div
-              className="mt-5 h-40 rounded-2xl"
-              style={{
-                backgroundImage: `linear-gradient(130deg, rgba(15,23,42,0.1), rgba(15,23,42,0.02)), url(${bg3})`,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-              }}
-            />
+            <p className="mt-3 leading-8 text-slate-700">
+              I continue documenting my travel experience and converting real road stories into better features for our
+              users.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section className="mx-auto w-full max-w-7xl px-5 pb-16 md:px-8">
+        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm md:p-6">
+          <h2 className="text-2xl font-semibold">Contact Us</h2>
+          <div className="mt-5 grid gap-3 md:grid-cols-2">
+            <a
+              href="https://wa.me/918248579662"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-900"
+            >
+              <MessageCircle size={18} />
+              WhatsApp: +91 82485 79662
+            </a>
+            <a
+              href="mailto:admin@trippolama.com"
+              className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-800"
+            >
+              <Mail size={18} />
+              admin@trippolama.com
+            </a>
+            <a
+              href="tel:+918248579662"
+              className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-800"
+            >
+              <Phone size={18} />
+              +91 82485 79662
+            </a>
+            <a
+              href="tel:+919003998623"
+              className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-800"
+            >
+              <Phone size={18} />
+              +91 90039 98623
+            </a>
           </div>
         </div>
       </section>

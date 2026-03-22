@@ -40,11 +40,6 @@ export default function Footer() {
               </Link>
             </li>
             <li>
-              <Link to="/about" className="transition hover:text-white">
-                About Us
-              </Link>
-            </li>
-            <li>
               <Link to="/host/register" className="transition hover:text-white">
                 Become a Host
               </Link>
@@ -64,9 +59,25 @@ export default function Footer() {
                 FAQs
               </Link>
             </li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 className="mb-3 font-semibold text-white">Quick Links</h4>
+          <ul className="space-y-2 text-sm">
             <li>
               <Link to="/blog" className="transition hover:text-white">
-                Blog
+                Blogs
+              </Link>
+            </li>
+            <li>
+              <Link to="/about" className="transition hover:text-white">
+                About Us
+              </Link>
+            </li>
+            <li>
+              <Link to="/faq" className="transition hover:text-white">
+                FAQs
               </Link>
             </li>
           </ul>

@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaWhatsapp, FaHeart, FaStar, FaMapMarkerAlt } from "react-icons/fa";
+import { FaWhatsapp, FaHeart, FaStar, FaMapMarkerAlt, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination } from "swiper/modules";
 import { api } from "../api.js";
@@ -15,6 +15,7 @@ const STAR_VALUES = [1, 2, 3, 4, 5];
 
 export default function TripCard({ trip }) {
   const navigate = useNavigate();
+  const swiperRef = useRef(null);
   const [isFavorite, setIsFavorite] = useState(false);
   const [userRating, setUserRating] = useState(0);
   const [submittingRating, setSubmittingRating] = useState(false);
@@ -115,6 +116,9 @@ Price: INR ${trip.price || "Contact"}`;
       <div className="relative h-[200px] overflow-hidden sm:h-[240px] lg:h-[300px]">
         <Swiper
           modules={[Pagination]}
+          onSwiper={(swiper) => {
+            swiperRef.current = swiper;
+          }}
           pagination={{ clickable: true }}
           className="h-full trip-swiper cursor-pointer"
         >
@@ -128,6 +132,33 @@ Price: INR ${trip.price || "Contact"}`;
             </SwiperSlide>
           ))}
         </Swiper>
+
+        {images.length > 1 && (
+          <>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                swiperRef.current?.slidePrev();
+              }}
+              className="absolute left-3 top-1/2 z-20 -translate-y-1/2 rounded-full bg-black/45 p-2 text-white transition hover:bg-black/70"
+              aria-label="Previous image"
+            >
+              <FaChevronLeft size={12} />
+            </button>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                swiperRef.current?.slideNext();
+              }}
+              className="absolute right-3 top-1/2 z-20 -translate-y-1/2 rounded-full bg-black/45 p-2 text-white transition hover:bg-black/70"
+              aria-label="Next image"
+            >
+              <FaChevronRight size={12} />
+            </button>
+          </>
+        )}
 
         <button
           onClick={handleFavorite}

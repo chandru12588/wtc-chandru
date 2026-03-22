@@ -169,6 +169,7 @@ export default function PackageDetails() {
   }
 
   const images = pkg.images?.length ? pkg.images : [pkg.image];
+  const videos = Array.isArray(pkg.videos) ? pkg.videos : [];
   const serviceType = inferServiceType(pkg);
 
   return (
@@ -245,6 +246,19 @@ export default function PackageDetails() {
           <BookingForm pkg={pkg} />
         </div>
       </div>
+
+      {videos.length > 0 && (
+        <section className="mt-10">
+          <h2 className="text-2xl font-semibold">Property Videos</h2>
+          <div className="mt-4 grid gap-4 md:grid-cols-2">
+            {videos.map((videoUrl, index) => (
+              <video key={`${videoUrl}-${index}`} controls className="h-64 w-full rounded-2xl object-cover">
+                <source src={videoUrl} />
+              </video>
+            ))}
+          </div>
+        </section>
+      )}
 
       <section className="mt-12 rounded-2xl border bg-white p-5 md:p-6">
         <div className="flex items-center justify-between gap-3">

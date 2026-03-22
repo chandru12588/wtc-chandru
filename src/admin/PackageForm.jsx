@@ -2,6 +2,11 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { api } from "../api.js";
 
+const IMAGE_ACCEPT =
+  "image/*,.jpg,.jpeg,.png,.webp,.avif,.gif,.bmp,.tiff,.tif,.svg,.heic,.heif,.raw";
+const VIDEO_ACCEPT =
+  "video/*,.mp4,.mov,.avi,.mkv,.webm,.m4v,.3gp,.mpeg,.mpg,.wmv";
+
 const CATEGORY_OPTIONS = [
   "Backpacker",
   "Forest",
@@ -111,6 +116,8 @@ export default function PackageForm() {
   const [oldImages, setOldImages] = useState([]);
   const [newImages, setNewImages] = useState([]);
   const [replacementImages, setReplacementImages] = useState({});
+  const [oldVideos, setOldVideos] = useState([]);
+  const [newVideos, setNewVideos] = useState([]);
 
   const isEdit = Boolean(id);
   const preset = SERVICE_PRESETS[form.serviceType] || SERVICE_PRESETS.general;
@@ -142,6 +149,7 @@ export default function PackageForm() {
         });
 
         setOldImages(pkg.images || []);
+        setOldVideos(pkg.videos || []);
       } catch (err) {
         console.log("LOAD ERROR:", err);
       }
@@ -194,6 +202,18 @@ export default function PackageForm() {
     }));
   };
 
+  const removeExistingVideo = (videoUrl) => {
+    setOldVideos((prev) => prev.filter((video) => video !== videoUrl));
+  };
+
+  const handleVideoSelect = (e) => {
+    setNewVideos([...e.target.files]);
+  };
+
+  const removeNewVideo = (indexToRemove) => {
+    setNewVideos((prev) => prev.filter((_, index) => index !== indexToRemove));
+  };
+
   const clearReplacementImage = (imageUrl) => {
     setReplacementImages((prev) => {
       const next = { ...prev };
@@ -231,9 +251,11 @@ export default function PackageForm() {
       });
 
       newImages.forEach((file) => fd.append("images", file));
+      newVideos.forEach((file) => fd.append("videos", file));
 
       if (isEdit) {
         fd.append("oldImages", JSON.stringify(oldImages));
+        fd.append("oldVideos", JSON.stringify(oldVideos));
         const replacementEntries = Object.entries(replacementImages);
         fd.append(
           "replacementTargets",
@@ -433,7 +455,7 @@ export default function PackageForm() {
                       Change Picture
                       <input
                         type="file"
-                        accept="image/*"
+                        accept={IMAGE_ACCEPT}
                         className="hidden"
                         onChange={(e) =>
                           handleReplaceImage(imageUrl, e.target.files?.[0] || null)
@@ -465,7 +487,7 @@ export default function PackageForm() {
           <input
             type="file"
             multiple
-            accept="image/*"
+            accept={IMAGE_ACCEPT}
             onChange={handleImageSelect}
             className="mt-4 cursor-pointer"
           />
@@ -480,6 +502,52 @@ export default function PackageForm() {
                     className="mt-3 rounded bg-red-50 px-3 py-2 text-sm font-medium text-red-700"
                   >
                     Remove New Picture
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="rounded border p-4">
+          <p className="font-medium">Upload Videos (Optional)</p>
+          {isEdit && oldVideos.length > 0 && (
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              {oldVideos.map((videoUrl) => (
+                <div key={videoUrl} className="rounded-lg border p-3">
+                  <video controls className="h-40 w-full rounded object-cover">
+                    <source src={videoUrl} />
+                  </video>
+                  <button
+                    type="button"
+                    onClick={() => removeExistingVideo(videoUrl)}
+                    className="mt-3 rounded bg-red-50 px-3 py-2 text-sm font-medium text-red-700"
+                  >
+                    Delete Video
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <input
+            type="file"
+            multiple
+            accept={VIDEO_ACCEPT}
+            onChange={handleVideoSelect}
+            className="mt-4 cursor-pointer"
+          />
+          {newVideos.length > 0 && (
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              {newVideos.map((file, index) => (
+                <div key={`${file.name}-${index}`} className="rounded-lg border p-3">
+                  <p className="truncate text-sm text-gray-700">{file.name}</p>
+                  <button
+                    type="button"
+                    onClick={() => removeNewVideo(index)}
+                    className="mt-3 rounded bg-red-50 px-3 py-2 text-sm font-medium text-red-700"
+                  >
+                    Remove New Video
                   </button>
                 </div>
               ))}
