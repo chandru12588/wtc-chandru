@@ -1,6 +1,7 @@
-﻿import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { api } from "../api.js";
 import PenguinLoader from "../components/PenguinLoader";
+import { formatRupees, sanitizeText } from "../utils/text";
 
 export default function AdminPackages() {
   const [packagesList, setPackagesList] = useState([]);
@@ -75,31 +76,31 @@ export default function AdminPackages() {
               {/* IMAGE */}
               <img
                 src={pkg.images?.[0] || "/no-image.png"}
-                alt={pkg.title}
+                alt={sanitizeText(pkg.title)}
                 className="w-20 h-20 rounded object-cover border"
               />
 
               <div className="ml-4 flex-1">
-                <h3 className="font-semibold text-lg">{pkg.title}</h3>
+                <h3 className="font-semibold text-lg">{sanitizeText(pkg.title)}</h3>
 
                 <p className="text-sm text-gray-600">
-                  <span className="font-medium">Rs {pkg.price}</span>
+                  <span className="font-medium">{formatRupees(pkg.price)}</span>
                 </p>
 
                 <p className="text-xs text-gray-600">
-                  Location: {pkg.location || "No location"}
+                  Location: {sanitizeText(pkg.location || "No location")}
                 </p>
 
                 <p className="text-xs text-gray-600">
-                  Region: {pkg.region || "No region"}
+                  Region: {sanitizeText(pkg.region || "No region")}
                 </p>
 
                 <p className="text-xs text-gray-600">
-                  Category: {pkg.category || "N/A"}
+                  Category: {sanitizeText(pkg.category || "N/A")}
                 </p>
 
                 <p className="text-xs text-gray-600">
-                  Duration: {pkg.days || "No duration"}
+                  Duration: {sanitizeText(pkg.days || "No duration")}
                 </p>
               </div>
 
@@ -125,4 +126,7 @@ export default function AdminPackages() {
     </div>
   );
 }
+
+
+
 

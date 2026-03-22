@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import { api } from "../api";
 import { loadFavorites } from "../utils/wishlist";
 import PenguinLoader from "../components/PenguinLoader";
@@ -8,7 +7,6 @@ import PenguinLoader from "../components/PenguinLoader";
 const FILTERS = ["ALL", "UPCOMING", "COMPLETED", "CANCELLED", "BOOKING REQUESTS"];
 
 export default function UserBookings() {
-  const API = import.meta.env.VITE_API_URL;
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("wtc_user"));
   const userId = user?._id || user?.id;
@@ -42,9 +40,9 @@ export default function UserBookings() {
       setLoading(true);
 
       const [pkgRes, hostRes, pillionRes] = await Promise.allSettled([
-        axios.get(`${API}/api/bookings/user/${userId}`),
-        axios.get(`${API}/api/host/bookings/user/${userId}`),
-        axios.get(`${API}/api/pillion-requests/user/${userId}`),
+        api.get(`/api/bookings/user/${userId}`),
+        api.get(`/api/host/bookings/user/${userId}`),
+        api.get(`/api/pillion-requests/user/${userId}`),
       ]);
 
       const packages = (pkgRes.status === "fulfilled" ? pkgRes.value.data : []).map((item) => ({
@@ -95,9 +93,9 @@ export default function UserBookings() {
     try {
       const url =
         booking.source === "host"
-          ? `${API}/api/host/bookings/${booking._id}/cancel`
-          : `${API}/api/bookings/${booking._id}/cancel`;
-      await axios.put(url);
+          ? `/api/host/bookings/${booking._id}/cancel`
+          : `/api/bookings/${booking._id}/cancel`;
+      await api.put(url);
       loadBookings();
     } catch (err) {
       alert(err.response?.data?.message || err.response?.data?.msg || "Cancel failed");
@@ -110,12 +108,12 @@ export default function UserBookings() {
     try {
       const url =
         booking.source === "host"
-          ? `${API}/api/host/bookings/${booking._id}/user-delete?userId=${userId}`
+          ? `/api/host/bookings/${booking._id}/user-delete`
           : booking.source === "pillion"
-          ? `${API}/api/pillion-requests/${booking._id}/user-delete?userId=${userId}`
-          : `${API}/api/bookings/${booking._id}/user-delete?userId=${userId}`;
+          ? `/api/pillion-requests/${booking._id}/user-delete`
+          : `/api/bookings/${booking._id}/user-delete`;
 
-      await axios.delete(url);
+      await api.delete(url);
       loadBookings();
     } catch (err) {
       alert(err.response?.data?.message || err.response?.data?.msg || "Delete failed");

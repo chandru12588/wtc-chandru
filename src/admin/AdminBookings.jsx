@@ -1,7 +1,8 @@
-﻿import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { api } from "../api.js";
 import { useNavigate } from "react-router-dom";
 import PenguinLoader from "../components/PenguinLoader";
+import { formatRupees, sanitizeText } from "../utils/text";
 
 export default function AdminBookings() {
   const navigate = useNavigate();
@@ -160,7 +161,7 @@ export default function AdminBookings() {
               filteredBookings.map((b) => (
                 <tr key={b._id} className="border-b hover:bg-gray-50">
                   <td className="p-3 font-medium">
-                    {b.packageId?.title || "-"}
+                    {sanitizeText(b.packageId?.title || "-")}
                     {b.source === "host" && (
                       <span className="ml-2 text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded">
                         HOST
@@ -174,18 +175,18 @@ export default function AdminBookings() {
                     </span>
                     {(b.serviceDestination || b.vehicleModel || b.preferredLanguage) && (
                       <div className="mt-2 space-y-1 text-[11px] font-normal text-gray-600">
-                        {b.serviceDestination && <div>To: {b.serviceDestination}</div>}
-                        {b.preferredLanguage && <div>Lang: {b.preferredLanguage}</div>}
-                        {b.vehicleModel && <div>Vehicle: {b.vehicleModel}</div>}
+                        {b.serviceDestination && <div>To: {sanitizeText(b.serviceDestination)}</div>}
+                        {b.preferredLanguage && <div>Lang: {sanitizeText(b.preferredLanguage)}</div>}
+                        {b.vehicleModel && <div>Vehicle: {sanitizeText(b.vehicleModel)}</div>}
                       </div>
                     )}
                   </td>
 
-                  <td className="p-3 font-semibold">{b.name}</td>
+                  <td className="p-3 font-semibold">{sanitizeText(b.name)}</td>
 
                   <td className="p-3">
                     <div>{b.phone}</div>
-                    <div className="text-xs text-gray-500">{b.email}</div>
+                    <div className="text-xs text-gray-500">{sanitizeText(b.email)}</div>
                   </td>
 
                   <td className="p-3">{b.people}</td>
@@ -195,7 +196,7 @@ export default function AdminBookings() {
                     <div>OUT: {formatDate(b.checkOut)}</div>
                   </td>
 
-                  <td className="p-3 font-semibold">Rs {b.amount}</td>
+                  <td className="p-3 font-semibold">{formatRupees(b.amount)}</td>
 
                   <td className="p-3">
                     <span
@@ -287,5 +288,6 @@ export default function AdminBookings() {
     
   );
 }
+
 
 
