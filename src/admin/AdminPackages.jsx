@@ -14,16 +14,16 @@ export default function AdminPackages() {
       try {
         const res = await api.get("/api/admin/packages");
 
-        console.log("ðŸ“¦ ADMIN PACKAGES:", res.data); // ðŸ”¥ DEBUG
+        console.log("ADMIN PACKAGES:", res.data);
 
-        // âœ… FIX: handle both formats
+        // handle both response formats
         const data = Array.isArray(res.data)
           ? res.data
           : res.data.packages || [];
 
         setPackagesList(data);
       } catch (err) {
-        console.error("âŒ LOAD ERROR:", err);
+        console.error("LOAD ERROR:", err);
       } finally {
         setLoading(false);
       }
@@ -42,7 +42,7 @@ export default function AdminPackages() {
       await api.delete(`/api/admin/packages/${id}`);
       setPackagesList((prev) => prev.filter((p) => p._id !== id));
     } catch (err) {
-      console.error("âŒ Delete failed:", err);
+      console.error("Delete failed:", err);
       alert("Failed to delete package");
     }
   };
@@ -60,7 +60,7 @@ export default function AdminPackages() {
         </a>
       </div>
 
-      {/* ðŸ”„ LOADING STATE */}
+      {/* Loading state */}
       {loading ? (
         <PenguinLoader compact message="Loading packages..." />
       ) : packagesList.length === 0 ? (
@@ -83,23 +83,23 @@ export default function AdminPackages() {
                 <h3 className="font-semibold text-lg">{pkg.title}</h3>
 
                 <p className="text-sm text-gray-600">
-                  <span className="font-medium">â‚¹{pkg.price}</span>
+                  <span className="font-medium">Rs {pkg.price}</span>
                 </p>
 
                 <p className="text-xs text-gray-600">
-                  ðŸ“ {pkg.location || "No location"}
+                  Location: {pkg.location || "No location"}
                 </p>
 
                 <p className="text-xs text-gray-600">
-                  ðŸŒ {pkg.region || "No region"}
+                  Region: {pkg.region || "No region"}
                 </p>
 
                 <p className="text-xs text-gray-600">
-                  ðŸ—‚ Category: {pkg.category || "N/A"}
+                  Category: {pkg.category || "N/A"}
                 </p>
 
                 <p className="text-xs text-gray-600">
-                  ðŸ•’ {pkg.days || "No duration"}
+                  Duration: {pkg.days || "No duration"}
                 </p>
               </div>
 

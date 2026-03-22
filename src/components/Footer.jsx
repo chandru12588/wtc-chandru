@@ -54,11 +54,6 @@ export default function Footer() {
                 Become an Acting Driver
               </Link>
             </li>
-            <li>
-              <Link to="/faq" className="transition hover:text-white">
-                FAQs
-              </Link>
-            </li>
           </ul>
         </div>
 

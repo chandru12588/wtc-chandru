@@ -90,7 +90,7 @@ export default function AdminBookings() {
             onClick={() => navigate("/admin")}
             className="px-3 md:px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 text-sm"
           >
-            â† Dashboard
+            Back to Dashboard
           </button>
 
           <button
@@ -195,7 +195,7 @@ export default function AdminBookings() {
                     <div>OUT: {formatDate(b.checkOut)}</div>
                   </td>
 
-                  <td className="p-3 font-semibold">â‚¹{b.amount}</td>
+                  <td className="p-3 font-semibold">Rs {b.amount}</td>
 
                   <td className="p-3">
                     <span
@@ -233,7 +233,7 @@ export default function AdminBookings() {
                         View
                       </a>
                     ) : (
-                      "â€”"
+                      "-"
                     )}
                   </td>
 
