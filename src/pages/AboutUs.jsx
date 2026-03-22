@@ -101,8 +101,16 @@ export default function AboutUs() {
         </article>
 
         <article className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-          <div className="absolute left-3 top-3 z-20 rounded-full bg-black/60 px-3 py-1 text-xs font-semibold text-white backdrop-blur md:bottom-6 md:left-4 md:top-auto md:rotate-[-90deg] md:origin-left">
-            Founder of Trippolama.com
+          <div className="absolute left-4 right-4 top-4 z-20 rounded-2xl border border-amber-200/50 bg-gradient-to-r from-black/80 via-slate-900/75 to-black/80 px-4 py-2.5 text-center shadow-xl backdrop-blur">
+            <div className="mx-auto mb-1 inline-flex items-center rounded-full border border-amber-200/70 bg-amber-300/15 px-3 py-0.5 text-[10px] font-bold uppercase tracking-[0.25em] text-amber-100">
+              Est. 2026
+            </div>
+            <p className="bg-gradient-to-r from-yellow-200 via-amber-300 to-yellow-100 bg-clip-text text-base font-extrabold tracking-wide text-transparent drop-shadow-[0_0_10px_rgba(251,191,36,0.65)] md:text-xl">
+              FOUNDER OF TRIPPOLAMA.COM
+            </p>
+            <p className="mt-0.5 text-xs font-semibold tracking-[0.2em] text-white/90 md:text-sm">
+              CHANDRU
+            </p>
           </div>
           {founderLoaded ? (
             <img
