@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from "react";
+﻿import React, { useEffect, useState } from "react";
 import { api } from "../api";
+import PenguinLoader from "../components/PenguinLoader";
 
 export default function AdminBikeRiders() {
   const [items, setItems] = useState([]);
@@ -78,7 +79,7 @@ export default function AdminBikeRiders() {
     }
   };
 
-  if (loading) return <p>Loading rider applications...</p>;
+  if (loading) return <PenguinLoader message="Loading rider applications..." />;
 
   return (
     <div>
@@ -163,3 +164,5 @@ export default function AdminBikeRiders() {
     </div>
   );
 }
+
+

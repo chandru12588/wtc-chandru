@@ -16,6 +16,7 @@ import RotatingReviewBadge from "../components/ReviewBadge";
 import RotatingBadge from "../components/RotatingBadge";
 import FilterDrawer from "../components/FilterDrawer";
 import ServicesHighlight from "../components/ServicesHighlight";
+import PenguinLoader from "../components/PenguinLoader";
 
 import { inferServiceType } from "../utils/serviceType";
 
@@ -334,7 +335,7 @@ export default function Home() {
         <h2 className="mb-6 hidden text-2xl font-semibold md:block">Featured Trips</h2>
 
         {loading ? (
-          <p>Loading...</p>
+          <PenguinLoader message="Loading trips..." />
         ) : (
           <div className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 md:grid md:gap-8 md:overflow-visible md:pb-0 md:snap-none md:grid-cols-2 lg:grid-cols-3">
             {filteredTrips.length ? (

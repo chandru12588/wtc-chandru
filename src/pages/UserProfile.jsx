@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { api } from "../api";
+import PenguinLoader from "../components/PenguinLoader";
 
 export default function UserProfile() {
   const [loading, setLoading] = useState(true);
@@ -70,7 +71,7 @@ export default function UserProfile() {
   };
 
   if (loading) {
-    return <div className="pt-28 text-center text-gray-500">Loading profile...</div>;
+    return <PenguinLoader message="Loading profile..." className="pt-28" />;
   }
 
   return (

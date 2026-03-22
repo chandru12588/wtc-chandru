@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { FaHeart, FaStar } from "react-icons/fa";
 import { api } from "../api.js";
 import BookingForm from "../components/BookingForm.jsx";
+import PenguinLoader from "../components/PenguinLoader.jsx";
 import { inferServiceType } from "../utils/serviceType";
 import { loadFavorites, toggleFavorite } from "../utils/wishlist";
 
@@ -152,7 +153,7 @@ export default function PackageDetails() {
     }
   };
 
-  if (loading) return <div className="p-6">Loading...</div>;
+  if (loading) return <PenguinLoader message="Loading trip details..." className="p-6" />;
 
   if (error || !pkg) {
     return (
@@ -316,7 +317,7 @@ export default function PackageDetails() {
         </form>
 
         <div className="mt-6 space-y-4">
-          {reviewLoading ? <p className="text-sm text-gray-500">Loading reviews...</p> : null}
+          {reviewLoading ? <PenguinLoader compact message="Loading reviews..." /> : null}
 
           {!reviewLoading && !reviews.length ? (
             <p className="text-sm text-gray-500">No reviews yet. Be the first to rate this package.</p>

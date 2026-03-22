@@ -1,5 +1,6 @@
-import React, { useEffect, useMemo, useState } from "react";
+﻿import React, { useEffect, useMemo, useState } from "react";
 import { api } from "../api.js";
+import PenguinLoader from "../components/PenguinLoader";
 
 export default function AdminUsers() {
   const [users, setUsers] = useState([]);
@@ -49,7 +50,7 @@ export default function AdminUsers() {
         />
       </div>
 
-      {loading ? <p className="text-gray-600">Loading users...</p> : null}
+      {loading ? <PenguinLoader compact message="Loading users..." /> : null}
       {error ? <p className="text-red-600">{error}</p> : null}
 
       {!loading && !error ? (
@@ -91,3 +92,5 @@ export default function AdminUsers() {
     </div>
   );
 }
+
+

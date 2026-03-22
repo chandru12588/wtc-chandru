@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from "react";
+﻿import React, { useEffect, useState } from "react";
 import { api } from "../api.js";
+import PenguinLoader from "../components/PenguinLoader";
 
 const MEDIA_ACCEPT =
   "image/*,video/*,.jpg,.jpeg,.png,.webp,.avif,.gif,.bmp,.tiff,.tif,.svg,.heic,.heif,.raw,.mp4,.mov,.avi,.mkv,.webm,.m4v,.3gp,.mpeg,.mpg,.wmv";
@@ -133,7 +134,7 @@ export default function AdminStories() {
         </button>
       </form>
 
-      {loading ? <p className="text-sm text-gray-500">Loading stories...</p> : null}
+      {loading ? <PenguinLoader compact message="Loading stories..." /> : null}
 
       {!loading && !stories.length ? <p className="text-sm text-gray-500">No stories yet.</p> : null}
 
@@ -144,7 +145,7 @@ export default function AdminStories() {
               <div>
                 <h3 className="text-lg font-semibold">{story.title}</h3>
                 <p className="text-xs text-gray-500">
-                  {story.location ? `${story.location} • ` : ""}
+                  {story.location ? `${story.location} â€¢ ` : ""}
                   {new Date(story.createdAt).toLocaleDateString("en-IN")}
                 </p>
               </div>
@@ -172,3 +173,5 @@ export default function AdminStories() {
     </div>
   );
 }
+
+

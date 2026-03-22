@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from "react";
+﻿import React, { useEffect, useState } from "react";
 import { api } from "../api";
+import PenguinLoader from "../components/PenguinLoader";
 
 export default function AdminPillionRequests() {
   const [requests, setRequests] = useState([]);
@@ -62,7 +63,7 @@ export default function AdminPillionRequests() {
     }
   };
 
-  if (loading) return <p>Loading pillion requests...</p>;
+  if (loading) return <PenguinLoader message="Loading pillion requests..." />;
 
   return (
     <div>
@@ -158,3 +159,5 @@ export default function AdminPillionRequests() {
     </div>
   );
 }
+
+

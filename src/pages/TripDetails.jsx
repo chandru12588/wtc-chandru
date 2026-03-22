@@ -1,7 +1,8 @@
-// frontend/src/pages/TripDetails.jsx
+﻿// frontend/src/pages/TripDetails.jsx
 import React, { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { api } from "../api.js";
+import PenguinLoader from "../components/PenguinLoader";
 
 export default function TripDetails() {
   const { id } = useParams();
@@ -24,8 +25,7 @@ export default function TripDetails() {
     loadTrip();
   }, [id]);
 
-  if (!trip)
-    return <div className="p-10 text-center text-gray-600">Loading…</div>;
+  if (!trip) return <PenguinLoader message="Loading trip details..." className="p-10" />;
 
   const images = trip.images?.length ? trip.images : [trip.image];
 
@@ -36,7 +36,7 @@ export default function TripDetails() {
         onClick={() => navigate('/trips')}
         className="mb-4 text-indigo-600 hover:text-indigo-800 hover:scale-105 font-semibold flex items-center gap-2 transition cursor-pointer"
       >
-        ← Back to Trips
+        â† Back to Trips
       </button>
 
       {/* TITLE */}
@@ -87,7 +87,7 @@ export default function TripDetails() {
             className="absolute top-4 right-4 text-white text-3xl"
             onClick={() => setShowSlider(false)}
           >
-            ✕
+            âœ•
           </button>
 
           <img
@@ -102,7 +102,7 @@ export default function TripDetails() {
               setSlideIndex((slideIndex - 1 + images.length) % images.length)
             }
           >
-            ‹
+            â€¹
           </button>
 
           {/* NEXT */}
@@ -110,7 +110,7 @@ export default function TripDetails() {
             className="absolute right-6 text-white text-4xl"
             onClick={() => setSlideIndex((slideIndex + 1) % images.length)}
           >
-            ›
+            â€º
           </button>
         </div>
       )}
@@ -124,7 +124,7 @@ export default function TripDetails() {
           <p className="text-gray-700 whitespace-pre-line">{trip.description}</p>
 
           <p className="text-xl font-bold text-indigo-600">
-            ₹ {trip.price} / person
+            â‚¹ {trip.price} / person
           </p>
         </div>
 
@@ -132,7 +132,7 @@ export default function TripDetails() {
         <aside className="p-4 border rounded-xl shadow">
           <div className="flex justify-between mb-2">
             <span className="text-sm text-gray-500">Starting from</span>
-            <span className="text-xl font-bold text-indigo-600">₹{trip.price}</span>
+            <span className="text-xl font-bold text-indigo-600">â‚¹{trip.price}</span>
           </div>
 
           <p className="text-xs text-gray-600 mb-3">
@@ -154,3 +154,5 @@ export default function TripDetails() {
     </div>
   );
 }
+
+

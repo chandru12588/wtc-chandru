@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { api } from "../api.js";
+import PenguinLoader from "../components/PenguinLoader.jsx";
 
 export default function BookingPage() {
   const { id } = useParams();
@@ -130,7 +131,7 @@ export default function BookingPage() {
     setLoading(false);
   };
 
-  if (!trip) return <p className="text-center py-10">Loading...</p>;
+  if (!trip) return <PenguinLoader message="Loading booking details..." className="py-10" />;
 
   const isPillionService = trip.serviceType === "bike";
   const totalPrice = trip.price * people;

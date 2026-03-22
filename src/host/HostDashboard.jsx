@@ -3,6 +3,7 @@ import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { getHostUser, getHostToken } from "../utils/hostAuth";
 import { Pencil, Trash2, Plus } from "lucide-react";
+import PenguinLoader from "../components/PenguinLoader";
 
 const API = import.meta.env.VITE_API_URL;
 
@@ -56,7 +57,7 @@ export default function HostDashboard() {
       </div>
 
       {loading ? (
-        <p>Loading...</p>
+        <PenguinLoader message="Loading host listings..." />
       ) : listings.length === 0 ? (
         <p className="text-gray-500 text-lg mt-10 text-center">
           No listings added yet.

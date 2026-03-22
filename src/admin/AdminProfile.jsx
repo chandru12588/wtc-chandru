@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from "react";
+﻿import React, { useEffect, useState } from "react";
 import { api } from "../api.js";
+import PenguinLoader from "../components/PenguinLoader";
 
 export default function AdminProfile() {
   const [admin, setAdmin] = useState(null);
@@ -80,7 +81,7 @@ export default function AdminProfile() {
     }
   };
 
-  if (loading) return <div className="p-6">Loading...</div>;
+  if (loading) return <PenguinLoader message="Loading admin profile..." className="p-6" />;
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
@@ -205,3 +206,5 @@ export default function AdminProfile() {
     </div>
   );
 }
+
+

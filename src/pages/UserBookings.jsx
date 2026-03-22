@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { api } from "../api";
 import { loadFavorites } from "../utils/wishlist";
+import PenguinLoader from "../components/PenguinLoader";
 
 const FILTERS = ["ALL", "UPCOMING", "COMPLETED", "CANCELLED", "BOOKING REQUESTS"];
 
@@ -245,7 +246,7 @@ export default function UserBookings() {
               </div>
 
               {loading ? (
-                <div className="py-10 text-center text-gray-500">Loading your bookings...</div>
+                <PenguinLoader message="Loading your bookings..." className="py-4" />
               ) : filteredBookings.length === 0 ? (
                 <div className="py-10 text-center text-gray-500">No bookings in this filter.</div>
               ) : (

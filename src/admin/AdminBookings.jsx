@@ -1,6 +1,7 @@
-import React, { useEffect, useMemo, useState } from "react";
+﻿import React, { useEffect, useMemo, useState } from "react";
 import { api } from "../api.js";
 import { useNavigate } from "react-router-dom";
+import PenguinLoader from "../components/PenguinLoader";
 
 export default function AdminBookings() {
   const navigate = useNavigate();
@@ -74,9 +75,7 @@ export default function AdminBookings() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-[60vh] text-gray-600">
-        Loading bookings...
-      </div>
+      <PenguinLoader message="Loading bookings..." className="h-[60vh]" />
     );
   }
 
@@ -91,7 +90,7 @@ export default function AdminBookings() {
             onClick={() => navigate("/admin")}
             className="px-3 md:px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 text-sm"
           >
-            ← Dashboard
+            â† Dashboard
           </button>
 
           <button
@@ -196,7 +195,7 @@ export default function AdminBookings() {
                     <div>OUT: {formatDate(b.checkOut)}</div>
                   </td>
 
-                  <td className="p-3 font-semibold">₹{b.amount}</td>
+                  <td className="p-3 font-semibold">â‚¹{b.amount}</td>
 
                   <td className="p-3">
                     <span
@@ -234,7 +233,7 @@ export default function AdminBookings() {
                         View
                       </a>
                     ) : (
-                      "—"
+                      "â€”"
                     )}
                   </td>
 
@@ -288,3 +287,5 @@ export default function AdminBookings() {
     
   );
 }
+
+

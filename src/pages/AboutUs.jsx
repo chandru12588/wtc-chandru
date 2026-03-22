@@ -100,7 +100,10 @@ export default function AboutUs() {
           </div>
         </article>
 
-        <article className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+        <article className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+          <div className="absolute left-3 top-3 z-20 rounded-full bg-black/60 px-3 py-1 text-xs font-semibold text-white backdrop-blur md:bottom-6 md:left-4 md:top-auto md:rotate-[-90deg] md:origin-left">
+            Founder of Trippolama.com
+          </div>
           {founderLoaded ? (
             <img
               src={founderSrc}

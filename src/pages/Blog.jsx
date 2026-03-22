@@ -1,5 +1,6 @@
 ﻿import React, { useEffect, useState } from "react";
 import { api } from "../api";
+import PenguinLoader from "../components/PenguinLoader";
 
 const MEDIA_ACCEPT =
   "image/*,video/*,.jpg,.jpeg,.png,.webp,.avif,.gif,.bmp,.tiff,.tif,.svg,.heic,.heif,.raw,.mp4,.mov,.avi,.mkv,.webm,.m4v,.3gp,.mpeg,.mpg,.wmv";
@@ -201,7 +202,7 @@ export default function Blog() {
         </button>
       </form>
 
-      {loading ? <p>Loading stories...</p> : null}
+      {loading ? <PenguinLoader compact message="Loading stories..." /> : null}
 
       {!loading && !stories.length ? (
         <p className="text-sm text-gray-600">No stories yet.</p>
@@ -238,3 +239,5 @@ export default function Blog() {
     </div>
   );
 }
+
+

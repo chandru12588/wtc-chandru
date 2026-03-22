@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from "react";
+﻿import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import HostBookingForm from "../components/HostBookingForm"; // ⭐ ADD THIS
+import HostBookingForm from "../components/HostBookingForm";
+import PenguinLoader from "../components/PenguinLoader";
 
 const API = import.meta.env.VITE_API_URL;
 
@@ -14,11 +15,11 @@ export default function HostListingDetails() {
   useEffect(() => {
     const loadListing = async () => {
       try {
-        // ⭐ Correct public endpoint
+        // â­ Correct public endpoint
         const res = await axios.get(`${API}/api/listings/${id}`);
         setListing(res.data);
       } catch (err) {
-        console.error("❌ Host listing details load error:", err);
+        console.error("âŒ Host listing details load error:", err);
       } finally {
         setLoading(false);
       }
@@ -27,12 +28,7 @@ export default function HostListingDetails() {
     loadListing();
   }, [id]);
 
-  if (loading)
-    return (
-      <div className="pt-24 text-center text-gray-500 text-lg">
-        Loading listing…
-      </div>
-    );
+  if (loading) return (<PenguinLoader message="Loading listing..." className="pt-24" />);
 
   if (!listing)
     return (
@@ -53,7 +49,7 @@ export default function HostListingDetails() {
         onClick={() => navigate('/trips')}
         className="mb-4 text-indigo-600 hover:text-indigo-800 hover:scale-105 font-semibold flex items-center gap-2 transition cursor-pointer"
       >
-        ← Back to Trips
+        â† Back to Trips
       </button>
 
       {/* TITLE */}
@@ -83,7 +79,7 @@ export default function HostListingDetails() {
 
       {/* PRICE */}
       <div className="text-2xl font-semibold mb-6">
-        Price: <span className="text-emerald-600">₹ {listing.price}</span>
+        Price: <span className="text-emerald-600">â‚¹ {listing.price}</span>
       </div>
 
       {/* HOST INFO */}
@@ -94,7 +90,7 @@ export default function HostListingDetails() {
         <p><strong>Phone:</strong> {hostPhone || "Not available"}</p>
       </div>
 
-      {/* ⭐ BOOKING FORM (NEW) */}
+      {/* â­ BOOKING FORM (NEW) */}
       <HostBookingForm listing={listing} />
 
       {/* WHATSAPP BUTTON */}
@@ -111,3 +107,5 @@ export default function HostListingDetails() {
     </div>
   );
 }
+
+

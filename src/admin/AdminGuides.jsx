@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from "react";
+﻿import React, { useEffect, useState } from "react";
 import { api } from "../api";
+import PenguinLoader from "../components/PenguinLoader";
 
 export default function AdminGuides() {
   const [items, setItems] = useState([]);
@@ -36,7 +37,7 @@ export default function AdminGuides() {
     }
   };
 
-  if (loading) return <p>Loading guide applications...</p>;
+  if (loading) return <PenguinLoader message="Loading guide applications..." />;
 
   return (
     <div>
@@ -133,3 +134,5 @@ export default function AdminGuides() {
     </div>
   );
 }
+
+

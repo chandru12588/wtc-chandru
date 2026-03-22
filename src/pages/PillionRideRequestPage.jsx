@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { api } from "../api";
 import { inferServiceType } from "../utils/serviceType";
 import BookingForm from "../components/BookingForm";
+import PenguinLoader from "../components/PenguinLoader";
 
 function getDescriptionPoints(description) {
   const text = String(description || "").trim();
@@ -39,7 +40,7 @@ export default function PillionRideRequestPage() {
     load();
   }, [id]);
 
-  if (!pkg) return <div className="p-6">Loading...</div>;
+  if (!pkg) return <PenguinLoader message="Loading ride request page..." className="p-6" />;
 
   if (inferServiceType(pkg) !== "bike") {
     return (
