@@ -14,6 +14,8 @@ import {
 } from "lucide-react";
 
 import logo3 from "../assets/log3.png";
+import muruganLogo from "../assets/muruganLogo.png";
+
 import CampfireAnimated from "../components/CampfireAnimated";
 import { getHostUser, logoutHost } from "../utils/hostAuth";
 
@@ -120,8 +122,20 @@ export default function Navbar() {
               </span>
               <span className="text-[8px] sm:text-[10px] md:text-xs font-medium uppercase tracking-[0.18em] sm:tracking-[0.22em] text-emerald-700">
                 Explore. Smile. Repeat.
-              </span>
+
+                 
+  
+          </span>
+
+          
             </span>
+<img
+              src={muruganLogo}
+              alt="Murugan"
+              className="h-18 w-18 object-contain ml-1 md:ml-2"
+            />
+
+
           </Link>
 
           {/* ================= Desktop Menu ================= */}
