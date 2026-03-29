@@ -1,11 +1,13 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { MessageCircle, Send, X } from "lucide-react";
 import { api } from "../api";
 
 const WELCOME =
   "Hi! I am Trippolama AI Assistant. Ask me about packages, acting driver, bike rider service, guide service, or bookings.";
+const WHATSAPP_NUMBER = import.meta.env.VITE_WHATSAPP_NUMBER || "918248579662";
 
 export default function AIChatWidget() {
+  const [enabled, setEnabled] = useState(true);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [input, setInput] = useState("");
@@ -21,6 +23,34 @@ export default function AIChatWidget() {
         .filter((m) => m.content),
     [messages]
   );
+
+  useEffect(() => {
+    let mounted = true;
+
+    api
+      .get("/api/ai/settings")
+      .then((res) => {
+        if (!mounted) return;
+        setEnabled(Boolean(res?.data?.enabled));
+      })
+      .catch(() => {
+        if (!mounted) return;
+        setEnabled(true);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const openWhatsAppHandoff = () => {
+    const msg = encodeURIComponent(
+      "Hi Admin, I need help with booking/services from Trippolama website."
+    );
+    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`, "_blank");
+  };
+
+  if (!enabled) return null;
 
   const sendMessage = async () => {
     const trimmed = String(input || "").trim();
@@ -127,6 +157,13 @@ export default function AIChatWidget() {
           <Send size={16} />
         </button>
       </div>
+      <button
+        type="button"
+        onClick={openWhatsAppHandoff}
+        className="w-full border-t bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-700 hover:bg-emerald-100"
+      >
+        Talk to Admin on WhatsApp
+      </button>
     </div>
   );
 }

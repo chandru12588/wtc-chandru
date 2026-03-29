@@ -24,6 +24,9 @@ ChartJS.register(
 
 
 export default function AdminDashboard() {
+  const [aiChatEnabled, setAiChatEnabled] = useState(true);
+  const [aiSettingsLoading, setAiSettingsLoading] = useState(true);
+  const [aiSettingsSaving, setAiSettingsSaving] = useState(false);
   const [stats, setStats] = useState({
     totalBookings: 0,
     totalRevenue: 0,
@@ -45,6 +48,32 @@ export default function AdminDashboard() {
         console.error("Failed to load admin stats:", err);
       });
   }, []);
+
+  useEffect(() => {
+    api
+      .get("/api/admin/ai-settings")
+      .then((res) => {
+        setAiChatEnabled(Boolean(res?.data?.aiChatEnabled));
+      })
+      .catch((err) => {
+        console.error("Failed to load AI settings:", err);
+      })
+      .finally(() => setAiSettingsLoading(false));
+  }, []);
+
+  const toggleAiChat = async () => {
+    const nextValue = !aiChatEnabled;
+    setAiSettingsSaving(true);
+    try {
+      await api.put("/api/admin/ai-settings", { aiChatEnabled: nextValue });
+      setAiChatEnabled(nextValue);
+    } catch (err) {
+      console.error("Failed to update AI settings:", err);
+      alert(err?.response?.data?.message || "Failed to update AI chat setting");
+    } finally {
+      setAiSettingsSaving(false);
+    }
+  };
 
   const formatINR = (num) =>
     num?.toLocaleString("en-IN", { maximumFractionDigits: 0 });
@@ -114,6 +143,29 @@ export default function AdminDashboard() {
             }}
           />
         </div>
+      </div>
+
+      <div className="bg-white mt-6 p-5 shadow rounded-xl">
+        <h2 className="text-sm font-semibold mb-3">AI Chat Control</h2>
+        <p className="text-sm text-gray-600 mb-3">
+          Enable or disable AI chatbot for website users.
+        </p>
+        <button
+          type="button"
+          onClick={toggleAiChat}
+          disabled={aiSettingsLoading || aiSettingsSaving}
+          className={`rounded px-4 py-2 text-sm font-medium text-white ${
+            aiChatEnabled ? "bg-emerald-600" : "bg-gray-600"
+          } disabled:opacity-60`}
+        >
+          {aiSettingsLoading
+            ? "Loading..."
+            : aiSettingsSaving
+            ? "Saving..."
+            : aiChatEnabled
+            ? "AI Chat: Enabled (Click to Disable)"
+            : "AI Chat: Disabled (Click to Enable)"}
+        </button>
       </div>
 
       {/* RECENT BOOKINGS */}
