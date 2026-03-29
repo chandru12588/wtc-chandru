@@ -102,6 +102,17 @@ export default function AdminLayout() {
           </NavLink>
 
           <NavLink
+            to="/admin/acting-drivers"
+            className={({ isActive }) =>
+              `p-2 rounded-lg ${
+                isActive ? "bg-indigo-100 text-indigo-700" : "text-gray-700"
+              }`
+            }
+          >
+            Acting Drivers
+          </NavLink>
+
+          <NavLink
             to="/admin/pillion-requests"
             className={({ isActive }) =>
               `p-2 rounded-lg ${

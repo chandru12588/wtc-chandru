@@ -54,7 +54,21 @@ export default function Trips() {
           isHostListing: true,
         }));
 
-        const finalTrips = [...adminTrips, ...hostTrips];
+        let actingDriverTrips = [];
+        try {
+          const actingDriversRes = await axios.get(
+            `${API}/api/acting-drivers/approved`
+          );
+          actingDriverTrips = (actingDriversRes.data || []).map((driver) => ({
+            ...driver,
+            isHostListing: false,
+            isActingDriverProfile: true,
+          }));
+        } catch (driverErr) {
+          console.error("Approved acting drivers load error:", driverErr);
+        }
+
+        const finalTrips = [...adminTrips, ...hostTrips, ...actingDriverTrips];
         setTrips(finalTrips);
         setFiltered(finalTrips);
         setActiveFilter(null);

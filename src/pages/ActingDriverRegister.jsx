@@ -10,10 +10,14 @@ export default function ActingDriverRegister() {
     age: "",
     phone: "",
     whatsappNumber: "",
+    city: "",
+    state: "",
+    address: "",
     vehicleType: "car",
     experienceYears: "",
   });
   const [licenseImage, setLicenseImage] = useState(null);
+  const [livePhoto, setLivePhoto] = useState(null);
 
   const setField = (key, value) => {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -28,6 +32,7 @@ export default function ActingDriverRegister() {
       const fd = new FormData();
       Object.entries(form).forEach(([k, v]) => fd.append(k, v));
       if (licenseImage) fd.append("licenseImage", licenseImage);
+      if (livePhoto) fd.append("livePhoto", livePhoto);
 
       const res = await fetch(`${API}/api/acting-drivers/apply`, {
         method: "POST",
@@ -45,10 +50,14 @@ export default function ActingDriverRegister() {
         age: "",
         phone: "",
         whatsappNumber: "",
+        city: "",
+        state: "",
+        address: "",
         vehicleType: "car",
         experienceYears: "",
       });
       setLicenseImage(null);
+      setLivePhoto(null);
     } catch (err) {
       setMessageType("error");
       setMessage(err.message);
@@ -61,7 +70,7 @@ export default function ActingDriverRegister() {
     <div className="mx-auto max-w-3xl px-4 py-10">
       <h1 className="text-3xl font-bold">Acting Driver Registration</h1>
       <p className="mt-2 text-gray-600">
-        Register as an acting driver for car or bike service.
+        Register as an acting driver for car, bike, or lorry service.
       </p>
 
       {message && (
@@ -110,7 +119,30 @@ export default function ActingDriverRegister() {
             onChange={(e) => setField("whatsappNumber", e.target.value)}
             required
           />
+          <input
+            className="rounded-lg border p-3"
+            placeholder="City"
+            value={form.city}
+            onChange={(e) => setField("city", e.target.value)}
+            required
+          />
+          <input
+            className="rounded-lg border p-3"
+            placeholder="State"
+            value={form.state}
+            onChange={(e) => setField("state", e.target.value)}
+            required
+          />
         </div>
+
+        <textarea
+          className="w-full rounded-lg border p-3"
+          rows={3}
+          placeholder="Driver Address"
+          value={form.address}
+          onChange={(e) => setField("address", e.target.value)}
+          required
+        />
 
         <div className="grid gap-3 md:grid-cols-2">
           <select
@@ -121,6 +153,7 @@ export default function ActingDriverRegister() {
           >
             <option value="car">Car Driver</option>
             <option value="bike">Bike Driver</option>
+            <option value="lorry">Lorry Driver</option>
           </select>
           <input
             className="rounded-lg border p-3"
@@ -143,6 +176,23 @@ export default function ActingDriverRegister() {
             onChange={(e) => setLicenseImage(e.target.files?.[0] || null)}
             required
           />
+        </label>
+
+        <label className="block rounded-lg border p-3">
+          <span className="text-sm text-gray-600">
+            Live Photo (Use Camera or Upload)
+          </span>
+          <input
+            type="file"
+            className="mt-2 block w-full"
+            accept="image/*"
+            capture="user"
+            onChange={(e) => setLivePhoto(e.target.files?.[0] || null)}
+            required
+          />
+          <p className="mt-1 text-xs text-gray-500">
+            On mobile, this opens your camera. You can also choose a photo from gallery.
+          </p>
         </label>
 
         <button

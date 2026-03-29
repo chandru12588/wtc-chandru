@@ -43,6 +43,11 @@ export default function TripCard({ trip }) {
   }, [trip?._id]);
 
   const handleDetails = () => {
+    if (trip?.isActingDriverProfile) {
+      handleWhatsApp();
+      return;
+    }
+
     if (serviceType === "host") {
       navigate(`/host-listing/${trip._id}`);
     } else if (serviceType === "bike") {
@@ -53,6 +58,12 @@ export default function TripCard({ trip }) {
   };
 
   const handleWhatsApp = () => {
+    const rawNumber =
+      trip?.driverProfile?.whatsappNumber ||
+      trip?.driverProfile?.phone ||
+      WHATSAPP_NUMBER;
+    const targetNumber = String(rawNumber).replace(/[^\d]/g, "") || WHATSAPP_NUMBER;
+
     const msg = `Hello
 I want to book:
 ${trip.title}
@@ -60,7 +71,7 @@ Location: ${trip.location}
 Price: INR ${trip.price || "Contact"}`;
 
     window.open(
-      `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`,
+      `https://wa.me/${targetNumber}?text=${encodeURIComponent(msg)}`,
       "_blank"
     );
   };
@@ -234,6 +245,8 @@ Price: INR ${trip.price || "Contact"}`;
               ? "Book a ride"
               : serviceType === "guide"
               ? "Book a guide"
+              : trip?.isActingDriverProfile
+              ? "Contact Driver"
               : serviceType === "host"
               ? "View Stay"
               : "View Details"}
