@@ -123,6 +123,7 @@ export default function PackageForm() {
   const preset = SERVICE_PRESETS[form.serviceType] || SERVICE_PRESETS.general;
   const isPillionService = form.serviceType === "bike";
   const isGuideService = form.serviceType === "guide";
+  const isDriverService = form.serviceType === "driver";
 
   useEffect(() => {
     if (!isEdit) return;
@@ -177,6 +178,12 @@ export default function PackageForm() {
           : value === "driver"
           ? prev.price || "1500"
           : prev.price,
+      category: value === "driver" ? "Acting Driver Service" : prev.category,
+      location: value === "driver" ? "Customer Request" : prev.location,
+      region: value === "driver" ? "Flexible" : prev.region,
+      days: value === "driver" ? "As per customer requirement" : prev.days,
+      startDate: value === "driver" ? prev.startDate || "2099-01-01" : prev.startDate,
+      endDate: value === "driver" ? "" : prev.endDate,
       guideType: value === "guide" ? prev.guideType || "Local Guide" : prev.guideType,
     }));
   };
@@ -228,13 +235,20 @@ export default function PackageForm() {
     try {
       const fd = new FormData();
       const payload =
-        isPillionService || isGuideService
+        isPillionService || isGuideService || isDriverService
           ? {
               ...form,
               price: isGuideService ? 0 : form.price,
-              category: isGuideService ? "Guide Service" : form.category,
-              location: isGuideService ? "Customer Requirement" : "Customer Request",
-              region: isGuideService ? "Flexible" : "Flexible",
+              category: isGuideService
+                ? "Guide Service"
+                : isDriverService
+                ? "Acting Driver Service"
+                : form.category,
+              location:
+                isGuideService || isDriverService
+                  ? "Customer Requirement"
+                  : "Customer Request",
+              region: "Flexible",
               days: "As per customer requirement",
               startDate: form.startDate || "2099-01-01",
               endDate: "",
@@ -310,25 +324,29 @@ export default function PackageForm() {
               onChange={(e) => update("price", e.target.value)}
             />
 
-            <input
-              className="w-full rounded border p-3"
-              placeholder="Location"
-              value={form.location}
-              onChange={(e) => update("location", e.target.value)}
-              required
-            />
+            {!isDriverService && (
+              <>
+                <input
+                  className="w-full rounded border p-3"
+                  placeholder="Location"
+                  value={form.location}
+                  onChange={(e) => update("location", e.target.value)}
+                  required
+                />
 
-            <input
-              className="w-full rounded border p-3"
-              placeholder="Region"
-              value={form.region}
-              onChange={(e) => update("region", e.target.value)}
-              required
-            />
+                <input
+                  className="w-full rounded border p-3"
+                  placeholder="Region"
+                  value={form.region}
+                  onChange={(e) => update("region", e.target.value)}
+                  required
+                />
+              </>
+            )}
           </>
         )}
 
-        {!isGuideService && (
+        {!isGuideService && !isDriverService && (
           <select
             className="w-full rounded border p-3 cursor-pointer"
             value={form.category}
@@ -407,7 +425,7 @@ export default function PackageForm() {
           }
         />
 
-        {!isPillionService && !isGuideService && (
+        {!isPillionService && !isGuideService && !isDriverService && (
           <>
             <input
               className="w-full rounded border p-3"
