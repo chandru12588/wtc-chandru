@@ -43,6 +43,7 @@ import AdminGuides from "./admin/AdminGuides.jsx";
 import AdminPillionRequests from "./admin/AdminPillionRequests.jsx";
 import AdminStories from "./admin/AdminStories.jsx";
 import AdminActingDrivers from "./admin/AdminActingDrivers.jsx";
+import AdminTravelAgentRequests from "./admin/AdminTravelAgentRequests.jsx";
 
 // Layout/Auth protection
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
@@ -114,6 +115,7 @@ export default function AppRouter() {
         <Route path="guides" element={<AdminGuides />} />
         <Route path="acting-drivers" element={<AdminActingDrivers />} />
         <Route path="pillion-requests" element={<AdminPillionRequests />} />
+        <Route path="travel-agent-requests" element={<AdminTravelAgentRequests />} />
         <Route path="stories" element={<AdminStories />} />
         <Route path="profile" element={<AdminProfile />} />
       </Route>

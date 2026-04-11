@@ -124,6 +124,17 @@ export default function AdminLayout() {
           </NavLink>
 
           <NavLink
+            to="/admin/travel-agent-requests"
+            className={({ isActive }) =>
+              `p-2 rounded-lg ${
+                isActive ? "bg-indigo-100 text-indigo-700" : "text-gray-700"
+              }`
+            }
+          >
+            Travel Agent Requests
+          </NavLink>
+
+          <NavLink
             to="/admin/stories"
             className={({ isActive }) =>
               `p-2 rounded-lg ${
