@@ -23,6 +23,7 @@ import BikeRiderRegister from "./pages/BikeRiderRegister.jsx";
 import GuideRegister from "./pages/GuideRegister.jsx";
 import ActingDriverRegister from "./pages/ActingDriverRegister.jsx";
 import PillionRideRequestPage from "./pages/PillionRideRequestPage.jsx";
+import KodaikanalAgents from "./pages/KodaikanalAgents.jsx";
 
 // ⭐ Host Listing Public Page
 import HostListingDetails from "./pages/HostListingDetails.jsx";
@@ -81,6 +82,7 @@ export default function AppRouter() {
       <Route path="/guide/register" element={<GuideRegister />} />
       <Route path="/acting-driver/register" element={<ActingDriverRegister />} />
       <Route path="/pillion-request/:id" element={<PillionRideRequestPage />} />
+      <Route path="/kodaikanal-agents" element={<KodaikanalAgents />} />
 
       {/* ⭐ Host Listing Public Detail Page */}
       <Route path="/host-listing/:id" element={<HostListingDetails />} />
