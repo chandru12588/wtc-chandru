@@ -1,7 +1,24 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { api } from "../api";
 
-const CITY_OPTIONS = ["Chennai", "Bengaluru", "Trichy"];
+const CITY_OPTIONS = ["Chennai", "Bengaluru", "Trichy", "Dindigul", "Kodaikanal"];
+const STATE_OPTIONS = ["All States", "Tamil Nadu", "Kerala"];
+const DEFAULT_DESTINATIONS = [
+  "All Destinations",
+  "Kodaikanal",
+  "Ooty",
+  "Yercaud",
+  "Munnar",
+  "Wayanad",
+  "Thekkady",
+  "Alleppey",
+  "Kochi",
+  "Kovalam",
+  "Varkala",
+  "Kanyakumari",
+  "Madurai",
+  "Rameswaram",
+];
 
 const initialForm = {
   customerName: "",
@@ -24,8 +41,11 @@ const formatDate = (value) => {
   });
 };
 
-export default function KodaikanalAgents() {
+export default function TravelAgents() {
+  const quoteFormRef = useRef(null);
   const [city, setCity] = useState("Chennai");
+  const [stateFilter, setStateFilter] = useState("All States");
+  const [destination, setDestination] = useState("All Destinations");
   const [search, setSearch] = useState("");
   const [minRating, setMinRating] = useState("0");
   const [maxPrice, setMaxPrice] = useState("");
@@ -35,32 +55,43 @@ export default function KodaikanalAgents() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [lastUpdated, setLastUpdated] = useState(null);
+  const [availableDestinations, setAvailableDestinations] = useState(DEFAULT_DESTINATIONS);
 
   const [selectedAgent, setSelectedAgent] = useState(null);
   const [form, setForm] = useState(initialForm);
   const [submitting, setSubmitting] = useState(false);
   const [submitMessage, setSubmitMessage] = useState("");
   const [submitType, setSubmitType] = useState("success");
+  const [selectionMessage, setSelectionMessage] = useState("");
 
   const params = useMemo(() => {
     const q = { city, limit: 24 };
+    if (stateFilter !== "All States") q.state = stateFilter;
+    if (destination !== "All Destinations") q.destination = destination;
     if (search.trim()) q.search = search.trim();
     if (Number(minRating) > 0) q.minRating = Number(minRating);
     if (maxPrice) q.maxPrice = Number(maxPrice);
     if (verifiedOnly) q.verified = "true";
     return q;
-  }, [city, search, minRating, maxPrice, verifiedOnly]);
+  }, [city, stateFilter, destination, search, minRating, maxPrice, verifiedOnly]);
 
   useEffect(() => {
     const fetchAgents = async () => {
       setLoading(true);
       setError("");
       try {
-        const { data } = await api.get("/api/kodaikanal-agents", { params });
+        const { data } = await api.get("/api/travel-agents", { params });
         setAgents(Array.isArray(data?.items) ? data.items : []);
         setLastUpdated(data?.meta?.lastUpdated || null);
+
+        const apiDestinations = Array.isArray(data?.meta?.availableDestinations)
+          ? data.meta.availableDestinations
+          : [];
+        if (apiDestinations.length) {
+          setAvailableDestinations(["All Destinations", ...apiDestinations]);
+        }
       } catch (err) {
-        console.error("KODAI AGENTS PAGE LOAD ERROR:", err);
+        console.error("TRAVEL AGENTS PAGE LOAD ERROR:", err);
         setError("Failed to load travel agents right now. Please try again.");
       } finally {
         setLoading(false);
@@ -69,6 +100,14 @@ export default function KodaikanalAgents() {
 
     fetchAgents();
   }, [params]);
+
+  const handleSelectAgent = (agent) => {
+    setSelectedAgent(agent);
+    setSelectionMessage(
+      `${agent?.name || "Agent"} selected. Fill the form below to submit your request.`
+    );
+    quoteFormRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
   const submitQuote = async (e) => {
     e.preventDefault();
@@ -79,16 +118,20 @@ export default function KodaikanalAgents() {
       const payload = {
         ...form,
         fromCity: city,
+        destination: selectedAgent?.destination || (destination !== "All Destinations" ? destination : ""),
+        destinationState:
+          selectedAgent?.destinationState || (stateFilter !== "All States" ? stateFilter : ""),
         agentId: selectedAgent?._id || null,
         budget: form.budget ? Number(form.budget) : 0,
         travelers: Number(form.travelers || 1),
       };
 
-      const { data } = await api.post("/api/kodaikanal-agents/quote-requests", payload);
+      const { data } = await api.post("/api/travel-agents/quote-requests", payload);
       setSubmitType("success");
       setSubmitMessage(data?.message || "Quote request submitted successfully");
       setForm({ ...initialForm, fromCity: city });
       setSelectedAgent(null);
+      setSelectionMessage("");
     } catch (err) {
       const msg =
         err?.response?.data?.message || "Unable to submit quote request. Please retry.";
@@ -102,20 +145,15 @@ export default function KodaikanalAgents() {
   return (
     <div className="mx-auto max-w-7xl px-4 pb-16 pt-10">
       <div className="rounded-2xl border border-emerald-100 bg-gradient-to-r from-emerald-50 via-teal-50 to-cyan-50 p-5">
-        <h1 className="text-2xl font-extrabold text-slate-900 md:text-3xl">
-          Kodaikanal Tour Agents
-        </h1>
+        <h1 className="text-2xl font-extrabold text-slate-900 md:text-3xl">Travel Agents</h1>
         <p className="mt-2 text-sm text-slate-700 md:text-base">
-          Compare agents from Chennai, Bengaluru, and Trichy. Get matched quickly with
-          the right Kodaikanal specialist.
+          Compare agents for top tourist places across Tamil Nadu and Kerala.
         </p>
-        <p className="mt-2 text-xs text-slate-500">
-          Last updated: {formatDate(lastUpdated)}
-        </p>
+        <p className="mt-2 text-xs text-slate-500">Last updated: {formatDate(lastUpdated)}</p>
       </div>
 
       <section className="mt-5 rounded-2xl border bg-white p-4 shadow-sm">
-        <div className="grid gap-3 md:grid-cols-5">
+        <div className="grid gap-3 md:grid-cols-6">
           <select
             value={city}
             onChange={(e) => {
@@ -131,11 +169,38 @@ export default function KodaikanalAgents() {
             ))}
           </select>
 
+          <select
+            value={stateFilter}
+            onChange={(e) => {
+              setStateFilter(e.target.value);
+              setDestination("All Destinations");
+            }}
+            className="rounded-lg border p-2.5"
+          >
+            {STATE_OPTIONS.map((value) => (
+              <option key={value} value={value}>
+                {value}
+              </option>
+            ))}
+          </select>
+
+          <select
+            value={destination}
+            onChange={(e) => setDestination(e.target.value)}
+            className="rounded-lg border p-2.5"
+          >
+            {availableDestinations.map((value) => (
+              <option key={value} value={value}>
+                {value}
+              </option>
+            ))}
+          </select>
+
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search agent/agency"
-            className="rounded-lg border p-2.5 md:col-span-2"
+            className="rounded-lg border p-2.5"
           />
 
           <select
@@ -193,7 +258,11 @@ export default function KodaikanalAgents() {
               </div>
               <p className="text-sm text-slate-600">{agent.agencyName || "Independent Agent"}</p>
               <div className="mt-3 space-y-1 text-sm text-slate-700">
-                <p>City: {agent.city}</p>
+                <p>From City: {agent.city}</p>
+                <p>
+                  Destination: {agent.destination || "N/A"}
+                  {agent.destinationState ? ` (${agent.destinationState})` : ""}
+                </p>
                 <p>Rating: {agent.rating || 0} / 5</p>
                 <p>Price from: Rs. {Number(agent.priceFrom || 0).toLocaleString("en-IN")}</p>
                 <p>Phone: {agent.phone || "N/A"}</p>
@@ -201,7 +270,7 @@ export default function KodaikanalAgents() {
               </div>
               <button
                 type="button"
-                onClick={() => setSelectedAgent(agent)}
+                onClick={() => handleSelectAgent(agent)}
                 className="mt-4 w-full rounded-lg bg-emerald-600 px-3 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
               >
                 Request Quote From This Agent
@@ -210,18 +279,25 @@ export default function KodaikanalAgents() {
           ))}
       </section>
 
-      <section className="mt-8 rounded-2xl border bg-white p-5 shadow-sm">
+      <section ref={quoteFormRef} className="mt-8 rounded-2xl border bg-white p-5 shadow-sm">
         <h3 className="text-xl font-bold text-slate-900">Get Personalized Quote</h3>
         <p className="mt-1 text-sm text-slate-600">
-          Source city: <strong>{city}</strong>{" "}
+          Source city: <strong>{city}</strong>
           {selectedAgent ? (
             <>
+              {" "}
               | Selected agent: <strong>{selectedAgent.name}</strong>
             </>
           ) : (
-            "| Agent: Auto-match best option"
+            " | Agent: Auto-match best option"
           )}
         </p>
+
+        {selectionMessage && (
+          <div className="mt-3 rounded-lg border border-sky-200 bg-sky-50 p-3 text-sm text-sky-700">
+            {selectionMessage}
+          </div>
+        )}
 
         {submitMessage && (
           <div

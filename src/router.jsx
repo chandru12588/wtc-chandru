@@ -82,6 +82,7 @@ export default function AppRouter() {
       <Route path="/guide/register" element={<GuideRegister />} />
       <Route path="/acting-driver/register" element={<ActingDriverRegister />} />
       <Route path="/pillion-request/:id" element={<PillionRideRequestPage />} />
+      <Route path="/travel-agents" element={<KodaikanalAgents />} />
       <Route path="/kodaikanal-agents" element={<KodaikanalAgents />} />
 
       {/* ⭐ Host Listing Public Detail Page */}
