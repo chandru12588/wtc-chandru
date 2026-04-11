@@ -7,17 +7,72 @@ const DEFAULT_DESTINATIONS = [
   "All Destinations",
   "Kodaikanal",
   "Ooty",
+  "Coonoor",
+  "Kotagiri",
   "Yercaud",
+  "Yelagiri",
+  "Kolli Hills",
+  "Valparai",
+  "Topslip",
+  "Megamalai",
+  "Manjolai",
+  "Kurangani",
+  "Courtallam",
   "Munnar",
   "Wayanad",
+  "Vagamon",
+  "Ponmudi",
+  "Nelliyampathy",
+  "Idukki",
+  "Gavi",
+  "Silent Valley",
   "Thekkady",
   "Alleppey",
   "Kochi",
   "Kovalam",
   "Varkala",
+  "Bekal",
+  "Cherai",
+  "Muzhappilangad",
+  "Marari",
+  "Poovar",
+  "Kappad",
+  "Fort Kochi",
+  "Kumarakom",
+  "Kollam",
+  "Ashtamudi",
   "Kanyakumari",
   "Madurai",
   "Rameswaram",
+  "Dhanushkodi",
+  "Mahabalipuram",
+  "Velankanni",
+  "Tharangambadi",
+  "Nagapattinam",
+  "Poompuhar",
+  "Thoothukudi",
+  "Muttom",
+  "Kovalam Beach Tamil Nadu",
+  "Marina Beach",
+  "Elliot's Beach",
+  "Besant Nagar Beach",
+  "Sothavilai",
+  "Meenakshi Amman Temple",
+  "Ramanathaswamy Temple",
+  "Brihadeeswarar Temple",
+  "Arunachaleswarar Temple",
+  "Nataraja Temple Chidambaram",
+  "Srirangam Temple",
+  "Kanchipuram Temples",
+  "Palani Temple",
+  "Guruvayur Temple",
+  "Sabarimala",
+  "Padmanabhaswamy Temple",
+  "Attukal Temple",
+  "Chottanikkara Temple",
+  "Vadakkunnathan Temple",
+  "Kalpathy Temple",
+  "Ambalappuzha Temple",
 ];
 
 const initialForm = {
@@ -66,14 +121,12 @@ export default function TravelAgents() {
 
   const params = useMemo(() => {
     const q = { city, limit: 24 };
-    if (stateFilter !== "All States") q.state = stateFilter;
-    if (destination !== "All Destinations") q.destination = destination;
     if (search.trim()) q.search = search.trim();
     if (Number(minRating) > 0) q.minRating = Number(minRating);
     if (maxPrice) q.maxPrice = Number(maxPrice);
     if (verifiedOnly) q.verified = "true";
     return q;
-  }, [city, stateFilter, destination, search, minRating, maxPrice, verifiedOnly]);
+  }, [city, search, minRating, maxPrice, verifiedOnly]);
 
   useEffect(() => {
     const fetchAgents = async () => {
@@ -87,9 +140,12 @@ export default function TravelAgents() {
         const apiDestinations = Array.isArray(data?.meta?.availableDestinations)
           ? data.meta.availableDestinations
           : [];
-        if (apiDestinations.length) {
-          setAvailableDestinations(["All Destinations", ...apiDestinations]);
-        }
+        const merged = [...DEFAULT_DESTINATIONS, ...apiDestinations]
+          .map((v) => String(v || "").trim())
+          .filter(Boolean)
+          .filter((v) => v.toLowerCase() !== "chennai");
+        const unique = Array.from(new Set(merged));
+        setAvailableDestinations(unique);
       } catch (err) {
         console.error("TRAVEL AGENTS PAGE LOAD ERROR:", err);
         setError("Failed to load travel agents right now. Please try again.");
@@ -231,6 +287,9 @@ export default function TravelAgents() {
           />
           Show verified agents only
         </label>
+        <p className="mt-2 text-xs text-slate-500">
+          Destination and state selections are captured as trip preference in quote request.
+        </p>
       </section>
 
       {error && (
