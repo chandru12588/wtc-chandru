@@ -34,6 +34,14 @@ const services = [
     to: "/trips?service=driver",
     accent: "from-violet-500 to-fuchsia-400",
   },
+  {
+    title: "Roadside Assistance",
+    description:
+      "Get help with vehicle breakdowns and roadside assistance across Tamil Nadu and Karnataka with verified service providers.",
+    cta: "Get assistance",
+    to: "/roadside-assistance",
+    accent: "from-red-500 to-pink-400",
+  },
 ];
 
 export default function ServicesHighlight() {
@@ -53,7 +61,7 @@ export default function ServicesHighlight() {
           </p>
         </div>
 
-        <div className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+        <div className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
           {services.map((service) => (
             <div
               key={service.title}

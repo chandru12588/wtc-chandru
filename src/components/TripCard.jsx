@@ -4,8 +4,8 @@ import { FaWhatsapp, FaHeart, FaStar, FaMapMarkerAlt, FaChevronLeft, FaChevronRi
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination } from "swiper/modules";
 import { api } from "../api.js";
+import { getSafeImages } from "../utils/safeImage";
 import { inferServiceType } from "../utils/serviceType";
-import { loadFavorites, toggleFavorite } from "../utils/wishlist";
 
 import "swiper/css";
 import "swiper/css/pagination";
@@ -76,7 +76,7 @@ Price: INR ${trip.price || "Contact"}`;
     );
   };
 
-  const images = trip.images?.length ? trip.images : ["/no-image.jpg"];
+  const images = getSafeImages(trip.images);
 
   const handleFavorite = async (e) => {
     e.stopPropagation();
@@ -133,7 +133,7 @@ Price: INR ${trip.price || "Contact"}`;
           pagination={{ clickable: true }}
           className="h-full trip-swiper cursor-pointer"
         >
-          {images.map((src, i) => (
+          {images.length > 0 ? images.map((src, i) => (
             <SwiperSlide key={i}>
               <img
                 src={src}
@@ -141,7 +141,13 @@ Price: INR ${trip.price || "Contact"}`;
                 className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
               />
             </SwiperSlide>
-          ))}
+          )) : (
+            <SwiperSlide>
+              <div className="h-full w-full bg-gray-200 flex items-center justify-center">
+                <span className="text-gray-500 text-sm">No image available</span>
+              </div>
+            </SwiperSlide>
+          )}
         </Swiper>
 
         {images.length > 1 && (

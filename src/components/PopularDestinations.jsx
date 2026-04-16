@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, Star } from "lucide-react";
 import { api } from "../api";
+import { SafeImage } from "../utils/safeImage";
 
 export default function PopularDestinations() {
   const scrollRef = useRef(null);
@@ -49,7 +50,7 @@ export default function PopularDestinations() {
                 className="min-w-[220px] overflow-hidden rounded-xl bg-white shadow-md transition hover:shadow-xl"
               >
                 {d.image ? (
-                  <img src={d.image} alt={d.location} className="h-32 w-full object-cover" />
+                  <SafeImage src={d.image} alt={d.location} className="h-32 w-full object-cover" />
                 ) : (
                   <div className="h-32 w-full bg-gradient-to-br from-emerald-100 to-slate-100" />
                 )}

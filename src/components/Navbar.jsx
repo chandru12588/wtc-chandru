@@ -169,6 +169,9 @@ export default function Navbar() {
                   <Link to="/trips?service=driver" onClick={() => setServicesMenu(false)} className="block px-4 py-3 hover:bg-gray-100">
                     Acting Driver Service
                   </Link>
+                  <Link to="/roadside-assistance" onClick={() => setServicesMenu(false)} className="block px-4 py-3 hover:bg-gray-100">
+                    Roadside Assistance
+                  </Link>
                   <Link to="/travel-agents" onClick={() => setServicesMenu(false)} className="block px-4 py-3 hover:bg-gray-100">
                     Travel Agents
                   </Link>
@@ -375,6 +378,13 @@ export default function Navbar() {
                       className="block rounded px-2 py-2"
                     >
                       Acting Driver Service
+                    </NavLink>
+                    <NavLink
+                      to="/roadside-assistance"
+                      onClick={closeMobileMenu}
+                      className="block rounded px-2 py-2"
+                    >
+                      Roadside Assistance
                     </NavLink>
                     <NavLink
                       to="/travel-agents"

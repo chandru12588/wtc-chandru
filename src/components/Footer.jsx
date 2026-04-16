@@ -4,6 +4,7 @@ import { Instagram, Facebook, Youtube, MapPin, Star } from "lucide-react";
 
 export default function Footer() {
   const instaImages = [];
+  const googleReviewsEmbedUrl = null;
 
   return (
     <footer className="bg-[#0f172a] text-gray-300">
@@ -114,13 +115,19 @@ export default function Footer() {
             <Star size={16} className="text-yellow-400" />
             Google Reviews
           </h4>
-          <iframe
-            title="Google Reviews"
-            src=""
-            className="h-48 w-full rounded-xl border border-white/10 shadow-lg"
-            loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
-          />
+          {googleReviewsEmbedUrl ? (
+            <iframe
+              title="Google Reviews"
+              src={googleReviewsEmbedUrl}
+              className="h-48 w-full rounded-xl border border-white/10 shadow-lg"
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+            />
+          ) : (
+            <div className="flex h-48 w-full items-center justify-center rounded-xl border border-white/10 bg-white/5 px-4 text-center text-sm text-gray-400">
+              Google reviews widget will appear here once configured.
+            </div>
+          )}
         </div>
 
         <div>

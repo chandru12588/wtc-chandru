@@ -135,6 +135,17 @@ export default function AdminLayout() {
           </NavLink>
 
           <NavLink
+            to="/admin/roadside-assistance"
+            className={({ isActive }) =>
+              `p-2 rounded-lg ${
+                isActive ? "bg-indigo-100 text-indigo-700" : "text-gray-700"
+              }`
+            }
+          >
+            Roadside Assistance
+          </NavLink>
+
+          <NavLink
             to="/admin/stories"
             className={({ isActive }) =>
               `p-2 rounded-lg ${

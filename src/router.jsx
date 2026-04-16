@@ -24,6 +24,7 @@ import GuideRegister from "./pages/GuideRegister.jsx";
 import ActingDriverRegister from "./pages/ActingDriverRegister.jsx";
 import PillionRideRequestPage from "./pages/PillionRideRequestPage.jsx";
 import KodaikanalAgents from "./pages/KodaikanalAgents.jsx";
+import RoadsideAssistance from "./pages/RoadsideAssistance.jsx";
 
 // ⭐ Host Listing Public Page
 import HostListingDetails from "./pages/HostListingDetails.jsx";
@@ -44,6 +45,7 @@ import AdminPillionRequests from "./admin/AdminPillionRequests.jsx";
 import AdminStories from "./admin/AdminStories.jsx";
 import AdminActingDrivers from "./admin/AdminActingDrivers.jsx";
 import AdminTravelAgentRequests from "./admin/AdminTravelAgentRequests.jsx";
+import AdminRoadsideAssistance from "./admin/AdminRoadsideAssistance.jsx";
 
 // Layout/Auth protection
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
@@ -89,6 +91,7 @@ export default function AppRouter() {
       <Route path="/pillion-request/:id" element={<PillionRideRequestPage />} />
       <Route path="/travel-agents" element={<KodaikanalAgents />} />
       <Route path="/kodaikanal-agents" element={<KodaikanalAgents />} />
+      <Route path="/roadside-assistance" element={<RoadsideAssistance />} />
 
       {/* ⭐ Host Listing Public Detail Page */}
       <Route path="/host-listing/:id" element={<HostListingDetails />} />
@@ -120,6 +123,7 @@ export default function AppRouter() {
         <Route path="acting-drivers" element={<AdminActingDrivers />} />
         <Route path="pillion-requests" element={<AdminPillionRequests />} />
         <Route path="travel-agent-requests" element={<AdminTravelAgentRequests />} />
+        <Route path="roadside-assistance" element={<AdminRoadsideAssistance />} />
         <Route path="stories" element={<AdminStories />} />
         <Route path="profile" element={<AdminProfile />} />
       </Route>

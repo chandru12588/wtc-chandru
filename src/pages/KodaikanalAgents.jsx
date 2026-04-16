@@ -121,12 +121,14 @@ export default function TravelAgents() {
 
   const params = useMemo(() => {
     const q = { city, limit: 24 };
+    if (stateFilter !== "All States") q.state = stateFilter;
+    if (destination !== "All Destinations") q.destination = destination;
     if (search.trim()) q.search = search.trim();
     if (Number(minRating) > 0) q.minRating = Number(minRating);
     if (maxPrice) q.maxPrice = Number(maxPrice);
     if (verifiedOnly) q.verified = "true";
     return q;
-  }, [city, search, minRating, maxPrice, verifiedOnly]);
+  }, [city, stateFilter, destination, search, minRating, maxPrice, verifiedOnly]);
 
   useEffect(() => {
     const fetchAgents = async () => {
