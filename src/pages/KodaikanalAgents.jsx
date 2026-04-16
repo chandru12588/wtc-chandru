@@ -159,6 +159,12 @@ export default function TravelAgents() {
     fetchAgents();
   }, [params]);
 
+  const visibleAgents = useMemo(() => {
+    const min = Number(minRating || 0);
+    if (!Number.isFinite(min) || min <= 0) return agents;
+    return agents.filter((agent) => Number(agent?.rating || 0) >= min);
+  }, [agents, minRating]);
+
   const handleSelectAgent = (agent) => {
     setSelectedAgent(agent);
     setSelectionMessage(
@@ -302,12 +308,16 @@ export default function TravelAgents() {
 
       <section className="mt-5 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {loading && <p className="text-sm text-slate-600">Loading agents...</p>}
-        {!loading && !agents.length && (
-          <p className="text-sm text-slate-600">No agents found for this filter.</p>
+        {!loading && !visibleAgents.length && (
+          <p className="text-sm text-slate-600">
+            {Number(minRating) > 0
+              ? `No agents found with rating ${minRating}+ for this filter.`
+              : "No agents found for this filter."}
+          </p>
         )}
 
         {!loading &&
-          agents.map((agent) => (
+          visibleAgents.map((agent) => (
             <article key={agent._id} className="rounded-2xl border bg-white p-4 shadow-sm">
               <div className="flex items-start justify-between gap-3">
                 <h2 className="text-lg font-semibold text-slate-900">{agent.name}</h2>
