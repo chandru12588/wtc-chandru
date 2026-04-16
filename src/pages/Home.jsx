@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import { Backpack, Building2, Compass, Headset, MapPin, Menu, Mountain, Trees, UserRound } from "lucide-react";
@@ -40,6 +40,13 @@ const MOBILE_QUICK_FILTERS = [
   { name: "Backpacking", icon: Backpack, filter: { type: "category", value: "backpacker" } },
   { name: "Bangalore", icon: Building2, filter: { type: "region", value: "karnataka" } },
   { name: "Chennai", icon: Building2, filter: { type: "region", value: "tamilnadu" } },
+];
+
+const LOCATION_QUICK_LINKS = [
+  { name: "Kodaikanal", icon: Mountain, to: "/kodaikanal" },
+  { name: "Ooty", icon: Compass, to: "/ooty" },
+  { name: "Munnar", icon: Trees, to: "/munnar" },
+  { name: "Valapari", icon: MapPin, to: "/valapari" },
 ];
 
 function sortTripsForHome(list = []) {
@@ -249,6 +256,47 @@ export default function Home() {
     handleCategoryFilter(filter);
   };
 
+  const featuredTrips = useMemo(() => {
+    const maxItems = 6;
+    const preview = filteredTrips.slice(0, maxItems);
+    const requiredTypes = ["guide", "bike"];
+
+    const requiredTrips = requiredTypes
+      .map((type) => filteredTrips.find((trip) => inferServiceType(trip) === type))
+      .filter(Boolean);
+
+    const uniqueIds = new Set();
+    const selected = [];
+
+    requiredTrips.forEach((trip) => {
+      if (!uniqueIds.has(trip._id)) {
+        uniqueIds.add(trip._id);
+        selected.push(trip);
+      }
+    });
+
+    preview.forEach((trip) => {
+      if (selected.length >= maxItems) return;
+      if (!uniqueIds.has(trip._id)) {
+        uniqueIds.add(trip._id);
+        selected.push(trip);
+      }
+    });
+
+    // Fallback: if required types were not found in the first 6, still keep the order
+    if (selected.length < maxItems) {
+      filteredTrips.forEach((trip) => {
+        if (selected.length >= maxItems) return;
+        if (!uniqueIds.has(trip._id)) {
+          uniqueIds.add(trip._id);
+          selected.push(trip);
+        }
+      });
+    }
+
+    return selected.slice(0, maxItems);
+  }, [filteredTrips]);
+
   return (
     <div className="w-full overflow-x-hidden pb-20 md:pb-0">
       <section className="md:hidden px-3 pt-3">
@@ -331,6 +379,44 @@ export default function Home() {
         <TripTabs onTabSelect={handleTripTab} />
       </div>
 
+      <section className="mx-auto max-w-7xl px-3 py-6 md:px-5">
+        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="text-2xl font-semibold">Browse by location</h2>
+            <p className="text-sm text-slate-500">
+              Quick access to Kodaikanal, Ooty, Munnar and Valapari packages.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => navigate("/packages")}
+            className="inline-flex items-center rounded-full border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+          >
+            View All Packages
+          </button>
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {LOCATION_QUICK_LINKS.map((item) => {
+            const Icon = item.icon;
+            return (
+              <button
+                key={item.name}
+                type="button"
+                onClick={() => navigate(item.to)}
+                className="group rounded-3xl border border-slate-200 bg-white px-4 py-5 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-orange-300 hover:shadow-md"
+              >
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-orange-500">
+                  <Icon size={22} />
+                </div>
+                <p className="mt-4 text-lg font-semibold text-slate-900">{item.name}</p>
+                <p className="mt-1 text-sm text-slate-500">Location wise packages</p>
+              </button>
+            );
+          })}
+        </div>
+      </section>
+
       <section className="mx-auto max-w-7xl px-3 py-6 md:px-5 md:py-12">
         <h2 className="mb-6 hidden text-2xl font-semibold md:block">Featured Trips</h2>
 
@@ -338,8 +424,8 @@ export default function Home() {
           <PenguinLoader message="Loading trips..." />
         ) : (
           <div className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 md:grid md:gap-8 md:overflow-visible md:pb-0 md:snap-none md:grid-cols-2 lg:grid-cols-3">
-            {filteredTrips.length ? (
-              filteredTrips.map((trip) => (
+            {featuredTrips.length ? (
+              featuredTrips.map((trip) => (
                 <div key={trip._id} className="min-w-[82%] snap-start md:min-w-0">
                   <TripCard trip={trip} />
                 </div>

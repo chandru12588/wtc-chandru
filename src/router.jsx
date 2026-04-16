@@ -64,6 +64,10 @@ export default function AppRouter() {
       {/* PUBLIC ROUTES */}
       <Route path="/" element={<Home />} />
       <Route path="/packages" element={<PackagesList />} />
+      <Route path="/kodaikanal" element={<PackagesList />} />
+      <Route path="/ooty" element={<PackagesList />} />
+      <Route path="/munnar" element={<PackagesList />} />
+      <Route path="/valapari" element={<PackagesList />} />
       <Route path="/packages/:id" element={<PackageDetails />} />
       <Route path="/guide/:id" element={<PackageDetails />} />
       <Route path="/booking/:id" element={<BookingPage />} />
