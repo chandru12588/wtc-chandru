@@ -5,6 +5,9 @@ import { Instagram, Facebook, Youtube, MapPin, Star } from "lucide-react";
 export default function Footer() {
   const instaImages = [];
   const googleReviewsEmbedUrl = null;
+  const instagramProfileUrl = "https://www.instagram.com/riderchandru88/";
+  const googleBusinessProfileUrl =
+    "https://www.google.com/search?q=Trippolama&oq=tr&gs_lcrp=EgZjaHJvbWUqCAgAEEUYJxg7MggIABBFGCcYOzIGCAEQRRg5MggIAhBFGCcYOzIGCAMQRRg7Mg0IBBAAGIMBGLEDGIAEMgcIBRAAGIAEMg0IBhAAGIMBGLEDGIAEMgoIBxAAGLEDGIAEMgcICBAAGIAEMgcICRAAGI8C0gEJMjU3MmowajE1qAIIsAIB8QURvVnCSAeC3w&sourceid=chrome&ie=UTF-8";
 
   return (
     <footer className="bg-[#0f172a] text-gray-300">
@@ -17,7 +20,7 @@ export default function Footer() {
           </p>
 
           <div className="mt-5 flex gap-4">
-            <a href="" target="_blank" rel="noopener noreferrer" className="transition hover:text-pink-400">
+            <a href={instagramProfileUrl} target="_blank" rel="noopener noreferrer" className="transition hover:text-pink-400">
               <Instagram size={18} />
             </a>
             <a href="" target="_blank" rel="noopener noreferrer" className="transition hover:text-blue-400">
@@ -26,7 +29,12 @@ export default function Footer() {
             <a href="" target="_blank" rel="noopener noreferrer" className="transition hover:text-red-400">
               <Youtube size={18} />
             </a>
-            <a href="" target="_blank" rel="noopener noreferrer" className="transition hover:text-emerald-400">
+            <a
+              href={googleBusinessProfileUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="transition hover:text-emerald-400"
+            >
               <MapPin size={18} />
             </a>
           </div>
@@ -124,8 +132,17 @@ export default function Footer() {
               referrerPolicy="no-referrer-when-downgrade"
             />
           ) : (
-            <div className="flex h-48 w-full items-center justify-center rounded-xl border border-white/10 bg-white/5 px-4 text-center text-sm text-gray-400">
-              Google reviews widget will appear here once configured.
+            <div className="flex h-48 w-full flex-col items-center justify-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 text-center text-sm text-gray-300">
+              <p className="text-base font-semibold text-white">Rated 4.9 on Google</p>
+              <p className="text-xs text-gray-400">See what travelers are saying about Trippolama.</p>
+              <a
+                href={googleBusinessProfileUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center rounded-full bg-emerald-500 px-4 py-2 text-xs font-semibold text-white transition hover:bg-emerald-400"
+              >
+                View Google Reviews
+              </a>
             </div>
           )}
         </div>
@@ -155,7 +172,7 @@ export default function Footer() {
           </div>
 
           <a
-            href=""
+            href={instagramProfileUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="mt-4 inline-block text-sm text-emerald-400 hover:underline"
