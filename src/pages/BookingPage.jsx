@@ -5,6 +5,8 @@ import "react-datepicker/dist/react-datepicker.css";
 import { api } from "../api.js";
 import PenguinLoader from "../components/PenguinLoader.jsx";
 
+const MAX_UI_GUESTS = 14;
+
 export default function BookingPage() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -27,7 +29,6 @@ export default function BookingPage() {
   const [paymentMethod, setPaymentMethod] = useState("property");
   const [loading, setLoading] = useState(false);
 
-  /* Load logged-in user */
   useEffect(() => {
     const stored = JSON.parse(localStorage.getItem("wtc_user"));
     if (!stored) {
@@ -38,9 +39,8 @@ export default function BookingPage() {
     setUser(stored);
     setName(stored.name);
     setEmail(stored.email);
-  }, []);
+  }, [navigate]);
 
-  /* Load package */
   useEffect(() => {
     const load = async () => {
       try {
@@ -53,15 +53,25 @@ export default function BookingPage() {
     load();
   }, [id]);
 
+  const configuredMaxGroup =
+    Number(trip?.maxGroupSize) > 0 ? Number(trip.maxGroupSize) : MAX_UI_GUESTS;
+  const maxAllowedGuests = Math.min(MAX_UI_GUESTS, configuredMaxGroup);
+  const guestOptions = Array.from({ length: maxAllowedGuests }, (_, index) => index + 1);
+  const isGuestCountInvalid = people < 1 || people > maxAllowedGuests;
+
   const submitBooking = async (e) => {
     e.preventDefault();
     const isPillionService = trip?.serviceType === "bike";
-    if (!checkIn || !checkOut)
+
+    if (isGuestCountInvalid) {
+      return alert(`Please select between 1 and ${maxAllowedGuests} guests.`);
+    }
+
+    if (!checkIn || !checkOut) {
       return alert("Select check-in & check-out dates");
-    if (
-      isPillionService &&
-      (!serviceStartPoint || !serviceDestination || !serviceDays)
-    ) {
+    }
+
+    if (isPillionService && (!serviceStartPoint || !serviceDestination || !serviceDays)) {
       return alert("Add start point, destination, and number of days");
     }
 
@@ -85,18 +95,15 @@ export default function BookingPage() {
 
       if (idProof) formData.append("idProof", idProof);
 
-      // 1️⃣ Create booking first
       const bookingRes = await api.post("/api/bookings", formData);
       const booking = bookingRes.data.booking;
 
-      // 2️⃣ Pay at Property
       if (paymentMethod === "property") {
         alert("Booking created! Pay at property.");
         navigate("/my-bookings");
         return;
       }
 
-      // 3️⃣ Online Payment → Razorpay
       const orderRes = await api.post("/api/payments/create-order", {
         amount: trip.price * people,
       });
@@ -110,13 +117,11 @@ export default function BookingPage() {
         name: trip.title,
         description: "Trip Booking",
         order_id: order.id,
-
         handler: async function (response) {
           await api.post("/api/payments/verify", {
             bookingId: booking._id,
             ...response,
           });
-
           alert("Payment Success!");
           navigate("/my-bookings");
         },
@@ -139,72 +144,95 @@ export default function BookingPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 py-10">
       <h1 className="text-4xl font-bold">{trip.title}</h1>
-      <p className="text-gray-600 mt-2">⭐ 4.9 · Beautiful Destination</p>
+      <p className="text-gray-600 mt-2">Rated and trusted destination</p>
 
-      {/* IMAGES */}
       <div className="grid grid-cols-4 gap-2 mt-6 rounded-2xl overflow-hidden">
-        <img src={trip.images?.[0]} loading="eager" decoding="async" className="col-span-2 row-span-2 h-[420px] object-cover rounded-xl" />
+        <img
+          src={trip.images?.[0]}
+          loading="eager"
+          decoding="async"
+          className="col-span-2 row-span-2 h-[420px] object-cover rounded-xl"
+        />
         <img src={trip.images?.[1]} loading="lazy" decoding="async" className="h-52 object-cover rounded-xl" />
         <img src={trip.images?.[2]} loading="lazy" decoding="async" className="h-52 object-cover rounded-xl" />
         <img src={trip.images?.[3]} loading="lazy" decoding="async" className="h-52 object-cover rounded-xl" />
         <img src={trip.images?.[4]} loading="lazy" decoding="async" className="h-52 object-cover rounded-xl" />
       </div>
 
-      {/* MAIN GRID */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 mt-10">
-
-        {/* LEFT PANEL */}
         <div className="lg:col-span-2 space-y-6">
           <h2 className="text-2xl font-semibold">About this trip</h2>
           <p className="text-gray-700">{trip.description}</p>
         </div>
 
-        {/* RIGHT BOOKING FORM */}
         <form onSubmit={submitBooking} className="border rounded-2xl p-6 shadow-xl space-y-4 sticky top-24">
-
           <p className="text-2xl font-bold">
-            ₹{trip.price} <span className="text-sm text-gray-500">/ person</span>
+            Rs.{trip.price} <span className="text-sm text-gray-500">/ person</span>
           </p>
 
-          {/* Inputs */}
-          <input className="border p-3 rounded-lg w-full" placeholder="Name"
-            value={name} onChange={(e) => setName(e.target.value)} />
-
-          <input className="border p-3 rounded-lg w-full" placeholder="Email"
-            value={email} onChange={(e) => setEmail(e.target.value)} />
-
-          <input className="border p-3 rounded-lg w-full" placeholder="Phone"
-            value={phone} onChange={(e) => setPhone(e.target.value)} />
+          <input
+            className="border p-3 rounded-lg w-full"
+            placeholder="Name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+          <input
+            className="border p-3 rounded-lg w-full"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <input
+            className="border p-3 rounded-lg w-full"
+            placeholder="Phone"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+          />
 
           {isPillionService && (
             <>
-              <input className="border p-3 rounded-lg w-full" placeholder="Start Point"
-                value={serviceStartPoint} onChange={(e) => setServiceStartPoint(e.target.value)} />
-              <input className="border p-3 rounded-lg w-full" placeholder="Destination"
-                value={serviceDestination} onChange={(e) => setServiceDestination(e.target.value)} />
+              <input
+                className="border p-3 rounded-lg w-full"
+                placeholder="Start Point"
+                value={serviceStartPoint}
+                onChange={(e) => setServiceStartPoint(e.target.value)}
+              />
+              <input
+                className="border p-3 rounded-lg w-full"
+                placeholder="Destination"
+                value={serviceDestination}
+                onChange={(e) => setServiceDestination(e.target.value)}
+              />
             </>
           )}
 
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="font-medium">{isPillionService ? "Trip Start Date" : "Check-in"}</label>
-              <DatePicker selected={checkIn} onChange={(d) => {
-                setCheckIn(d);
-                if (isPillionService && d) {
-                  const end = new Date(d);
-                  end.setDate(end.getDate() + Number(serviceDays || 1) - 1);
-                  setCheckOut(end);
-                } else {
-                  setCheckOut(null);
-                }
-              }}
-                className="border p-3 rounded-lg w-full" minDate={new Date()} />
+              <DatePicker
+                selected={checkIn}
+                onChange={(d) => {
+                  setCheckIn(d);
+                  if (isPillionService && d) {
+                    const end = new Date(d);
+                    end.setDate(end.getDate() + Number(serviceDays || 1) - 1);
+                    setCheckOut(end);
+                  } else {
+                    setCheckOut(null);
+                  }
+                }}
+                className="border p-3 rounded-lg w-full"
+                minDate={new Date()}
+              />
             </div>
 
             <div>
               <label className="font-medium">{isPillionService ? "Number of Days" : "Check-out"}</label>
               {isPillionService ? (
-                <input type="number" min="1" className="border p-3 rounded-lg w-full"
+                <input
+                  type="number"
+                  min="1"
+                  className="border p-3 rounded-lg w-full"
                   value={serviceDays}
                   onChange={(e) => {
                     const days = Number(e.target.value || 1);
@@ -214,75 +242,74 @@ export default function BookingPage() {
                       end.setDate(end.getDate() + days - 1);
                       setCheckOut(end);
                     }
-                  }} />
+                  }}
+                />
               ) : (
-                <DatePicker selected={checkOut} onChange={setCheckOut}
-                  className="border p-3 rounded-lg w-full" minDate={checkIn || new Date()} />
+                <DatePicker
+                  selected={checkOut}
+                  onChange={setCheckOut}
+                  className="border p-3 rounded-lg w-full"
+                  minDate={checkIn || new Date()}
+                />
               )}
             </div>
           </div>
 
-          {/* People */}
-          <select className="border p-3 rounded-lg w-full"
-            value={people} onChange={(e) => setPeople(Number(e.target.value))}>
-            <option value="1">1 Guest</option>
-            <option value="2">2 Guests</option>
-            <option value="3">3 Guests</option>
-            <option value="4">4 Guests</option>
-            <option value="5">5 Guests</option>
-            <option value="6">6 Guests</option>
-            <option value="7">7 Guests</option>
-            <option value="8">8 Guests</option>
-            <option value="9">9 Guests</option>
-            <option value="10">10 Guests</option>
-            <option value="11">11 Guests</option>
-            <option value="12">12 Guests</option>
-            <option value="13">13 Guests</option>
-            <option value="14">14 Guests</option>
+          <select className="border p-3 rounded-lg w-full" value={people} onChange={(e) => setPeople(Number(e.target.value))}>
+            {guestOptions.map((count) => (
+              <option key={count} value={count}>
+                {count} {count === 1 ? "Guest" : "Guests"}
+              </option>
+            ))}
           </select>
+          <p className="text-xs text-gray-500">Allowed guests: 1 to {maxAllowedGuests}</p>
+          {isGuestCountInvalid ? (
+            <p className="text-xs font-semibold text-red-600">Guest count must be between 1 and {maxAllowedGuests}.</p>
+          ) : null}
 
-          {/* ID Proof */}
           <div className="border rounded-lg p-3">
             <label>ID Proof (optional)</label>
-            <input type="file" className="mt-2"
+            <input
+              type="file"
+              className="mt-2"
               accept="image/*,.pdf"
-              onChange={(e) => setIdProof(e.target.files[0])} />
+              onChange={(e) => setIdProof(e.target.files[0])}
+            />
           </div>
 
-          {/* PAYMENT METHOD */}
           <div className="border rounded-lg p-3 space-y-2">
-
             <label className="font-semibold">Payment Method</label>
 
             <label className="flex gap-2 items-center">
-              <input type="radio" checked={paymentMethod === "property"}
-                onChange={() => setPaymentMethod("property")} />
+              <input type="radio" checked={paymentMethod === "property"} onChange={() => setPaymentMethod("property")} />
               Pay at Property
             </label>
 
             <label className="flex gap-2 items-center">
-              <input type="radio" checked={paymentMethod === "online"}
-                onChange={() => setPaymentMethod("online")} />
+              <input type="radio" checked={paymentMethod === "online"} onChange={() => setPaymentMethod("online")} />
               Pay Online (Razorpay)
             </label>
           </div>
 
-          {/* Summary */}
           <div className="bg-gray-50 p-4 rounded-xl">
+            <p className="mb-1 text-xs font-medium text-gray-500">Pricing Summary</p>
             <p className="flex justify-between text-gray-700">
-              <span>₹{trip.price} × {people}</span>
-              <span>₹{totalPrice}</span>
+              <span>
+                Rs.{trip.price} × {people} {people === 1 ? "guest" : "guests"}
+              </span>
+              <span>Rs.{totalPrice}</span>
             </p>
           </div>
 
-          {/* Button */}
-          <button disabled={loading}
-            className="bg-purple-600 hover:bg-purple-700 text-white w-full p-3 rounded-lg font-bold">
-            {loading ? "Processing..." : `Pay ₹${totalPrice} & Book`}
+          <button
+            disabled={loading || isGuestCountInvalid}
+            className="bg-purple-600 hover:bg-purple-700 disabled:opacity-60 text-white w-full p-3 rounded-lg font-bold"
+          >
+            {loading ? "Processing..." : `Pay Rs.${totalPrice} & Book`}
           </button>
-
         </form>
       </div>
     </div>
   );
 }
+
