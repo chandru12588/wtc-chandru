@@ -40,6 +40,7 @@ const STAY_TYPES = [
   "Private Villa",
   "Individual Bungalow",
   "Farm Stay",
+  "Hut Stay",
   "Homestay",
   "Hotel / Rooms",
   "Luxury Hotel",

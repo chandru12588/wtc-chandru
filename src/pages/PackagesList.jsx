@@ -8,7 +8,15 @@ import TripCard from "../components/TripCard";
 const API = import.meta.env.VITE_API_URL;
 
 const LOCATION_ALIAS = {
-  kodaikanal: ["kodaikanal", "kookal", "poombari", "poombri", "poombuhari"],
+  kodaikanal: [
+    "kodaikanal",
+    "kookal",
+    "poombari",
+    "poombri",
+    "poombuhari",
+    "mannavanur",
+    "poondi",
+  ],
   ooty: ["ooty", "ooty hill", "ooty hills"],
   munnar: ["munnar", "munnar hills"],
   valapari: ["valapari", "valparai"],
@@ -24,6 +32,12 @@ const DEDICATED_LOCATION_PATHS = {
 function getLocationAliases(locationName) {
   const normalized = String(locationName || "").trim().toLowerCase();
   return LOCATION_ALIAS[normalized] || [normalized];
+}
+
+function packageMatchesLocation(pkgLocation, aliases) {
+  const normalizedPackageLocation = String(pkgLocation || "").trim().toLowerCase();
+  if (!normalizedPackageLocation) return false;
+  return aliases.some((alias) => normalizedPackageLocation.includes(alias));
 }
 
 export default function PackagesList() {
@@ -63,7 +77,7 @@ export default function PackagesList() {
       const aliases = getLocationAliases(activeLocation);
       setFiltered(
         packages.filter((p) =>
-          aliases.includes(String(p.location || "").trim().toLowerCase())
+          packageMatchesLocation(p.location, aliases)
         )
       );
     } else if (cat === "all") {
