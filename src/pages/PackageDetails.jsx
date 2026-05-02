@@ -6,6 +6,7 @@ import BookingForm from "../components/BookingForm.jsx";
 import PenguinLoader from "../components/PenguinLoader.jsx";
 import { inferServiceType } from "../utils/serviceType";
 import { loadFavorites, toggleFavorite } from "../utils/wishlist";
+import { useSeo } from "../utils/seo";
 
 const STAR_VALUES = [1, 2, 3, 4, 5];
 
@@ -37,6 +38,33 @@ export default function PackageDetails() {
   const [reviewText, setReviewText] = useState("");
   const [reviewMedia, setReviewMedia] = useState([]);
   const [submittingReview, setSubmittingReview] = useState(false);
+
+  useSeo({
+    title: pkg?.title ? `${pkg.title} | Trippolama` : "Package Details | Trippolama",
+    description:
+      pkg?.description?.slice(0, 155) ||
+      "Explore package details, itinerary, stay type, and booking options on Trippolama.",
+    canonical: `https://trippolama.com/packages/${id}`,
+    ogType: "article",
+    jsonLdId: "package-details",
+    jsonLd: pkg
+      ? {
+          "@context": "https://schema.org",
+          "@type": "TouristTrip",
+          name: pkg.title,
+          description: pkg.description || "",
+          touristType: pkg.stayType || "Travelers",
+          itinerary: pkg.location || "",
+          offers: {
+            "@type": "Offer",
+            price: Number(pkg.price || 0),
+            priceCurrency: "INR",
+            availability: "https://schema.org/InStock",
+            url: `https://trippolama.com/packages/${id}`,
+          },
+        }
+      : null,
+  });
 
   const user = useMemo(() => {
     try {
@@ -209,6 +237,8 @@ export default function PackageDetails() {
           <img
             src={images[0]}
             alt={pkg.title}
+            loading="eager"
+            decoding="async"
             onClick={() => {
               setSlideIndex(0);
               setShowSlider(true);
@@ -222,6 +252,8 @@ export default function PackageDetails() {
             <img
               src={img}
               alt={`${pkg.title} ${index + 2}`}
+              loading="lazy"
+              decoding="async"
               onClick={() => {
                 setSlideIndex(index + 1);
                 setShowSlider(true);
@@ -349,6 +381,8 @@ export default function PackageDetails() {
                         key={`${review._id}-img-${idx}`}
                         src={item.url}
                         alt="Review media"
+                        loading="lazy"
+                        decoding="async"
                         className="h-52 w-full rounded-xl object-cover"
                       />
                     )

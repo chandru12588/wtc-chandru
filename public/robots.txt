@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://trippolama.com/sitemap.xml
+

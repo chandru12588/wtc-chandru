@@ -4,6 +4,7 @@ import axios from "axios";
 
 import CategoriesBar from "../components/CategoriesBar";
 import TripCard from "../components/TripCard";
+import { useSeo } from "../utils/seo";
 
 const API = import.meta.env.VITE_API_URL;
 
@@ -101,6 +102,27 @@ export default function PackagesList() {
   const pageDescription = locationFilter
     ? `Showing packages for ${locationFilter}.` 
     : "Explore our full collection of tours and packages.";
+  const seoTitle = locationFilter
+    ? `${locationFilter} Tour Packages | Trippolama`
+    : "Tour Packages in India | Trippolama";
+
+  useSeo({
+    title: seoTitle,
+    description: pageDescription,
+    canonical: locationFilter
+      ? `https://trippolama.com/packages?location=${encodeURIComponent(locationFilter)}`
+      : "https://trippolama.com/packages",
+    jsonLdId: "packages-list",
+    jsonLd: {
+      "@context": "https://schema.org",
+      "@type": "CollectionPage",
+      name: seoTitle,
+      description: pageDescription,
+      url: locationFilter
+        ? `https://trippolama.com/packages?location=${encodeURIComponent(locationFilter)}`
+        : "https://trippolama.com/packages",
+    },
+  });
 
   return (
     <div className="pt-24 pb-16 max-w-6xl mx-auto px-4">
@@ -112,6 +134,31 @@ export default function PackagesList() {
         <div>
           <h1 className="text-3xl font-bold">{pageTitle}</h1>
           <p className="text-sm text-gray-500 mt-1 capitalize">{pageDescription}</p>
+          {String(locationFilter || "").toLowerCase() === "kodaikanal" ? (
+            <div className="mt-3 flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => navigate("/kodaikanal/mannavanur")}
+                className="rounded-full border border-slate-300 px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-100"
+              >
+                Mannavanur Packages
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate("/kodaikanal/poondi")}
+                className="rounded-full border border-slate-300 px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-100"
+              >
+                Poondi Packages
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate("/kodaikanal/kookal")}
+                className="rounded-full border border-slate-300 px-3 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-100"
+              >
+                Kookal Packages
+              </button>
+            </div>
+          ) : null}
         </div>
         {locationFilter && (
           <button

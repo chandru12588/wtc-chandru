@@ -3,23 +3,188 @@
 
 <url>
   <loc>https://trippolama.com/</loc>
-  <lastmod>2026-03-16</lastmod>
+  <lastmod>2026-05-02</lastmod>
   <priority>1.0</priority>
 </url>
 
 <url>
+  <loc>https://trippolama.com/packages</loc>
+  <lastmod>2026-05-02</lastmod>
+  <priority>0.9</priority>
+</url>
+
+<url>
   <loc>https://trippolama.com/trips</loc>
+  <lastmod>2026-05-02</lastmod>
   <priority>0.8</priority>
 </url>
 
 <url>
-  <loc>https://trippolama.com/services</loc>
+  <loc>https://trippolama.com/kodaikanal</loc>
+  <lastmod>2026-05-02</lastmod>
   <priority>0.8</priority>
 </url>
 
 <url>
-  <loc>https://trippolama.com/become-host</loc>
+  <loc>https://trippolama.com/kodaikanal/mannavanur</loc>
+  <lastmod>2026-05-02</lastmod>
+  <priority>0.8</priority>
+</url>
+
+<url>
+  <loc>https://trippolama.com/kodaikanal/poondi</loc>
+  <lastmod>2026-05-02</lastmod>
+  <priority>0.8</priority>
+</url>
+
+<url>
+  <loc>https://trippolama.com/kodaikanal/kookal</loc>
+  <lastmod>2026-05-02</lastmod>
+  <priority>0.8</priority>
+</url>
+
+<url>
+  <loc>https://trippolama.com/ooty</loc>
+  <lastmod>2026-05-02</lastmod>
+  <priority>0.8</priority>
+</url>
+
+<url>
+  <loc>https://trippolama.com/munnar</loc>
+  <lastmod>2026-05-02</lastmod>
+  <priority>0.8</priority>
+</url>
+
+<url>
+  <loc>https://trippolama.com/valapari</loc>
+  <lastmod>2026-05-02</lastmod>
+  <priority>0.8</priority>
+</url>
+
+<url>
+  <loc>https://trippolama.com/blog</loc>
+  <lastmod>2026-05-02</lastmod>
   <priority>0.7</priority>
+</url>
+
+<url>
+  <loc>https://trippolama.com/about</loc>
+  <lastmod>2026-05-02</lastmod>
+  <priority>0.7</priority>
+</url>
+
+<url>
+  <loc>https://trippolama.com/reviews</loc>
+  <lastmod>2026-05-02</lastmod>
+  <priority>0.7</priority>
+</url>
+
+<url>
+  <loc>https://trippolama.com/faq</loc>
+  <lastmod>2026-05-02</lastmod>
+  <priority>0.6</priority>
+</url>
+
+<url>
+  <loc>https://trippolama.com/safety</loc>
+  <lastmod>2026-05-02</lastmod>
+  <priority>0.6</priority>
+</url>
+
+<url>
+  <loc>https://trippolama.com/travel-agents</loc>
+  <lastmod>2026-05-02</lastmod>
+  <priority>0.6</priority>
+</url>
+
+<url>
+  <loc>https://trippolama.com/roadside-assistance</loc>
+  <lastmod>2026-05-02</lastmod>
+  <priority>0.6</priority>
+</url>
+
+<url>
+  <loc>https://trippolama.com/host/register</loc>
+  <lastmod>2026-05-02</lastmod>
+  <priority>0.5</priority>
+</url>
+
+<url>
+  <loc>https://trippolama.com/host/login</loc>
+  <lastmod>2026-05-02</lastmod>
+  <priority>0.5</priority>
+</url>
+
+<url>
+  <loc>https://trippolama.com/packages/69f658b231583ca5f617950a</loc>
+  <lastmod>2026-05-02</lastmod>
+  <priority>0.8</priority>
+</url>
+
+<url>
+  <loc>https://trippolama.com/packages/69f64ffb31583ca5f61794d2</loc>
+  <lastmod>2026-05-02</lastmod>
+  <priority>0.8</priority>
+</url>
+
+<url>
+  <loc>https://trippolama.com/packages/69f3aa1331583ca5f6178edb</loc>
+  <lastmod>2026-05-02</lastmod>
+  <priority>0.8</priority>
+</url>
+
+<url>
+  <loc>https://trippolama.com/packages/69f37be131583ca5f6178d65</loc>
+  <lastmod>2026-04-30</lastmod>
+  <priority>0.8</priority>
+</url>
+
+<url>
+  <loc>https://trippolama.com/packages/69e11662826f64ecba84c652</loc>
+  <lastmod>2026-05-02</lastmod>
+  <priority>0.8</priority>
+</url>
+
+<url>
+  <loc>https://trippolama.com/packages/69c8afdb0b07b8bdd5e2d793</loc>
+  <lastmod>2026-03-29</lastmod>
+  <priority>0.8</priority>
+</url>
+
+<url>
+  <loc>https://trippolama.com/packages/69c3ba712733d95ea66608cd</loc>
+  <lastmod>2026-05-01</lastmod>
+  <priority>0.8</priority>
+</url>
+
+<url>
+  <loc>https://trippolama.com/packages/69c3aff90aa69ff864d5b96c</loc>
+  <lastmod>2026-05-02</lastmod>
+  <priority>0.8</priority>
+</url>
+
+<url>
+  <loc>https://trippolama.com/packages/69b6d6020d2423524c39a7eb</loc>
+  <lastmod>2026-03-15</lastmod>
+  <priority>0.8</priority>
+</url>
+
+<url>
+  <loc>https://trippolama.com/packages/69ac7388c3f6227a61181502</loc>
+  <lastmod>2026-03-15</lastmod>
+  <priority>0.8</priority>
+</url>
+
+<url>
+  <loc>https://trippolama.com/packages/694c309b78c99890987e0be6</loc>
+  <lastmod>2026-05-02</lastmod>
+  <priority>0.8</priority>
+</url>
+
+<url>
+  <loc>https://trippolama.com/packages/694ada1c78c99890987e0afd</loc>
+  <lastmod>2026-04-30</lastmod>
+  <priority>0.8</priority>
 </url>
 
 </urlset>

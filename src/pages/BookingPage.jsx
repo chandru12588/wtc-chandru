@@ -143,11 +143,11 @@ export default function BookingPage() {
 
       {/* IMAGES */}
       <div className="grid grid-cols-4 gap-2 mt-6 rounded-2xl overflow-hidden">
-        <img src={trip.images?.[0]} className="col-span-2 row-span-2 h-[420px] object-cover rounded-xl" />
-        <img src={trip.images?.[1]} className="h-52 object-cover rounded-xl" />
-        <img src={trip.images?.[2]} className="h-52 object-cover rounded-xl" />
-        <img src={trip.images?.[3]} className="h-52 object-cover rounded-xl" />
-        <img src={trip.images?.[4]} className="h-52 object-cover rounded-xl" />
+        <img src={trip.images?.[0]} loading="eager" decoding="async" className="col-span-2 row-span-2 h-[420px] object-cover rounded-xl" />
+        <img src={trip.images?.[1]} loading="lazy" decoding="async" className="h-52 object-cover rounded-xl" />
+        <img src={trip.images?.[2]} loading="lazy" decoding="async" className="h-52 object-cover rounded-xl" />
+        <img src={trip.images?.[3]} loading="lazy" decoding="async" className="h-52 object-cover rounded-xl" />
+        <img src={trip.images?.[4]} loading="lazy" decoding="async" className="h-52 object-cover rounded-xl" />
       </div>
 
       {/* MAIN GRID */}

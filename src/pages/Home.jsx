@@ -19,6 +19,7 @@ import ServicesHighlight from "../components/ServicesHighlight";
 import PenguinLoader from "../components/PenguinLoader";
 
 import { inferServiceType } from "../utils/serviceType";
+import { useSeo } from "../utils/seo";
 
 const API = import.meta.env.VITE_API_URL;
 const CATEGORY_ORDER = [
@@ -68,6 +69,25 @@ function sortTripsForHome(list = []) {
 }
 
 export default function Home() {
+  useSeo({
+    title: "Trippolama | Adventure Trips, Camping Stays & Travel Services",
+    description:
+      "Discover camping stays, backpacking trips, bike tours, guide services, and unique travel experiences with Trippolama.",
+    canonical: "https://trippolama.com/",
+    jsonLdId: "home-website",
+    jsonLd: {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      name: "Trippolama",
+      url: "https://trippolama.com/",
+      potentialAction: {
+        "@type": "SearchAction",
+        target: "https://trippolama.com/search?location={search_term_string}",
+        "query-input": "required name=search_term_string",
+      },
+    },
+  });
+
   const navigate = useNavigate();
   const [allTrips, setAllTrips] = useState([]);
   const [filteredTrips, setFilteredTrips] = useState([]);

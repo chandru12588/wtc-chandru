@@ -13,8 +13,8 @@ import {
   UserPlus,
 } from "lucide-react";
 
-import logo3 from "../assets/log3.png";
-import muruganLogo from "../assets/muruganLogo.png";
+import logo3 from "../assets/log3.webp";
+import muruganLogo from "../assets/muruganLogo.webp";
 
 import CampfireAnimated from "../components/CampfireAnimated";
 import { getHostUser, logoutHost } from "../utils/hostAuth";

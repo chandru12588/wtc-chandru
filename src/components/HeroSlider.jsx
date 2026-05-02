@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
-import bg1 from "../assets/bg1.jpg";
-import bg9 from "../assets/bg9.jpg";
-import bg3 from "../assets/bg3.jpg";
-import bg5 from "../assets/bg5.jpg";
-import munnar from "../assets/munnar.jpeg";
-import bg22 from "../assets/bg22.jpg";
+import bg1 from "../assets/bg1.webp";
+import bg9 from "../assets/bg9-opt.webp";
+import bg3 from "../assets/bg3.webp";
+import bg5 from "../assets/bg5.webp";
+import munnar from "../assets/munnar.webp";
+import bg22 from "../assets/bg22-opt.webp";
 
 
 

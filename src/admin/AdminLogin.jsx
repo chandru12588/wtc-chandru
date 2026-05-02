@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { api } from "../api.js";
-import bgImage from "../assets/bg1.jpg";
+import bgImage from "../assets/bg1.webp";
 
 export default function AdminLogin() {
   const navigate = useNavigate();

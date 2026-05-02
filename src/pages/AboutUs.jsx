@@ -1,10 +1,27 @@
 import React, { useMemo, useState } from "react";
 import { ExternalLink, Mail, MessageCircle, Phone, Rocket, Route, Users } from "lucide-react";
-import bg22 from "../assets/bg22.jpg";
-import munnar from "../assets/munnar.jpeg";
-import yercaud from "../assets/yercaud.jpg";
+import bg22 from "../assets/bg22-opt.webp";
+import munnar from "../assets/munnar.webp";
+import yercaud from "../assets/yercaud.webp";
+import { useSeo } from "../utils/seo";
 
 export default function AboutUs() {
+  useSeo({
+    title: "About Trippolama | Founder Story & Travel Vision",
+    description:
+      "Meet the founder of Trippolama and learn how travel passion became a startup for adventure stays and trips.",
+    canonical: "https://trippolama.com/about",
+    jsonLdId: "about-org",
+    jsonLd: {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      name: "Trippolama",
+      url: "https://trippolama.com",
+      email: "admin@trippolama.com",
+      telephone: "+91-8248579662",
+    },
+  });
+
   const founderCandidates = useMemo(
     () => [
       "founder-photo.png",

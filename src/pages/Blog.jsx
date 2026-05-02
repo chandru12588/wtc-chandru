@@ -1,6 +1,7 @@
 ﻿import React, { useEffect, useState } from "react";
 import { api } from "../api";
 import PenguinLoader from "../components/PenguinLoader";
+import { useSeo } from "../utils/seo";
 
 const MEDIA_ACCEPT =
   "image/*,video/*,.jpg,.jpeg,.png,.webp,.avif,.gif,.bmp,.tiff,.tif,.svg,.heic,.heif,.raw,.mp4,.mov,.avi,.mkv,.webm,.m4v,.3gp,.mpeg,.mpg,.wmv";
@@ -31,6 +32,8 @@ function MediaView({ item }) {
       <img
         src={item.url}
         alt="Story"
+        loading="lazy"
+        decoding="async"
         className="h-56 w-full rounded-xl object-cover"
         onError={(e) => {
           e.currentTarget.style.display = "none";
@@ -49,6 +52,20 @@ function MediaView({ item }) {
 }
 
 export default function Blog() {
+  useSeo({
+    title: "Travel Stories Blog | Trippolama",
+    description:
+      "Read and share travel stories, photos, and short videos from real travelers on Trippolama.",
+    canonical: "https://trippolama.com/blog",
+    jsonLdId: "blog-page",
+    jsonLd: {
+      "@context": "https://schema.org",
+      "@type": "Blog",
+      name: "Trippolama Travel Stories",
+      url: "https://trippolama.com/blog",
+    },
+  });
+
   const MAX_VIDEO_SECONDS = 60;
   const [stories, setStories] = useState([]);
   const [loading, setLoading] = useState(true);
