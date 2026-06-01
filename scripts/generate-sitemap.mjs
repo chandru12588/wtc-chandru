@@ -19,7 +19,7 @@ const staticRoutes = [
   { loc: "/kodaikanal/kookal", priority: "0.8" },
   { loc: "/ooty", priority: "0.8" },
   { loc: "/munnar", priority: "0.8" },
-  { loc: "/valapari", priority: "0.8" },
+  { loc: "/valparai", priority: "0.8" },
   { loc: "/blog", priority: "0.7" },
   { loc: "/about", priority: "0.7" },
   { loc: "/reviews", priority: "0.7" },

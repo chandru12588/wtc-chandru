@@ -111,6 +111,7 @@ export default function PackageForm() {
     days: "",
     startDate: "",
     endDate: "",
+    blockedDates: [],
     guideType: "Local Guide",
   });
 
@@ -147,6 +148,7 @@ export default function PackageForm() {
           days: pkg.days || "",
           startDate: pkg.startDate ? pkg.startDate.split("T")[0] : "",
           endDate: pkg.endDate ? pkg.endDate.split("T")[0] : "",
+          blockedDates: (pkg.blockedDates || []).map((d) => String(d).split("T")[0]),
           guideType: pkg.guideType || "Local Guide",
         });
 
@@ -258,6 +260,11 @@ export default function PackageForm() {
 
       Object.keys(payload).forEach((key) => {
         if (key === "tags") {
+          fd.append(key, JSON.stringify(payload[key]));
+          return;
+        }
+
+        if (key === "blockedDates") {
           fd.append(key, JSON.stringify(payload[key]));
           return;
         }
@@ -449,6 +456,42 @@ export default function PackageForm() {
                 value={form.endDate}
                 onChange={(e) => update("endDate", e.target.value)}
               />
+            </div>
+
+            <div className="rounded border p-4">
+              <p className="mb-2 text-sm font-medium text-gray-700">Manually Block Dates (optional)</p>
+              <input
+                type="date"
+                className="rounded border p-3 cursor-pointer"
+                onChange={(e) => {
+                  const date = e.target.value;
+                  if (!date) return;
+                  setForm((prev) => ({
+                    ...prev,
+                    blockedDates: [...new Set([...(prev.blockedDates || []), date])],
+                  }));
+                  e.target.value = "";
+                }}
+              />
+              {form.blockedDates.length ? (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {form.blockedDates.map((date) => (
+                    <button
+                      key={date}
+                      type="button"
+                      onClick={() =>
+                        setForm((prev) => ({
+                          ...prev,
+                          blockedDates: prev.blockedDates.filter((d) => d !== date),
+                        }))
+                      }
+                      className="rounded-full border border-red-200 bg-red-50 px-3 py-1 text-xs font-medium text-red-700"
+                    >
+                      {date} x
+                    </button>
+                  ))}
+                </div>
+              ) : null}
             </div>
           </>
         )}

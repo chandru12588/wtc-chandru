@@ -1,11 +1,14 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { api } from "../api.js";
 import PenguinLoader from "../components/PenguinLoader.jsx";
+import { loadScript } from "../utils/loadScript";
+import { getAbVariant } from "../utils/abTest";
 
 const MAX_UI_GUESTS = 14;
+const WHATSAPP_NUMBER = import.meta.env.VITE_WHATSAPP_NUMBER || "918248579662";
 
 export default function BookingPage() {
   const { id } = useParams();
@@ -13,6 +16,7 @@ export default function BookingPage() {
 
   const [trip, setTrip] = useState(null);
   const [user, setUser] = useState(null);
+  const [blockedDates, setBlockedDates] = useState([]);
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -28,6 +32,8 @@ export default function BookingPage() {
 
   const [paymentMethod, setPaymentMethod] = useState("property");
   const [loading, setLoading] = useState(false);
+  const bookingFormRef = useRef(null);
+  const ctaVariant = getAbVariant("sticky_cta_booking_page");
 
   useEffect(() => {
     const stored = JSON.parse(localStorage.getItem("wtc_user"));
@@ -46,12 +52,40 @@ export default function BookingPage() {
       try {
         const res = await api.get(`/api/packages/${id}`);
         setTrip(res.data);
+        const blockedRes = await api.get(`/api/bookings/package/${id}/blocked-dates`);
+        setBlockedDates(blockedRes.data?.blockedDates || []);
       } catch (err) {
+        if (err?.response?.status === 410) {
+          alert("This package date is over. Please choose another available package.");
+          navigate("/packages");
+          return;
+        }
         console.log(err);
       }
     };
     load();
   }, [id]);
+
+  const blockedDateSet = new Set(blockedDates);
+  const isBlockedDate = (date) => {
+    const key = new Date(date).toISOString().split("T")[0];
+    return blockedDateSet.has(key);
+  };
+
+  const packageDateOptions = (() => {
+    if (!trip) return [];
+    const raw = [trip.startDate, ...(trip.availableDates || [])].filter(Boolean);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return raw
+      .map((value) => new Date(value))
+      .filter((value) => !Number.isNaN(value.getTime()))
+      .filter((value) => {
+        const day = new Date(value);
+        day.setHours(0, 0, 0, 0);
+        return day >= today;
+      });
+  })();
 
   const configuredMaxGroup =
     Number(trip?.maxGroupSize) > 0 ? Number(trip.maxGroupSize) : MAX_UI_GUESTS;
@@ -127,6 +161,11 @@ export default function BookingPage() {
         },
       };
 
+      await loadScript("https://checkout.razorpay.com/v1/checkout.js");
+      if (!window.Razorpay) {
+        throw new Error("Razorpay SDK failed to load");
+      }
+
       new window.Razorpay(options).open();
     } catch (err) {
       console.log("BOOKING ERROR:", err);
@@ -140,6 +179,13 @@ export default function BookingPage() {
 
   const isPillionService = trip.serviceType === "bike";
   const totalPrice = trip.price * people;
+  const openWhatsapp = () => {
+    const msg = `Hi Trippolama, I need help booking ${trip.title}.`;
+    window.open(
+      `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`,
+      "_blank"
+    );
+  };
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-10">
@@ -165,7 +211,7 @@ export default function BookingPage() {
           <p className="text-gray-700">{trip.description}</p>
         </div>
 
-        <form onSubmit={submitBooking} className="border rounded-2xl p-6 shadow-xl space-y-4 sticky top-24">
+        <form ref={bookingFormRef} onSubmit={submitBooking} className="border rounded-2xl p-6 shadow-xl space-y-4 sticky top-24">
           <p className="text-2xl font-bold">
             Rs.{trip.price} <span className="text-sm text-gray-500">/ person</span>
           </p>
@@ -223,6 +269,8 @@ export default function BookingPage() {
                 }}
                 className="border p-3 rounded-lg w-full"
                 minDate={new Date()}
+                filterDate={(date) => !isBlockedDate(date)}
+                includeDates={!isPillionService && packageDateOptions.length ? packageDateOptions : undefined}
               />
             </div>
 
@@ -250,10 +298,16 @@ export default function BookingPage() {
                   onChange={setCheckOut}
                   className="border p-3 rounded-lg w-full"
                   minDate={checkIn || new Date()}
+                  filterDate={(date) => !isBlockedDate(date)}
                 />
               )}
             </div>
           </div>
+          {blockedDates.length ? (
+            <p className="text-xs font-medium text-red-600">
+              Some dates are blocked/booked and cannot be selected.
+            </p>
+          ) : null}
 
           <select className="border p-3 rounded-lg w-full" value={people} onChange={(e) => setPeople(Number(e.target.value))}>
             {guestOptions.map((count) => (
@@ -300,6 +354,9 @@ export default function BookingPage() {
               <span>Rs.{totalPrice}</span>
             </p>
           </div>
+          <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
+            Cancellation is allowed before check-in date. Refund for online payments is processed in 5-7 working days.
+          </div>
 
           <button
             disabled={loading || isGuestCountInvalid}
@@ -309,7 +366,46 @@ export default function BookingPage() {
           </button>
         </form>
       </div>
+
+      <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-slate-200 bg-white p-3 shadow-lg md:hidden">
+        <div className="flex gap-2">
+          {ctaVariant === "A" ? (
+            <>
+              <button
+                type="button"
+                onClick={() => bookingFormRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
+                className="w-1/2 rounded-lg bg-purple-600 py-2 text-sm font-semibold text-white"
+              >
+                Book Now
+              </button>
+              <button
+                type="button"
+                onClick={openWhatsapp}
+                className="w-1/2 rounded-lg border border-emerald-300 bg-emerald-50 py-2 text-sm font-semibold text-emerald-700"
+              >
+                WhatsApp Help
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={openWhatsapp}
+                className="w-1/2 rounded-lg bg-emerald-600 py-2 text-sm font-semibold text-white"
+              >
+                WhatsApp Fast Help
+              </button>
+              <button
+                type="button"
+                onClick={() => bookingFormRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
+                className="w-1/2 rounded-lg border border-purple-300 bg-purple-50 py-2 text-sm font-semibold text-purple-700"
+              >
+                Continue Booking
+              </button>
+            </>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
-

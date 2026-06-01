@@ -4,9 +4,16 @@ import { useNavigate } from "react-router-dom";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { api } from "../api.js";
 import bgImage from "../assets/bg1.webp";
+import { useSeo } from "../utils/seo";
 
 export default function AdminLogin() {
   const navigate = useNavigate();
+  useSeo({
+    title: "Admin Login | Trippolama",
+    description: "Admin login portal for Trippolama.",
+    canonical: "https://trippolama.com/admin/login",
+    noIndex: true,
+  });
 
   const [email, setEmail] = useState("admin@trippolama.com");
   const [password, setPassword] = useState("");

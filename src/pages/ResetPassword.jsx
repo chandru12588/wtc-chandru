@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { useSeo } from "../utils/seo";
 
 export default function ResetPassword() {
   const { token } = useParams();
@@ -13,6 +14,12 @@ export default function ResetPassword() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const API = import.meta.env.VITE_API_URL;
+  useSeo({
+    title: "Reset Password | Trippolama",
+    description: "Reset your Trippolama account password.",
+    canonical: "https://trippolama.com/reset-password",
+    noIndex: true,
+  });
 
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });

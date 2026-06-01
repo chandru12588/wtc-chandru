@@ -7,8 +7,11 @@ import PenguinLoader from "../components/PenguinLoader.jsx";
 import { inferServiceType } from "../utils/serviceType";
 import { loadFavorites, toggleFavorite } from "../utils/wishlist";
 import { useSeo } from "../utils/seo";
+import { loadRecentlyViewed, pushRecentlyViewed } from "../utils/recentlyViewed";
+import { getAbVariant } from "../utils/abTest";
 
 const STAR_VALUES = [1, 2, 3, 4, 5];
+const WHATSAPP_NUMBER = import.meta.env.VITE_WHATSAPP_NUMBER || "918248579662";
 
 function renderStars(value) {
   const rounded = Math.max(0, Math.min(5, Number(value || 0)));
@@ -38,6 +41,8 @@ export default function PackageDetails() {
   const [reviewText, setReviewText] = useState("");
   const [reviewMedia, setReviewMedia] = useState([]);
   const [submittingReview, setSubmittingReview] = useState(false);
+  const [recentItems, setRecentItems] = useState([]);
+  const ctaVariant = getAbVariant("sticky_cta_package_details");
 
   useSeo({
     title: pkg?.title ? `${pkg.title} | Trippolama` : "Package Details | Trippolama",
@@ -113,6 +118,13 @@ export default function PackageDetails() {
     load();
     loadReviews();
   }, [id, navigate]);
+
+  useEffect(() => {
+    if (!pkg?._id) return;
+    pushRecentlyViewed(pkg);
+    const recent = loadRecentlyViewed().filter((item) => String(item._id) !== String(pkg._id));
+    setRecentItems(recent.slice(0, 4));
+  }, [pkg?._id]);
 
   useEffect(() => {
     let mounted = true;
@@ -200,6 +212,13 @@ export default function PackageDetails() {
   const images = pkg.images?.length ? pkg.images : [pkg.image];
   const videos = Array.isArray(pkg.videos) ? pkg.videos : [];
   const serviceType = inferServiceType(pkg);
+  const openWhatsapp = () => {
+    const msg = `Hi Trippolama, I need help with ${pkg.title}.`;
+    window.open(
+      `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`,
+      "_blank"
+    );
+  };
 
   return (
     <div className="mx-auto max-w-6xl p-4 md:p-8">
@@ -214,6 +233,14 @@ export default function PackageDetails() {
         <div>
           <h1 className="text-4xl font-bold">{pkg.title}</h1>
           <p className="mt-2 text-gray-600">{pkg.region || "Beautiful Destination"}</p>
+          <button
+            type="button"
+            onClick={handleFavorite}
+            className="mt-3 inline-flex items-center gap-2 rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+          >
+            <FaHeart className={isFavorite ? "text-red-500" : "text-slate-400"} />
+            {isFavorite ? "Saved" : "Save Trip"}
+          </button>
         </div>
 
         <div className="rounded-xl border px-4 py-3">
@@ -393,6 +420,70 @@ export default function PackageDetails() {
           ))}
         </div>
       </section>
+
+      {recentItems.length ? (
+        <section className="mt-10">
+          <h2 className="text-2xl font-semibold">Recently Viewed</h2>
+          <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {recentItems.map((item) => (
+              <button
+                key={item._id}
+                type="button"
+                onClick={() => navigate(`/packages/${item._id}`)}
+                className="overflow-hidden rounded-2xl border bg-white text-left shadow-sm hover:shadow-md"
+              >
+                {item.image ? (
+                  <img src={item.image} alt={item.title} className="h-28 w-full object-cover" />
+                ) : null}
+                <div className="p-3">
+                  <p className="line-clamp-1 text-sm font-semibold text-slate-900">{item.title}</p>
+                  <p className="mt-1 text-xs text-slate-500">{item.location || "Destination"}</p>
+                </div>
+              </button>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-slate-200 bg-white p-3 shadow-lg md:hidden">
+        <div className="flex gap-2">
+          {ctaVariant === "A" ? (
+            <>
+              <button
+                type="button"
+                onClick={() => navigate(`/booking/${pkg._id}`)}
+                className="w-1/2 rounded-lg bg-indigo-600 py-2 text-sm font-semibold text-white"
+              >
+                Book This Trip
+              </button>
+              <button
+                type="button"
+                onClick={openWhatsapp}
+                className="w-1/2 rounded-lg border border-emerald-300 bg-emerald-50 py-2 text-sm font-semibold text-emerald-700"
+              >
+                WhatsApp
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={openWhatsapp}
+                className="w-1/2 rounded-lg bg-emerald-600 py-2 text-sm font-semibold text-white"
+              >
+                WhatsApp First
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate(`/booking/${pkg._id}`)}
+                className="w-1/2 rounded-lg border border-indigo-300 bg-indigo-50 py-2 text-sm font-semibold text-indigo-700"
+              >
+                Open Booking
+              </button>
+            </>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

@@ -1,8 +1,22 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 
 export default function AdminLayout() {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    let tag = document.head.querySelector('meta[name="robots"]');
+    if (!tag) {
+      tag = document.createElement("meta");
+      tag.setAttribute("name", "robots");
+      document.head.appendChild(tag);
+    }
+    tag.setAttribute("content", "noindex,nofollow");
+
+    return () => {
+      tag.setAttribute("content", "index,follow");
+    };
+  }, []);
 
   const logout = () => {
     localStorage.removeItem("adminToken");

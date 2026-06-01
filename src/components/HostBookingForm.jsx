@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { loadScript } from "../utils/loadScript";
 
 const API = import.meta.env.VITE_API_URL;
 
@@ -133,6 +134,11 @@ export default function HostBookingForm({ listing }) {
 
         theme: { color: "#10b981" },
       };
+
+      await loadScript("https://checkout.razorpay.com/v1/checkout.js");
+      if (!window.Razorpay) {
+        throw new Error("Razorpay SDK failed to load");
+      }
 
       const rzp = new window.Razorpay(options);
       rzp.open();

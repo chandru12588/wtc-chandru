@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { ChevronDown } from "lucide-react";
+import { useSeo } from "../utils/seo";
 
 const faqList = [
   {
@@ -21,6 +22,24 @@ const faqList = [
 ];
 
 export default function FAQ() {
+  useSeo({
+    title: "FAQ | Trippolama",
+    description: "Frequently asked questions about Trippolama trips, stays, and bookings.",
+    canonical: "https://trippolama.com/faq",
+    jsonLdId: "faq-page",
+    jsonLd: {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      mainEntity: faqList.map((item) => ({
+        "@type": "Question",
+        name: item.q,
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: item.a,
+        },
+      })),
+    },
+  });
 
   const [openIndex, setOpenIndex] = useState(null);
 

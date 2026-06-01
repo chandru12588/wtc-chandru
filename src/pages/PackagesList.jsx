@@ -20,14 +20,14 @@ const LOCATION_ALIAS = {
   ],
   ooty: ["ooty", "ooty hill", "ooty hills"],
   munnar: ["munnar", "munnar hills"],
-  valapari: ["valapari", "valparai"],
+  valparai: ["valparai", "valpari"],
 };
 
 const DEDICATED_LOCATION_PATHS = {
   "/kodaikanal": "Kodaikanal",
   "/ooty": "Ooty",
   "/munnar": "Munnar",
-  "/valapari": "Valapari",
+  "/valparai": "Valparai",
 };
 
 function getLocationAliases(locationName) {

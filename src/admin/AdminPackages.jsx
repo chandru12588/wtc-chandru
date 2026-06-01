@@ -112,6 +112,13 @@ export default function AdminPackages() {
                   Edit
                 </a>
 
+                <a
+                  href={`/admin/packages/${pkg._id}/calendar`}
+                  className="text-emerald-700 font-medium"
+                >
+                  Calendar
+                </a>
+
                 <button
                   onClick={() => deletePackage(pkg._id)}
                   className="text-red-600 font-medium"

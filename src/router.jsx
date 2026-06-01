@@ -29,6 +29,7 @@ const HostListingDetails = lazy(() => import("./pages/HostListingDetails.jsx"));
 const AdminLogin = lazy(() => import("./admin/AdminLogin.jsx"));
 const AdminDashboard = lazy(() => import("./admin/AdminDashboard.jsx"));
 const AdminPackages = lazy(() => import("./admin/AdminPackages.jsx"));
+const AdminPackageCalendar = lazy(() => import("./admin/AdminPackageCalendar.jsx"));
 const PackageForm = lazy(() => import("./admin/PackageForm.jsx"));
 const AdminBookings = lazy(() => import("./admin/AdminBookings.jsx"));
 const AdminHostListings = lazy(() => import("./admin/AdminHostListings.jsx"));
@@ -63,7 +64,7 @@ export default function AppRouter() {
         <Route path="/kodaikanal/:placeSlug" element={<KodaikanalPlacePage />} />
         <Route path="/ooty" element={<PackagesList />} />
         <Route path="/munnar" element={<PackagesList />} />
-        <Route path="/valapari" element={<PackagesList />} />
+        <Route path="/valparai" element={<PackagesList />} />
         <Route path="/packages/:id" element={<PackageDetails />} />
         <Route path="/guide/:id" element={<PackageDetails />} />
         <Route path="/booking/:id" element={<BookingPage />} />
@@ -98,6 +99,7 @@ export default function AppRouter() {
         <Route path="/admin" element={<ProtectedRoute><AdminLayout /></ProtectedRoute>}>
           <Route index element={<AdminDashboard />} />
           <Route path="packages" element={<AdminPackages />} />
+          <Route path="packages/:id/calendar" element={<AdminPackageCalendar />} />
           <Route path="packages/new" element={<PackageForm />} />
           <Route path="packages/:id/edit" element={<PackageForm />} />
           <Route path="bookings" element={<AdminBookings />} />

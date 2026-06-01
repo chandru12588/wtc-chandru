@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { inferServiceType } from "../utils/serviceType";
 import { SERVICE_COUNTRIES } from "../constants/countries";
+import { loadScript } from "../utils/loadScript";
 
 const ID_PROOF_OPTIONS = ["Aadhaar", "PAN", "Passport", "Voter ID"];
 const GUIDE_LANGUAGE_OPTIONS = [
@@ -105,6 +106,36 @@ export default function BookingForm({ pkg, containerClassName = "" }) {
   const [profilePhoto, setProfilePhoto] = useState(null);
   const [vehicleImage, setVehicleImage] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [activeStep, setActiveStep] = useState(1);
+  const draftKey = `booking_draft_${pkg?._id || "default"}`;
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(draftKey);
+      if (!saved) return;
+      const parsed = JSON.parse(saved);
+      setForm((prev) => ({ ...prev, ...parsed }));
+    } catch {
+      // ignore malformed draft
+    }
+  }, [draftKey]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      localStorage.setItem(draftKey, JSON.stringify(form));
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [draftKey, form]);
+
+  const progress = useMemo(() => {
+    const step1 = Boolean(form.name && form.email && form.phone);
+    const step2 = Boolean(form.checkIn && form.checkOut);
+    const step3 = Boolean(
+      isServiceRequest || form.paymentMethod
+    );
+    const completed = [step1, step2, step3].filter(Boolean).length;
+    return Math.round((completed / 3) * 100);
+  }, [form, isServiceRequest]);
 
   const renderUploadField = ({
     inputId,
@@ -249,6 +280,11 @@ export default function BookingForm({ pkg, containerClassName = "" }) {
   };
 
   const startRazorpayPayment = async (booking) => {
+    await loadScript("https://checkout.razorpay.com/v1/checkout.js");
+    if (!window.Razorpay) {
+      throw new Error("Razorpay SDK failed to load");
+    }
+
     const amount = pkg.price * Number(form.people || 1);
 
     const orderRes = await axios.post(`${API}/api/payments/create-order`, {
@@ -375,6 +411,7 @@ export default function BookingForm({ pkg, containerClassName = "" }) {
       if (serviceType === "bike") {
         await createPillionRequest();
         alert("Pillion rider request submitted. Admin will assign a rider after review.");
+        localStorage.removeItem(draftKey);
         navigate("/my-bookings");
         return;
       }
@@ -383,12 +420,14 @@ export default function BookingForm({ pkg, containerClassName = "" }) {
 
       if (serviceType === "guide" || serviceType === "driver") {
         alert("Service request submitted. Admin will review and confirm the assignment.");
+        localStorage.removeItem(draftKey);
         navigate("/my-bookings");
         return;
       }
 
       if (form.paymentMethod === "property") {
         alert("Booking confirmed. Pay at property.");
+        localStorage.removeItem(draftKey);
         navigate("/my-bookings");
         return;
       }
@@ -882,6 +921,16 @@ export default function BookingForm({ pkg, containerClassName = "" }) {
       className={`rounded-xl border p-5 shadow ${containerClassName}`}
     >
       <div className="space-y-4 md:flex md:h-full md:min-h-0 md:flex-col">
+        <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+          <div className="flex items-center justify-between text-xs font-semibold text-slate-600">
+            <span>Step {activeStep} of 3</span>
+            <span>{progress}% complete</span>
+          </div>
+          <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-slate-200">
+            <div className="h-full rounded-full bg-emerald-600 transition-all" style={{ width: `${progress}%` }} />
+          </div>
+        </div>
+
         <div className="space-y-4 md:min-h-0 md:flex-1 md:overflow-y-auto md:pr-2">
           <h2 className="text-lg font-bold leading-tight">
             {copy?.heading || "Book This Trip"}
@@ -899,38 +948,69 @@ export default function BookingForm({ pkg, containerClassName = "" }) {
             </div>
           ) : null}
 
-          <input
-            name="name"
-            value={form.name}
-            onChange={handleChange}
-            required
-            className="border p-2 rounded w-full"
-            placeholder="Your Name"
-          />
-          <input
-            name="email"
-            type="email"
-            value={form.email}
-            onChange={handleChange}
-            required
-            className="border p-2 rounded w-full"
-            placeholder="Your Email"
-          />
-          <input
-            name="phone"
-            value={form.phone}
-            onChange={handleChange}
-            required
-            className="border p-2 rounded w-full"
-            placeholder="Phone Number"
-          />
+          {activeStep === 1 ? (
+            <>
+              <input
+                name="name"
+                value={form.name}
+                onChange={handleChange}
+                required
+                className="border p-2 rounded w-full"
+                placeholder="Your Name"
+              />
+              <input
+                name="email"
+                type="email"
+                value={form.email}
+                onChange={handleChange}
+                required
+                className="border p-2 rounded w-full"
+                placeholder="Your Email"
+              />
+              <input
+                name="phone"
+                value={form.phone}
+                onChange={handleChange}
+                required
+                className="border p-2 rounded w-full"
+                placeholder="Phone Number"
+              />
+              <button
+                type="button"
+                onClick={() => setActiveStep(2)}
+                className="w-full rounded-lg border border-emerald-300 bg-emerald-50 py-2 text-sm font-semibold text-emerald-700"
+              >
+                Continue to Trip Details
+              </button>
+            </>
+          ) : null}
 
-          {serviceType === "bike" && renderPillionFields()}
-          {serviceType === "guide" && renderGuideFields()}
-          {serviceType === "driver" && renderDriverFields()}
-          {serviceType === "general" && renderGeneralFields()}
+          {activeStep === 2 ? (
+            <>
+              {serviceType === "bike" && renderPillionFields()}
+              {serviceType === "guide" && renderGuideFields()}
+              {serviceType === "driver" && renderDriverFields()}
+              {serviceType === "general" && renderGeneralFields()}
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setActiveStep(1)}
+                  className="w-1/2 rounded-lg border border-slate-300 py-2 text-sm font-semibold text-slate-700"
+                >
+                  Back
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveStep(3)}
+                  className="w-1/2 rounded-lg border border-emerald-300 bg-emerald-50 py-2 text-sm font-semibold text-emerald-700"
+                >
+                  Continue to Review
+                </button>
+              </div>
+            </>
+          ) : null}
 
-          {isServiceRequest ? (
+          {activeStep === 3 && isServiceRequest ? (
             <div className="bg-gray-100 p-3 rounded text-sm text-gray-700">
               {isGuidePricePending ? (
                 <>
@@ -953,29 +1033,38 @@ export default function BookingForm({ pkg, containerClassName = "" }) {
                 </>
               )}
             </div>
-          ) : (
+          ) : null}
+          {activeStep === 3 && !isServiceRequest ? (
             <div className="bg-gray-100 p-3 rounded">
               <p className="flex justify-between text-sm">
                 <span>Rs. {pkg.price} x {form.people} Guests</span>
                 <strong>Rs. {totalAmount}</strong>
               </p>
             </div>
-          )}
+          ) : null}
+
+          {activeStep === 3 ? (
+            <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
+              Free cancellation before trip start date. If already paid, refund processing may take 5-7 working days.
+            </div>
+          ) : null}
         </div>
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full rounded-xl bg-purple-600 py-2 font-semibold text-white md:mt-4"
-        >
-          {loading
-            ? "Processing..."
-            : serviceType === "general"
-            ? form.paymentMethod === "property"
-              ? "Confirm Booking"
-              : `Pay Rs. ${totalAmount} & Book`
-            : "Submit Service Request"}
-        </button>
+        {activeStep === 3 ? (
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full rounded-xl bg-purple-600 py-2 font-semibold text-white md:mt-4"
+          >
+            {loading
+              ? "Processing..."
+              : serviceType === "general"
+              ? form.paymentMethod === "property"
+                ? "Confirm Booking"
+                : `Pay Rs. ${totalAmount} & Book`
+              : "Submit Service Request"}
+          </button>
+        ) : null}
       </div>
     </form>
   );

@@ -1,9 +1,16 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { saveHost } from "../utils/hostAuth";
+import { useSeo } from "../utils/seo";
 
 export default function HostLogin() {
   const API = import.meta.env.VITE_API_URL;
+  useSeo({
+    title: "Host Login | Trippolama",
+    description: "Host login portal for Trippolama listings.",
+    canonical: "https://trippolama.com/host/login",
+    noIndex: true,
+  });
 
   const [form, setForm] = useState({ email: "", password: "" });
 

@@ -4,10 +4,17 @@ import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
 import { SiApple } from "react-icons/si";
 import bgImage from "../assets/bg4.avif";
+import { useSeo } from "../utils/seo";
 
 export default function Login() {
 const navigate = useNavigate();
 const API = import.meta.env.VITE_API_URL;
+useSeo({
+  title: "Login | Trippolama",
+  description: "Login or create your Trippolama account.",
+  canonical: "https://trippolama.com/login",
+  noIndex: true,
+});
 
 const [mode, setMode] = useState("password");
 // password | otp | signup | reset
@@ -19,7 +26,8 @@ name: "",
 dob: "",
 phone: "",
 email: "",
-password: ""
+password: "",
+referralCode: ""
 });
 
 const [otp, setOtp] = useState("");
@@ -40,9 +48,14 @@ localStorage.setItem("wtc_user", JSON.stringify(user));
 const params = new URLSearchParams(window.location.search);
   const token = params.get("token");
   const requestedMode = params.get("mode");
+  const refCode = params.get("ref");
 
   if (requestedMode === "signup") {
   setMode("signup");
+  }
+  if (refCode) {
+    setMode("signup");
+    setForm((prev) => ({ ...prev, referralCode: String(refCode).toUpperCase() }));
   }
 
 if (token) {
@@ -101,6 +114,7 @@ if (targetMode === "signup") {
 payload.name = form.name;
 payload.dob = form.dob;
 payload.phone = form.phone;
+payload.referralCode = form.referralCode;
 }
 
 const res = await fetch(`${API}/api/auth/send-otp`, {
@@ -187,6 +201,8 @@ dob: form.dob,
 email: form.email,
 phone: form.phone,
 password: form.password
+,
+referralCode: form.referralCode
 })
 });
 const data = await res.json();
@@ -392,6 +408,14 @@ type="date"
 name="dob"
 value={form.dob}
 onChange={handleChange}
+className="w-full border border-slate-300 focus:border-slate-500 focus:outline-none rounded-xl px-4 py-3"
+/>
+<input
+type="text"
+name="referralCode"
+placeholder="Referral Code (optional)"
+value={form.referralCode}
+onChange={(e) => setForm({ ...form, referralCode: e.target.value.toUpperCase() })}
 className="w-full border border-slate-300 focus:border-slate-500 focus:outline-none rounded-xl px-4 py-3"
 />
 </>

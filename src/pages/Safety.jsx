@@ -1,7 +1,14 @@
 import React from "react";
 import { ShieldCheck, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { useSeo } from "../utils/seo";
 
 export default function Safety() {
+  useSeo({
+    title: "Safety Guidelines | Trippolama",
+    description: "Read Trippolama safety guidelines for secure and comfortable travel experiences.",
+    canonical: "https://trippolama.com/safety",
+  });
+
   return (
     <div className="max-w-5xl mx-auto px-4 py-10">
       <h1 className="text-2xl font-bold mb-4">Safety Guidelines</h1>

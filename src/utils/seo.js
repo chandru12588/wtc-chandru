@@ -42,20 +42,32 @@ export function useSeo({
   ogTitle,
   ogDescription,
   ogType = "website",
+  ogImage = "https://trippolama.com/founder-photo.jpg",
+  noIndex = false,
   jsonLd,
   jsonLdId,
 }) {
   useEffect(() => {
+    const resolvedCanonical =
+      canonical ||
+      (typeof window !== "undefined"
+        ? `${window.location.origin}${window.location.pathname}`
+        : undefined);
+
     if (title) document.title = title;
     upsertMeta("description", description);
     upsertMeta("og:title", ogTitle || title, "property");
     upsertMeta("og:description", ogDescription || description, "property");
     upsertMeta("og:type", ogType, "property");
+    upsertMeta("og:url", resolvedCanonical, "property");
+    upsertMeta("og:image", ogImage, "property");
     upsertMeta("og:site_name", "Trippolama", "property");
     upsertMeta("twitter:card", "summary_large_image");
     upsertMeta("twitter:title", ogTitle || title);
     upsertMeta("twitter:description", ogDescription || description);
-    upsertCanonical(canonical);
+    upsertMeta("twitter:image", ogImage);
+    upsertMeta("robots", noIndex ? "noindex,nofollow" : "index,follow");
+    upsertCanonical(resolvedCanonical);
     if (jsonLd && jsonLdId) upsertJsonLd(jsonLdId, jsonLd);
   }, [
     title,
@@ -64,8 +76,9 @@ export function useSeo({
     ogTitle,
     ogDescription,
     ogType,
+    ogImage,
+    noIndex,
     jsonLd,
     jsonLdId,
   ]);
 }
-

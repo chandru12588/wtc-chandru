@@ -20,6 +20,7 @@ import PenguinLoader from "../components/PenguinLoader";
 
 import { inferServiceType } from "../utils/serviceType";
 import { useSeo } from "../utils/seo";
+import { loadRecentlyViewed } from "../utils/recentlyViewed";
 
 const API = import.meta.env.VITE_API_URL;
 const CATEGORY_ORDER = [
@@ -47,8 +48,9 @@ const LOCATION_QUICK_LINKS = [
   { name: "Kodaikanal", icon: Mountain, to: "/kodaikanal" },
   { name: "Ooty", icon: Compass, to: "/ooty" },
   { name: "Munnar", icon: Trees, to: "/munnar" },
-  { name: "Valapari", icon: MapPin, to: "/valapari" },
+  { name: "Valparai", icon: MapPin, to: "/valparai" },
 ];
+const WHATSAPP_NUMBER = import.meta.env.VITE_WHATSAPP_NUMBER || "918248579662";
 
 function sortTripsForHome(list = []) {
   return [...list].sort((a, b) => {
@@ -94,6 +96,9 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [mobileSearch, setMobileSearch] = useState("");
+  const [showLeadCard, setShowLeadCard] = useState(false);
+  const [recentViewed, setRecentViewed] = useState([]);
+  const [referralSummary, setReferralSummary] = useState(null);
 
   useEffect(() => {
     (async () => {
@@ -112,6 +117,33 @@ export default function Home() {
         setLoading(false);
       }
     })();
+  }, []);
+
+  useEffect(() => {
+    const token = localStorage.getItem("wtc_token");
+    if (!token) return;
+    (async () => {
+      try {
+        const res = await axios.get(`${API}/api/auth/referral/summary`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setReferralSummary(res.data);
+      } catch {
+        setReferralSummary(null);
+      }
+    })();
+  }, []);
+
+  useEffect(() => {
+    const list = loadRecentlyViewed();
+    setRecentViewed(list.slice(0, 4));
+  }, []);
+
+  useEffect(() => {
+    const optedOut = localStorage.getItem("lead_card_dismissed") === "1";
+    if (optedOut) return;
+    const timer = setTimeout(() => setShowLeadCard(true), 7000);
+    return () => clearTimeout(timer);
   }, []);
 
   const handleSearch = ({ location }) => {
@@ -317,6 +349,28 @@ export default function Home() {
     return selected.slice(0, maxItems);
   }, [filteredTrips]);
 
+  const trustStats = useMemo(() => {
+    const destinations = new Set(
+      allTrips
+        .map((trip) => String(trip.location || "").trim().toLowerCase())
+        .filter(Boolean)
+    );
+    return {
+      trips: allTrips.length,
+      destinations: destinations.size,
+      rating: "4.8/5",
+    };
+  }, [allTrips]);
+
+  const openWhatsappLead = () => {
+    const msg =
+      "Hi Trippolama, share your best upcoming weekend packages and offers.";
+    window.open(
+      `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`,
+      "_blank"
+    );
+  };
+
   return (
     <div className="w-full overflow-x-hidden pb-20 md:pb-0">
       <section className="md:hidden px-3 pt-3">
@@ -404,7 +458,7 @@ export default function Home() {
           <div>
             <h2 className="text-2xl font-semibold">Browse by location</h2>
             <p className="text-sm text-slate-500">
-              Quick access to Kodaikanal, Ooty, Munnar and Valapari packages.
+              Quick access to Kodaikanal, Ooty, Munnar and Valparai packages.
             </p>
           </div>
           <button
@@ -459,6 +513,92 @@ export default function Home() {
         <ExploreMoreButton />
       </section>
 
+      {recentViewed.length ? (
+        <section className="mx-auto max-w-7xl px-3 pb-6 md:px-5">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-2xl font-semibold">Recently Viewed Trips</h2>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {recentViewed.map((item) => (
+              <button
+                key={item._id}
+                type="button"
+                onClick={() => navigate(`/packages/${item._id}`)}
+                className="overflow-hidden rounded-2xl border bg-white text-left shadow-sm hover:shadow-md"
+              >
+                {item.image ? (
+                  <img src={item.image} alt={item.title} className="h-28 w-full object-cover" />
+                ) : null}
+                <div className="p-3">
+                  <p className="line-clamp-1 text-sm font-semibold text-slate-900">{item.title}</p>
+                  <p className="mt-1 text-xs text-slate-500">{item.location || "Destination"}</p>
+                </div>
+              </button>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      <section className="mx-auto max-w-7xl px-3 pb-6 md:px-5">
+        <div className="grid gap-4 md:grid-cols-3">
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Happy Travelers</p>
+            <p className="mt-2 text-3xl font-bold text-slate-900">{trustStats.trips}+</p>
+            <p className="mt-1 text-sm text-slate-600">Trips and stays curated with verified partners.</p>
+          </div>
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Top Destinations</p>
+            <p className="mt-2 text-3xl font-bold text-slate-900">{trustStats.destinations}+</p>
+            <p className="mt-1 text-sm text-slate-600">Popular locations for weekends and short breaks.</p>
+          </div>
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Average Rating</p>
+            <p className="mt-2 text-3xl font-bold text-slate-900">{trustStats.rating}</p>
+            <p className="mt-1 text-sm text-slate-600">Rated highly by returning community travelers.</p>
+          </div>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-3 pb-8 md:px-5">
+        <div className="rounded-3xl border border-emerald-200 bg-gradient-to-r from-emerald-50 to-teal-50 p-6 md:p-8">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div>
+              <h3 className="text-2xl font-bold text-slate-900">Refer a Friend, Both Save More</h3>
+              <p className="mt-2 text-sm text-slate-600">
+                Invite your travel buddy and both of you can unlock special weekend trip offers.
+              </p>
+              {referralSummary?.referralCode ? (
+                <p className="mt-2 text-xs font-semibold text-emerald-800">
+                  Your code: {referralSummary.referralCode} | Friends joined: {referralSummary.referralJoinedCount}
+                </p>
+              ) : null}
+            </div>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <button
+                type="button"
+                onClick={openWhatsappLead}
+                className="inline-flex items-center justify-center rounded-full bg-emerald-600 px-6 py-3 text-sm font-semibold text-white hover:bg-emerald-700"
+              >
+                Get Referral Offer on WhatsApp
+              </button>
+              {referralSummary?.referralCode ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    const link = `${window.location.origin}/login?mode=signup&ref=${referralSummary.referralCode}`;
+                    navigator.clipboard.writeText(link);
+                    alert("Referral link copied");
+                  }}
+                  className="inline-flex items-center justify-center rounded-full border border-emerald-300 bg-white px-6 py-3 text-sm font-semibold text-emerald-700"
+                >
+                  Copy My Invite Link
+                </button>
+              ) : null}
+            </div>
+          </div>
+        </div>
+      </section>
+
       <ServicesHighlight />
       <PopularDestinations />
       <BlogSection />
@@ -491,6 +631,32 @@ export default function Home() {
           </button>
         </div>
       </nav>
+
+      {showLeadCard ? (
+        <div className="fixed bottom-20 right-3 z-50 w-[92%] max-w-sm rounded-2xl border border-slate-200 bg-white p-4 shadow-xl md:bottom-5 md:right-5">
+          <button
+            type="button"
+            onClick={() => {
+              setShowLeadCard(false);
+              localStorage.setItem("lead_card_dismissed", "1");
+            }}
+            className="absolute right-3 top-2 text-slate-400 hover:text-slate-600"
+          >
+            x
+          </button>
+          <p className="text-sm font-semibold text-slate-900">Want best deals this week?</p>
+          <p className="mt-1 text-xs text-slate-600">
+            Get curated trip offers directly on WhatsApp.
+          </p>
+          <button
+            type="button"
+            onClick={openWhatsappLead}
+            className="mt-3 w-full rounded-full bg-slate-900 px-4 py-2 text-xs font-semibold text-white"
+          >
+            Send Me Weekly Deals
+          </button>
+        </div>
+      ) : null}
     </div>
   );
 }
